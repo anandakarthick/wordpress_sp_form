@@ -59,12 +59,14 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
         <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                    <span class="dashicons dashicons-media-document"></span>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-value"><?php echo $total_forms; ?></span>
-                    <span class="stat-label">Order Forms</span>
+                <div class="stat-card-inner">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <span class="dashicons dashicons-media-document"></span>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value"><?php echo $total_forms; ?></span>
+                        <span class="stat-label">Order Forms</span>
+                    </div>
                 </div>
                 <a href="<?php echo admin_url('admin.php?page=spfm-forms'); ?>" class="stat-link">
                     View All <span class="dashicons dashicons-arrow-right-alt2"></span>
@@ -72,12 +74,14 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
             </div>
             
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                    <span class="dashicons dashicons-admin-appearance"></span>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-value"><?php echo $total_templates; ?></span>
-                    <span class="stat-label">Website Templates</span>
+                <div class="stat-card-inner">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <span class="dashicons dashicons-admin-appearance"></span>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value"><?php echo $total_templates; ?></span>
+                        <span class="stat-label">Website Templates</span>
+                    </div>
                 </div>
                 <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="stat-link">
                     View All <span class="dashicons dashicons-arrow-right-alt2"></span>
@@ -85,12 +89,14 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
             </div>
             
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-                    <span class="dashicons dashicons-text-page"></span>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-value"><?php echo $submission_stats['total']; ?></span>
-                    <span class="stat-label">Total Submissions</span>
+                <div class="stat-card-inner">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <span class="dashicons dashicons-text-page"></span>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value"><?php echo $submission_stats['total']; ?></span>
+                        <span class="stat-label">Total Submissions</span>
+                    </div>
                 </div>
                 <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="stat-link">
                     View All <span class="dashicons dashicons-arrow-right-alt2"></span>
@@ -98,12 +104,14 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
             </div>
             
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
-                    <span class="dashicons dashicons-groups"></span>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-value"><?php echo $total_customers; ?></span>
-                    <span class="stat-label">Customers</span>
+                <div class="stat-card-inner">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+                        <span class="dashicons dashicons-groups"></span>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value"><?php echo $total_customers; ?></span>
+                        <span class="stat-label">Customers</span>
+                    </div>
                 </div>
                 <a href="<?php echo admin_url('admin.php?page=spfm-customers'); ?>" class="stat-link">
                     View All <span class="dashicons dashicons-arrow-right-alt2"></span>
@@ -330,7 +338,7 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
     border-radius: 6px;
 }
 
-/* Stats Grid */
+/* Stats Grid - FIXED ALIGNMENT */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -342,16 +350,25 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 140px;
+}
+.stat-card-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
 }
 .stat-icon {
     width: 50px;
     height: 50px;
+    min-width: 50px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 15px;
+    flex-shrink: 0;
 }
 .stat-icon .dashicons {
     color: #fff;
@@ -359,15 +376,29 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
     width: 24px;
     height: 24px;
 }
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    flex: 1;
+}
 .stat-value {
     display: block;
     font-size: 32px;
     font-weight: 700;
     color: #333;
+    line-height: 1.2;
+    margin-bottom: 4px;
 }
 .stat-label {
+    display: block;
     font-size: 14px;
     color: #666;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .stat-link {
     display: flex;
@@ -377,6 +408,16 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
     color: #667eea;
     text-decoration: none;
     margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+.stat-link:hover {
+    color: #764ba2;
+}
+.stat-link .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
 }
 
 /* Dashboard Columns */
@@ -602,6 +643,15 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
     }
     .step-item {
         flex-basis: calc(50% - 20px);
+    }
+}
+
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .step-item {
+        flex-basis: 100%;
     }
 }
 </style>
