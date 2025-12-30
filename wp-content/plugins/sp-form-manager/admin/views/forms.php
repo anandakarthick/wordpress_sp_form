@@ -20,27 +20,34 @@ $available_themes = $themes_handler->get_templates();
 $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1));
 ?>
 
-<div class="wrap spfm-admin-wrap">
-    <h1 class="wp-heading-inline">
-        <span class="dashicons dashicons-feedback"></span> Forms
-    </h1>
-    
+<div class="spfm-forms-wrap">
     <?php if ($action === 'list'): ?>
-        <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="page-title-action">Create New Form</a>
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1><span class="dashicons dashicons-feedback"></span> Forms</h1>
+                <p>Create forms and share with customers. Customers can select a website template, fill their content, and submit.</p>
+            </div>
+            <div class="header-actions">
+                <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="btn btn-white">
+                    <span class="dashicons dashicons-plus-alt"></span> Create New Form
+                </a>
+            </div>
+        </div>
         
-        <p class="description">Create forms and share with customers. Customers can select a website template, fill their content, and submit.</p>
-        
-        <?php 
-        $forms = $forms_handler->get_all(array('per_page' => 50));
-        ?>
+        <?php $forms = $forms_handler->get_all(array('per_page' => 50)); ?>
         
         <div class="forms-container">
             <?php if (empty($forms)): ?>
-                <div class="empty-state">
-                    <span class="dashicons dashicons-feedback"></span>
+                <div class="empty-state-card">
+                    <div class="empty-icon">
+                        <span class="dashicons dashicons-feedback"></span>
+                    </div>
                     <h3>No Forms Yet</h3>
                     <p>Create your first form to let customers select and customize website templates.</p>
-                    <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="button button-primary button-hero">Create Form</a>
+                    <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="btn btn-primary">
+                        <span class="dashicons dashicons-plus-alt"></span> Create Form
+                    </a>
                 </div>
             <?php else: ?>
                 <div class="forms-grid">
@@ -51,10 +58,12 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                     ?>
                         <div class="form-card">
                             <div class="form-card-header">
-                                <h3><?php echo esc_html($f->name); ?></h3>
-                                <span class="status-badge <?php echo $f->status ? 'active' : 'inactive'; ?>">
-                                    <?php echo $f->status ? 'Active' : 'Inactive'; ?>
-                                </span>
+                                <div class="form-title-area">
+                                    <h3><?php echo esc_html($f->name); ?></h3>
+                                    <span class="status-badge <?php echo $f->status ? 'active' : 'inactive'; ?>">
+                                        <?php echo $f->status ? 'Active' : 'Inactive'; ?>
+                                    </span>
+                                </div>
                             </div>
                             
                             <div class="form-card-body">
@@ -64,19 +73,31 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                                 
                                 <div class="form-stats">
                                     <div class="stat-item">
-                                        <span class="stat-icon"><span class="dashicons dashicons-admin-appearance"></span></span>
-                                        <span class="stat-value"><?php echo count($theme_ids); ?></span>
-                                        <span class="stat-label">Templates</span>
+                                        <div class="stat-icon templates">
+                                            <span class="dashicons dashicons-layout"></span>
+                                        </div>
+                                        <div class="stat-info">
+                                            <span class="stat-value"><?php echo count($theme_ids); ?></span>
+                                            <span class="stat-label">Templates</span>
+                                        </div>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-icon"><span class="dashicons dashicons-share"></span></span>
-                                        <span class="stat-value"><?php echo $share_count; ?></span>
-                                        <span class="stat-label">Shares</span>
+                                        <div class="stat-icon shares">
+                                            <span class="dashicons dashicons-share"></span>
+                                        </div>
+                                        <div class="stat-info">
+                                            <span class="stat-value"><?php echo $share_count; ?></span>
+                                            <span class="stat-label">Shares</span>
+                                        </div>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-icon"><span class="dashicons dashicons-text-page"></span></span>
-                                        <span class="stat-value"><?php echo $submission_count; ?></span>
-                                        <span class="stat-label">Submissions</span>
+                                        <div class="stat-icon submissions">
+                                            <span class="dashicons dashicons-portfolio"></span>
+                                        </div>
+                                        <div class="stat-info">
+                                            <span class="stat-value"><?php echo $submission_count; ?></span>
+                                            <span class="stat-label">Submissions</span>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -96,13 +117,13 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                             </div>
                             
                             <div class="form-card-actions">
-                                <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=share&id=' . $f->id); ?>" class="button button-primary">
+                                <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=share&id=' . $f->id); ?>" class="btn btn-primary btn-sm">
                                     <span class="dashicons dashicons-share"></span> Share
                                 </a>
-                                <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=edit&id=' . $f->id); ?>" class="button">
+                                <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=edit&id=' . $f->id); ?>" class="btn btn-outline btn-sm">
                                     <span class="dashicons dashicons-edit"></span> Edit
                                 </a>
-                                <button class="button button-link-delete delete-form" data-id="<?php echo $f->id; ?>">
+                                <button class="btn btn-danger btn-sm delete-form" data-id="<?php echo $f->id; ?>">
                                     <span class="dashicons dashicons-trash"></span>
                                 </button>
                             </div>
@@ -114,102 +135,107 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
         
     <?php elseif ($action === 'share' && $form): ?>
         <!-- Share Form View -->
-        <a href="<?php echo admin_url('admin.php?page=spfm-forms'); ?>" class="page-title-action">← Back to Forms</a>
+        <div class="page-header">
+            <div class="header-content">
+                <a href="<?php echo admin_url('admin.php?page=spfm-forms'); ?>" class="back-link">
+                    <span class="dashicons dashicons-arrow-left-alt"></span> Back to Forms
+                </a>
+                <h1><span class="dashicons dashicons-share"></span> Share: <?php echo esc_html($form->name); ?></h1>
+                <p>Share this form with customers via email, WhatsApp, or copy the link.</p>
+            </div>
+        </div>
         
-        <div class="share-container">
-            <div class="share-header">
-                <div class="share-header-content">
-                    <h2><?php echo esc_html($form->name); ?></h2>
-                    <p>Share this form with customers via email, WhatsApp, or copy the link.</p>
+        <div class="share-methods">
+            <!-- Generate Link -->
+            <div class="share-method-card">
+                <div class="method-icon link">
+                    <span class="dashicons dashicons-admin-links"></span>
+                </div>
+                <h3>Share Link</h3>
+                <p>Generate a unique link to share with your customer</p>
+                
+                <div class="link-generator">
+                    <button type="button" class="btn btn-primary" id="generate-link">
+                        <span class="dashicons dashicons-admin-links"></span> Generate Link
+                    </button>
+                    <div class="generated-link" style="display:none;">
+                        <input type="text" id="share-link" readonly>
+                        <button type="button" class="btn btn-outline copy-link">
+                            <span class="dashicons dashicons-clipboard"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <div class="share-methods">
-                <!-- Generate Link -->
-                <div class="share-method-card">
-                    <div class="method-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                        <span class="dashicons dashicons-admin-links"></span>
-                    </div>
-                    <h3>Share Link</h3>
-                    <p>Generate a unique link to share with your customer</p>
-                    
-                    <div class="link-generator">
-                        <button type="button" class="button button-primary" id="generate-link">Generate Link</button>
-                        <div class="generated-link" style="display:none;">
-                            <input type="text" id="share-link" readonly>
-                            <button type="button" class="button copy-link">
-                                <span class="dashicons dashicons-clipboard"></span>
-                            </button>
-                        </div>
-                    </div>
+            <!-- Email Share -->
+            <div class="share-method-card">
+                <div class="method-icon email">
+                    <span class="dashicons dashicons-email"></span>
                 </div>
+                <h3>Send via Email</h3>
+                <p>Send the form link directly to customer's email</p>
                 
-                <!-- Email Share -->
-                <div class="share-method-card">
-                    <div class="method-icon" style="background: linear-gradient(135deg, #28a745, #20c997);">
-                        <span class="dashicons dashicons-email"></span>
+                <form id="email-share-form" class="share-form">
+                    <div class="form-field">
+                        <label>Select Customer or Enter Email</label>
+                        <select name="customer_id" id="email-customer-select" class="customer-select">
+                            <option value="">-- Select Customer --</option>
+                            <?php foreach ($customers as $c): ?>
+                                <option value="<?php echo $c->id; ?>" data-email="<?php echo esc_attr($c->email); ?>" data-phone="<?php echo esc_attr($c->phone); ?>">
+                                    <?php echo esc_html($c->name); ?> (<?php echo esc_html($c->email); ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
-                    <h3>Send via Email</h3>
-                    <p>Send the form link directly to customer's email</p>
-                    
-                    <form id="email-share-form" class="share-form">
-                        <div class="form-field">
-                            <label>Select Customer or Enter Email</label>
-                            <select name="customer_id" id="email-customer-select" class="customer-select">
-                                <option value="">-- Select Customer --</option>
-                                <?php foreach ($customers as $c): ?>
-                                    <option value="<?php echo $c->id; ?>" data-email="<?php echo esc_attr($c->email); ?>" data-phone="<?php echo esc_attr($c->phone); ?>">
-                                        <?php echo esc_html($c->name); ?> (<?php echo esc_html($c->email); ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label>Email Address</label>
-                            <input type="email" name="email" id="share-email" required placeholder="customer@example.com">
-                        </div>
-                        <button type="submit" class="button button-primary">
-                            <span class="dashicons dashicons-email-alt"></span> Send Email
-                        </button>
-                    </form>
-                </div>
-                
-                <!-- WhatsApp Share -->
-                <div class="share-method-card">
-                    <div class="method-icon" style="background: linear-gradient(135deg, #25d366, #128c7e);">
-                        <span class="dashicons dashicons-smartphone"></span>
+                    <div class="form-field">
+                        <label>Email Address</label>
+                        <input type="email" name="email" id="share-email" required placeholder="customer@example.com">
                     </div>
-                    <h3>Send via WhatsApp/SMS</h3>
-                    <p>Send the form link via SMS or WhatsApp</p>
-                    
-                    <form id="sms-share-form" class="share-form">
-                        <div class="form-field">
-                            <label>Select Customer or Enter Phone</label>
-                            <select name="customer_id" id="sms-customer-select" class="customer-select">
-                                <option value="">-- Select Customer --</option>
-                                <?php foreach ($customers as $c): ?>
-                                    <?php if (!empty($c->phone)): ?>
-                                    <option value="<?php echo $c->id; ?>" data-email="<?php echo esc_attr($c->email); ?>" data-phone="<?php echo esc_attr($c->phone); ?>">
-                                        <?php echo esc_html($c->name); ?> (<?php echo esc_html($c->phone); ?>)
-                                    </option>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label>Phone Number</label>
-                            <input type="tel" name="phone" id="share-phone" required placeholder="+1234567890">
-                        </div>
-                        <button type="submit" class="button button-primary">
-                            <span class="dashicons dashicons-smartphone"></span> Send SMS
-                        </button>
-                    </form>
-                </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="dashicons dashicons-email-alt"></span> Send Email
+                    </button>
+                </form>
             </div>
             
-            <!-- Share History -->
-            <div class="share-history">
+            <!-- WhatsApp Share -->
+            <div class="share-method-card">
+                <div class="method-icon whatsapp">
+                    <span class="dashicons dashicons-smartphone"></span>
+                </div>
+                <h3>Send via WhatsApp/SMS</h3>
+                <p>Send the form link via SMS or WhatsApp</p>
+                
+                <form id="sms-share-form" class="share-form">
+                    <div class="form-field">
+                        <label>Select Customer or Enter Phone</label>
+                        <select name="customer_id" id="sms-customer-select" class="customer-select">
+                            <option value="">-- Select Customer --</option>
+                            <?php foreach ($customers as $c): ?>
+                                <?php if (!empty($c->phone)): ?>
+                                <option value="<?php echo $c->id; ?>" data-email="<?php echo esc_attr($c->email); ?>" data-phone="<?php echo esc_attr($c->phone); ?>">
+                                    <?php echo esc_html($c->name); ?> (<?php echo esc_html($c->phone); ?>)
+                                </option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Phone Number</label>
+                        <input type="tel" name="phone" id="share-phone" required placeholder="+1234567890">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="dashicons dashicons-smartphone"></span> Send SMS
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Share History -->
+        <div class="dashboard-card">
+            <div class="card-header">
                 <h3><span class="dashicons dashicons-backup"></span> Share History</h3>
+            </div>
+            <div class="card-body">
                 <?php
                 global $wpdb;
                 $shares = $wpdb->get_results($wpdb->prepare(
@@ -223,58 +249,50 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                 ?>
                 
                 <?php if (empty($shares)): ?>
-                    <p class="no-history">No shares yet. Share this form to see history.</p>
+                    <div class="empty-state-small">
+                        <span class="dashicons dashicons-share"></span>
+                        <p>No shares yet. Share this form to see history.</p>
+                    </div>
                 <?php else: ?>
-                    <table class="wp-list-table widefat striped">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Shared To</th>
-                                <th>Method</th>
-                                <th>Views</th>
-                                <th>Status</th>
-                                <th>Link</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($shares as $s): ?>
-                                <tr>
-                                    <td><?php echo date('M j, Y g:i A', strtotime($s->created_at)); ?></td>
-                                    <td>
-                                        <?php if ($s->customer_name): ?>
-                                            <strong><?php echo esc_html($s->customer_name); ?></strong><br>
-                                        <?php endif; ?>
-                                        <small><?php echo esc_html($s->shared_to); ?></small>
-                                    </td>
-                                    <td>
-                                        <?php 
-                                        $method_icons = array('link' => 'admin-links', 'email' => 'email', 'sms' => 'smartphone', 'whatsapp' => 'smartphone');
-                                        ?>
-                                        <span class="dashicons dashicons-<?php echo $method_icons[$s->shared_via] ?? 'admin-links'; ?>"></span>
-                                        <?php echo ucfirst($s->shared_via); ?>
-                                    </td>
-                                    <td><?php echo $s->views; ?></td>
-                                    <td>
-                                        <span class="status-badge <?php echo $s->status; ?>">
-                                            <?php echo ucfirst($s->status); ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="<?php echo home_url('/?spfm_token=' . $s->token); ?>" target="_blank" class="button button-small">
-                                            <span class="dashicons dashicons-external"></span>
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                    <div class="history-list">
+                        <?php foreach ($shares as $s): ?>
+                            <div class="history-item">
+                                <div class="history-icon <?php echo $s->shared_via; ?>">
+                                    <?php 
+                                    $method_icons = array('link' => 'admin-links', 'email' => 'email', 'sms' => 'smartphone', 'whatsapp' => 'smartphone');
+                                    ?>
+                                    <span class="dashicons dashicons-<?php echo $method_icons[$s->shared_via] ?? 'admin-links'; ?>"></span>
+                                </div>
+                                <div class="history-info">
+                                    <strong><?php echo $s->customer_name ?: esc_html($s->shared_to); ?></strong>
+                                    <span class="history-meta">
+                                        <?php echo ucfirst($s->shared_via); ?> • 
+                                        <?php echo human_time_diff(strtotime($s->created_at)); ?> ago •
+                                        <?php echo $s->views; ?> views
+                                    </span>
+                                </div>
+                                <span class="status-badge <?php echo $s->status; ?>"><?php echo ucfirst($s->status); ?></span>
+                                <a href="<?php echo home_url('/?spfm_token=' . $s->token); ?>" target="_blank" class="btn btn-outline btn-sm">
+                                    <span class="dashicons dashicons-external"></span>
+                                </a>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
         
     <?php else: ?>
         <!-- Add/Edit Form -->
-        <a href="<?php echo admin_url('admin.php?page=spfm-forms'); ?>" class="page-title-action">← Back to Forms</a>
+        <div class="page-header">
+            <div class="header-content">
+                <a href="<?php echo admin_url('admin.php?page=spfm-forms'); ?>" class="back-link">
+                    <span class="dashicons dashicons-arrow-left-alt"></span> Back to Forms
+                </a>
+                <h1><span class="dashicons dashicons-feedback"></span> <?php echo $form ? 'Edit Form' : 'Create New Form'; ?></h1>
+                <p>Set up your form and select which templates customers can choose from.</p>
+            </div>
+        </div>
         
         <?php $selected_themes = $form ? (json_decode($form->available_themes, true) ?: array()) : array(); ?>
         
@@ -283,93 +301,106 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                 <input type="hidden" name="id" value="<?php echo $form ? $form->id : ''; ?>">
                 
                 <div class="editor-main">
-                    <div class="editor-section">
-                        <h3>Basic Information</h3>
-                        
-                        <div class="form-field">
-                            <label for="name">Form Name *</label>
-                            <input type="text" name="name" id="name" required 
-                                   value="<?php echo $form ? esc_attr($form->name) : ''; ?>" 
-                                   placeholder="e.g., Hospital Website Form">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><span class="dashicons dashicons-info"></span> Basic Information</h3>
                         </div>
-                        
-                        <div class="form-field">
-                            <label for="description">Description</label>
-                            <textarea name="description" id="description" rows="3" 
-                                      placeholder="Describe what this form is for..."><?php echo $form ? esc_textarea($form->description) : ''; ?></textarea>
+                        <div class="card-body">
+                            <div class="form-field">
+                                <label for="name">Form Name *</label>
+                                <input type="text" name="name" id="name" required 
+                                       value="<?php echo $form ? esc_attr($form->name) : ''; ?>" 
+                                       placeholder="e.g., Hospital Website Form">
+                            </div>
+                            
+                            <div class="form-field">
+                                <label for="description">Description</label>
+                                <textarea name="description" id="description" rows="3" 
+                                          placeholder="Describe what this form is for..."><?php echo $form ? esc_textarea($form->description) : ''; ?></textarea>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="editor-section">
-                        <h3><span class="dashicons dashicons-admin-appearance"></span> Select Website Templates</h3>
-                        <p class="section-description">Choose which templates customers can select from. Click to toggle selection.</p>
-                        
-                        <div class="templates-selector">
-                            <?php foreach ($available_themes as $theme): 
-                                $is_selected = in_array($theme->id, $selected_themes);
-                            ?>
-                                <div class="template-select-card <?php echo $is_selected ? 'selected' : ''; ?>" 
-                                     data-theme-id="<?php echo $theme->id; ?>">
-                                    <div class="select-indicator">
-                                        <span class="dashicons dashicons-yes-alt"></span>
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><span class="dashicons dashicons-layout"></span> Select Website Templates</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="section-description">Choose which templates customers can select from. Click to toggle selection.</p>
+                            
+                            <div class="templates-selector">
+                                <?php foreach ($available_themes as $theme): 
+                                    $is_selected = in_array($theme->id, $selected_themes);
+                                ?>
+                                    <div class="template-select-card <?php echo $is_selected ? 'selected' : ''; ?>" 
+                                         data-theme-id="<?php echo $theme->id; ?>">
+                                        <div class="select-indicator">
+                                            <span class="dashicons dashicons-yes-alt"></span>
+                                        </div>
+                                        <div class="template-preview-mini" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?> 0%, <?php echo esc_attr($theme->secondary_color); ?> 100%);"></div>
+                                        <div class="template-select-info">
+                                            <h4><?php echo esc_html($theme->name); ?></h4>
+                                            <span class="category"><?php echo esc_html($themes_handler->get_categories()[$theme->category] ?? $theme->category); ?></span>
+                                        </div>
                                     </div>
-                                    <div class="template-preview-mini" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?> 0%, <?php echo esc_attr($theme->secondary_color); ?> 100%);"></div>
-                                    <div class="template-select-info">
-                                        <h4><?php echo esc_html($theme->name); ?></h4>
-                                        <span class="category"><?php echo esc_html($themes_handler->get_categories()[$theme->category] ?? $theme->category); ?></span>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                        
-                        <input type="hidden" name="available_themes" id="available-themes" 
-                               value="<?php echo esc_attr(json_encode($selected_themes)); ?>">
-                    </div>
-                    
-                    <div class="editor-section">
-                        <h3>Customer Options</h3>
-                        
-                        <div class="form-field checkbox-field">
-                            <label>
-                                <input type="checkbox" name="allow_theme_selection" value="1" 
-                                       <?php checked($form ? $form->allow_theme_selection : 1, 1); ?>>
-                                Allow customer to select from multiple templates
-                            </label>
-                            <p class="field-hint">If unchecked, customer will only see the first selected template.</p>
-                        </div>
-                        
-                        <div class="form-field checkbox-field">
-                            <label>
-                                <input type="checkbox" name="allow_color_customization" value="1" 
-                                       <?php checked($form ? $form->allow_color_customization : 1, 1); ?>>
-                                Allow customer to customize colors
-                            </label>
-                            <p class="field-hint">Customer can change primary, secondary, and accent colors.</p>
-                        </div>
-                        
-                        <div class="form-field checkbox-field">
-                            <label>
-                                <input type="checkbox" name="notify_admin" value="1" 
-                                       <?php checked($form ? $form->notify_admin : 1, 1); ?>>
-                                Send email notification on submission
-                            </label>
+                                <?php endforeach; ?>
+                            </div>
+                            
+                            <input type="hidden" name="available_themes" id="available-themes" 
+                                   value="<?php echo esc_attr(json_encode($selected_themes)); ?>">
                         </div>
                     </div>
                     
-                    <div class="editor-section">
-                        <h3>Messages</h3>
-                        
-                        <div class="form-field">
-                            <label for="header_text">Header Text</label>
-                            <input type="text" name="header_text" id="header_text" 
-                                   value="<?php echo $form ? esc_attr($form->header_text) : 'Choose Your Website Template'; ?>" 
-                                   placeholder="Choose Your Website Template">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><span class="dashicons dashicons-admin-settings"></span> Customer Options</h3>
                         </div>
-                        
-                        <div class="form-field">
-                            <label for="success_message">Success Message</label>
-                            <textarea name="success_message" id="success_message" rows="2" 
-                                      placeholder="Thank you! Your submission has been received successfully."><?php echo $form ? esc_textarea($form->success_message) : 'Thank you! Your submission has been received successfully. We will contact you shortly.'; ?></textarea>
+                        <div class="card-body">
+                            <div class="form-field checkbox-field">
+                                <label>
+                                    <input type="checkbox" name="allow_theme_selection" value="1" 
+                                           <?php checked($form ? $form->allow_theme_selection : 1, 1); ?>>
+                                    Allow customer to select from multiple templates
+                                </label>
+                                <p class="field-hint">If unchecked, customer will only see the first selected template.</p>
+                            </div>
+                            
+                            <div class="form-field checkbox-field">
+                                <label>
+                                    <input type="checkbox" name="allow_color_customization" value="1" 
+                                           <?php checked($form ? $form->allow_color_customization : 1, 1); ?>>
+                                    Allow customer to customize colors
+                                </label>
+                                <p class="field-hint">Customer can change primary, secondary, and accent colors.</p>
+                            </div>
+                            
+                            <div class="form-field checkbox-field">
+                                <label>
+                                    <input type="checkbox" name="notify_admin" value="1" 
+                                           <?php checked($form ? $form->notify_admin : 1, 1); ?>>
+                                    Send email notification on submission
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><span class="dashicons dashicons-edit"></span> Messages</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-field">
+                                <label for="header_text">Header Text</label>
+                                <input type="text" name="header_text" id="header_text" 
+                                       value="<?php echo $form ? esc_attr($form->header_text) : 'Choose Your Website Template'; ?>" 
+                                       placeholder="Choose Your Website Template">
+                            </div>
+                            
+                            <div class="form-field">
+                                <label for="success_message">Success Message</label>
+                                <textarea name="success_message" id="success_message" rows="2" 
+                                          placeholder="Thank you! Your submission has been received successfully."><?php echo $form ? esc_textarea($form->success_message) : 'Thank you! Your submission has been received successfully. We will contact you shortly.'; ?></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -384,7 +415,8 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                                 <option value="0" <?php selected($form ? $form->status : 1, 0); ?>>Inactive</option>
                             </select>
                         </div>
-                        <button type="submit" class="button button-primary button-large" style="width:100%;">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span class="dashicons dashicons-saved"></span>
                             <?php echo $form ? 'Update Form' : 'Create Form'; ?>
                         </button>
                     </div>
@@ -392,7 +424,8 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                     <div class="sidebar-card">
                         <h4>Selected Templates</h4>
                         <div id="selected-count">
-                            <span class="count"><?php echo count($selected_themes); ?></span> templates selected
+                            <span class="count"><?php echo count($selected_themes); ?></span>
+                            <span>templates selected</span>
                         </div>
                     </div>
                 </div>
@@ -402,42 +435,157 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
 </div>
 
 <style>
-/* Forms Grid */
-.forms-container {
-    margin-top: 20px;
+.spfm-forms-wrap {
+    padding: 20px;
+    max-width: 1400px;
+    font-family: 'Inter', -apple-system, sans-serif;
 }
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 20px;
+    padding: 40px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+.header-content h1 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+}
+.header-content h1 .dashicons {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+}
+.header-content p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 15px;
+}
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+.back-link:hover {
+    color: #fff;
+}
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+}
+.btn-white {
+    background: #fff;
+    color: #10b981;
+}
+.btn-white:hover {
+    background: #f0fdf4;
+    transform: translateY(-2px);
+}
+.btn-primary {
+    background: #10b981;
+    color: #fff;
+}
+.btn-primary:hover {
+    background: #059669;
+    color: #fff;
+}
+.btn-outline {
+    background: transparent;
+    color: #10b981;
+    border: 2px solid #10b981;
+}
+.btn-outline:hover {
+    background: #10b981;
+    color: #fff;
+}
+.btn-danger {
+    background: #fee2e2;
+    color: #dc2626;
+}
+.btn-danger:hover {
+    background: #dc2626;
+    color: #fff;
+}
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+.btn-block {
+    width: 100%;
+    justify-content: center;
+}
+.btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Forms Grid */
 .forms-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
     gap: 25px;
 }
 .form-card {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     transition: all 0.3s;
 }
 .form-card:hover {
-    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
 }
 .form-card-header {
+    padding: 20px 25px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+.form-title-area {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
-    color: #fff;
 }
 .form-card-header h3 {
     margin: 0;
     font-size: 18px;
     color: #fff;
+    font-weight: 600;
 }
 .status-badge {
-    padding: 3px 10px;
-    border-radius: 15px;
+    padding: 5px 12px;
+    border-radius: 20px;
     font-size: 11px;
+    font-weight: 600;
 }
 .status-badge.active {
     background: rgba(255,255,255,0.2);
@@ -447,91 +595,96 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
     background: rgba(0,0,0,0.2);
     color: #fff;
 }
+.status-badge.sent { background: #dbeafe; color: #2563eb; }
+.status-badge.submitted { background: #dcfce7; color: #16a34a; }
+.status-badge.pending { background: #fef3c7; color: #d97706; }
+.status-badge.new { background: #fef3c7; color: #d97706; }
+
 .form-card-body {
-    padding: 20px;
+    padding: 25px;
 }
 .form-description {
-    color: #666;
+    color: #64748b;
     font-size: 14px;
-    margin-bottom: 15px;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
 }
 .form-stats {
     display: flex;
-    gap: 20px;
-    margin-bottom: 15px;
+    gap: 15px;
+    margin-bottom: 20px;
 }
 .stat-item {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 10px;
 }
 .stat-icon {
-    display: block;
-    color: #0891b2;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.stat-icon .dashicons {
+    color: #fff;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+.stat-icon.templates { background: linear-gradient(135deg, #0891b2, #0e7490); }
+.stat-icon.shares { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.stat-icon.submissions { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.stat-info {
+    display: flex;
+    flex-direction: column;
 }
 .stat-value {
-    display: block;
     font-size: 20px;
     font-weight: 700;
-    color: #333;
+    color: #1e293b;
+    line-height: 1;
 }
 .stat-label {
     font-size: 11px;
-    color: #999;
+    color: #94a3b8;
+    margin-top: 3px;
 }
+
 .selected-themes-preview {
     display: flex;
     gap: 8px;
     align-items: center;
 }
 .theme-mini {
-    width: 35px;
-    height: 35px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .more-themes {
     font-size: 12px;
-    color: #666;
-    background: #f0f0f0;
-    padding: 8px 12px;
-    border-radius: 8px;
-}
-.form-card-actions {
-    display: flex;
-    gap: 8px;
-    padding: 15px 20px;
-    background: #f8f9fa;
-    border-top: 1px solid #eee;
-}
-.form-card-actions .button {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.form-card-actions .dashicons {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 600;
 }
 
-/* Share Container */
-.share-container {
-    margin-top: 20px;
+.form-card-actions {
+    display: flex;
+    gap: 10px;
+    padding: 20px 25px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
 }
-.share-header {
-    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
-    padding: 30px;
-    border-radius: 12px;
-    color: #fff;
-    margin-bottom: 25px;
-}
-.share-header h2 {
-    margin: 0 0 5px 0;
-    color: #fff;
-}
-.share-header p {
-    margin: 0;
-    opacity: 0.9;
-}
+
+/* Share Methods */
 .share-methods {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -540,184 +693,248 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
 }
 .share-method-card {
     background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
 .method-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
+    width: 70px;
+    height: 70px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 .method-icon .dashicons {
     color: #fff;
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
 }
+.method-icon.link { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.method-icon.email { background: linear-gradient(135deg, #10b981, #059669); }
+.method-icon.whatsapp { background: linear-gradient(135deg, #25d366, #128c7e); }
 .share-method-card h3 {
-    margin: 0 0 8px 0;
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #1e293b;
 }
 .share-method-card > p {
-    color: #666;
+    color: #64748b;
     font-size: 14px;
-    margin-bottom: 20px;
+    margin: 0 0 25px 0;
 }
 .share-form .form-field {
     margin-bottom: 15px;
 }
 .share-form label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
+    color: #334155;
 }
 .share-form input, .share-form select {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+}
+.share-form input:focus, .share-form select:focus {
+    border-color: #10b981;
+    outline: none;
 }
 .link-generator .generated-link {
     display: flex;
-    gap: 5px;
-    margin-top: 10px;
+    gap: 10px;
+    margin-top: 15px;
 }
 .link-generator input {
     flex: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #f8f9fa;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
 }
-.share-history {
+
+/* Dashboard Card */
+.dashboard-card {
     background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    margin-bottom: 25px;
 }
-.share-history h3 {
-    margin: 0 0 20px 0;
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.card-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 10px;
+    color: #1e293b;
 }
-.no-history {
-    color: #999;
-    text-align: center;
-    padding: 30px;
+.card-header .dashicons {
+    color: #10b981;
+}
+.card-body {
+    padding: 25px;
+}
+
+/* History List */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+.history-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.history-icon .dashicons {
+    color: #fff;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+.history-icon.link { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.history-icon.email { background: linear-gradient(135deg, #10b981, #059669); }
+.history-icon.sms, .history-icon.whatsapp { background: linear-gradient(135deg, #25d366, #128c7e); }
+.history-info {
+    flex: 1;
+}
+.history-info strong {
+    display: block;
+    color: #1e293b;
+    font-size: 14px;
+}
+.history-meta {
+    font-size: 12px;
+    color: #64748b;
 }
 
 /* Form Editor */
-.form-editor-container {
-    margin-top: 20px;
-}
 .form-editor-container form {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 320px;
     gap: 25px;
 }
 .editor-main {
-    flex: 1;
-}
-.editor-section {
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-.editor-section h3 {
-    margin: 0 0 20px 0;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
     display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.section-description {
-    color: #666;
-    margin: -10px 0 20px 0;
+    flex-direction: column;
+    gap: 0;
 }
 .form-field {
     margin-bottom: 20px;
 }
+.form-field:last-child {
+    margin-bottom: 0;
+}
 .form-field label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 14px;
+    color: #334155;
 }
 .form-field input[type="text"],
 .form-field input[type="email"],
 .form-field textarea,
 .form-field select {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    padding: 12px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: border-color 0.2s;
 }
 .form-field input:focus,
 .form-field textarea:focus,
 .form-field select:focus {
-    border-color: #0891b2;
+    border-color: #10b981;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(8,145,178,0.1);
 }
 .checkbox-field label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
+    font-weight: 500;
 }
 .checkbox-field input {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
+    accent-color: #10b981;
 }
 .field-hint {
-    margin: 5px 0 0 28px;
-    color: #999;
-    font-size: 12px;
+    margin: 8px 0 0 32px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+.section-description {
+    color: #64748b;
+    margin: 0 0 20px 0;
+    font-size: 14px;
 }
 
 /* Templates Selector */
 .templates-selector {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 15px;
 }
 .template-select-card {
     position: relative;
-    background: #f8f9fa;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
     padding: 15px;
     cursor: pointer;
     transition: all 0.2s;
 }
 .template-select-card:hover {
-    border-color: #0891b2;
+    border-color: #10b981;
+    transform: translateY(-2px);
 }
 .template-select-card.selected {
-    border-color: #0891b2;
-    background: #f0fdfa;
+    border-color: #10b981;
+    background: #f0fdf4;
 }
 .select-indicator {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 24px;
-    height: 24px;
-    background: #e0e0e0;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    background: #e2e8f0;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 .template-select-card.selected .select-indicator {
-    background: #0891b2;
+    background: #10b981;
 }
 .select-indicator .dashicons {
     color: #fff;
@@ -731,81 +948,137 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
 }
 .template-preview-mini {
     height: 80px;
-    border-radius: 6px;
-    margin-bottom: 10px;
+    border-radius: 8px;
+    margin-bottom: 12px;
 }
 .template-select-info h4 {
-    margin: 0 0 5px 0;
+    margin: 0 0 6px 0;
     font-size: 14px;
+    color: #1e293b;
 }
 .template-select-info .category {
     font-size: 11px;
-    background: #e9ecef;
-    padding: 2px 8px;
+    background: #e2e8f0;
+    padding: 3px 10px;
     border-radius: 10px;
-    color: #666;
+    color: #64748b;
 }
 
 /* Editor Sidebar */
 .editor-sidebar {
-    width: 280px;
-    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 .sidebar-card {
     background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
 .sidebar-card h4 {
-    margin: 0 0 15px 0;
+    margin: 0 0 20px 0;
     font-size: 14px;
-    color: #666;
+    color: #64748b;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 #selected-count {
     text-align: center;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
+    padding: 20px;
+    background: #f0fdf4;
+    border-radius: 12px;
 }
 #selected-count .count {
-    font-size: 28px;
+    font-size: 36px;
     font-weight: 700;
-    color: #0891b2;
+    color: #10b981;
     display: block;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+#selected-count span {
+    font-size: 13px;
+    color: #64748b;
 }
 
 /* Empty State */
-.empty-state {
+.empty-state-card {
     text-align: center;
-    padding: 80px 20px;
+    padding: 80px 40px;
     background: #fff;
-    border-radius: 12px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
-.empty-state .dashicons {
-    font-size: 60px;
-    width: 60px;
-    height: 60px;
-    color: #ddd;
+.empty-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+}
+.empty-icon .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #fff;
+}
+.empty-state-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    color: #1e293b;
+}
+.empty-state-card p {
+    margin: 0 0 25px 0;
+    color: #64748b;
+    font-size: 15px;
+}
+.empty-state-small {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+}
+.empty-state-small .dashicons {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: #cbd5e1;
     margin-bottom: 15px;
 }
 
+/* Responsive */
 @media (max-width: 1200px) {
     .share-methods {
         grid-template-columns: 1fr;
     }
     .form-editor-container form {
-        flex-direction: column;
+        grid-template-columns: 1fr;
     }
-    .editor-sidebar {
-        width: 100%;
+}
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+    .forms-grid {
+        grid-template-columns: 1fr;
+    }
+    .form-stats {
+        flex-direction: column;
     }
 }
 </style>
 
 <script>
+var spfm_ajax = {
+    ajax_url: '<?php echo admin_url('admin-ajax.php'); ?>',
+    nonce: '<?php echo wp_create_nonce('spfm_nonce'); ?>'
+};
+
 jQuery(document).ready(function($) {
     var formId = <?php echo $form ? $form->id : 0; ?>;
     
@@ -852,7 +1125,7 @@ jQuery(document).ready(function($) {
                 $('.generated-link').show();
                 $btn.hide();
             }
-            $btn.text('Generate Link').prop('disabled', false);
+            $btn.html('<span class="dashicons dashicons-admin-links"></span> Generate Link').prop('disabled', false);
         });
     });
     
@@ -940,7 +1213,7 @@ jQuery(document).ready(function($) {
                 window.location.href = '<?php echo admin_url('admin.php?page=spfm-forms'); ?>';
             } else {
                 alert(response.data.message);
-                $btn.text('Save Form').prop('disabled', false);
+                $btn.html('<span class="dashicons dashicons-saved"></span> Save Form').prop('disabled', false);
             }
         });
     });
