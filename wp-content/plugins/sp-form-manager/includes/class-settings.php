@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) {
 class SPFM_Settings {
     
     private static $instance = null;
+    private static $phpmailer_error = '';
     
     public static function get_instance() {
         if (null === self::$instance) {
@@ -20,14 +21,36 @@ class SPFM_Settings {
     
     private function __construct() {
         // Configure SMTP if enabled
-        add_action('phpmailer_init', array($this, 'configure_smtp'));
+        add_action('phpmailer_init', array($this, 'configure_smtp'), 10, 1);
+        
+        // Capture mail errors
+        add_action('wp_mail_failed', array($this, 'capture_mail_error'), 10, 1);
+    }
+    
+    /**
+     * Capture mail errors
+     */
+    public function capture_mail_error($wp_error) {
+        if (is_wp_error($wp_error)) {
+            self::$phpmailer_error = $wp_error->get_error_message();
+            error_log('SPFM Mail Error: ' . self::$phpmailer_error);
+        }
+    }
+    
+    /**
+     * Get last mail error
+     */
+    public static function get_last_error() {
+        return self::$phpmailer_error;
     }
     
     /**
      * Configure PHPMailer for SMTP
      */
     public function configure_smtp($phpmailer) {
-        if (!get_option('spfm_smtp_enabled', 0)) {
+        $smtp_enabled = get_option('spfm_smtp_enabled', 0);
+        
+        if (!$smtp_enabled) {
             return;
         }
         
@@ -38,33 +61,58 @@ class SPFM_Settings {
         $password = get_option('spfm_smtp_password', '');
         
         if (empty($host) || empty($username) || empty($password)) {
+            error_log('SPFM: SMTP enabled but missing configuration - Host: ' . (!empty($host) ? 'Set' : 'Empty') . ', User: ' . (!empty($username) ? 'Set' : 'Empty') . ', Pass: ' . (!empty($password) ? 'Set' : 'Empty'));
             return;
         }
         
-        $phpmailer->isSMTP();
-        $phpmailer->Host = $host;
-        $phpmailer->SMTPAuth = true;
-        $phpmailer->Port = $port;
-        $phpmailer->Username = $username;
-        $phpmailer->Password = $password;
-        
-        if ($encryption === 'tls') {
-            $phpmailer->SMTPSecure = 'tls';
-        } elseif ($encryption === 'ssl') {
-            $phpmailer->SMTPSecure = 'ssl';
+        try {
+            $phpmailer->isSMTP();
+            $phpmailer->Host = $host;
+            $phpmailer->SMTPAuth = true;
+            $phpmailer->Port = intval($port);
+            $phpmailer->Username = $username;
+            $phpmailer->Password = $password;
+            
+            if ($encryption === 'tls') {
+                $phpmailer->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            } elseif ($encryption === 'ssl') {
+                $phpmailer->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+            } else {
+                $phpmailer->SMTPSecure = '';
+                $phpmailer->SMTPAutoTLS = false;
+            }
+            
+            // Set From headers - IMPORTANT: Use SMTP username as From email to avoid "Data not accepted" error
+            $from_name = get_option('spfm_email_from_name', get_bloginfo('name'));
+            $from_email = get_option('spfm_email_from_address', '');
+            
+            // If From email is empty or different from SMTP username, use SMTP username
+            // Most SMTP providers require From address to match authenticated user
+            if (empty($from_email) || strpos($host, 'gmail') !== false || strpos($host, 'office365') !== false || strpos($host, 'outlook') !== false) {
+                $from_email = $username;
+            }
+            
+            $phpmailer->setFrom($from_email, $from_name);
+            
+            // Clear any existing Reply-To and set it to the configured from address if different
+            $configured_from = get_option('spfm_email_from_address', '');
+            if (!empty($configured_from) && $configured_from !== $from_email) {
+                $phpmailer->clearReplyTos();
+                $phpmailer->addReplyTo($configured_from, $from_name);
+            }
+            
+        } catch (Exception $e) {
+            error_log('SPFM SMTP Configuration Error: ' . $e->getMessage());
         }
-        
-        // Set From headers
-        $from_name = get_option('spfm_email_from_name', get_bloginfo('name'));
-        $from_email = get_option('spfm_email_from_address', get_option('admin_email'));
-        
-        $phpmailer->setFrom($from_email, $from_name);
     }
     
     /**
      * Send email with HTML template
      */
     public static function send_email($to, $subject, $message, $attachments = array()) {
+        // Reset error
+        self::$phpmailer_error = '';
+        
         $from_name = get_option('spfm_email_from_name', get_bloginfo('name'));
         $from_email = get_option('spfm_email_from_address', get_option('admin_email'));
         
@@ -75,7 +123,74 @@ class SPFM_Settings {
         
         $html_message = self::get_email_template($subject, $message);
         
-        return wp_mail($to, $subject, $html_message, $headers, $attachments);
+        // Ensure Settings instance is initialized (registers SMTP hook)
+        self::get_instance();
+        
+        $result = wp_mail($to, $subject, $html_message, $headers, $attachments);
+        
+        if (!$result && !empty(self::$phpmailer_error)) {
+            error_log('SPFM: Email failed to ' . $to . ' - Error: ' . self::$phpmailer_error);
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Send test email with detailed error reporting
+     */
+    public static function send_test_email($to) {
+        // Reset error
+        self::$phpmailer_error = '';
+        
+        // Ensure Settings instance is initialized
+        self::get_instance();
+        
+        $smtp_enabled = get_option('spfm_smtp_enabled', 0);
+        $from_name = get_option('spfm_email_from_name', get_bloginfo('name'));
+        $from_email = get_option('spfm_email_from_address', get_option('admin_email'));
+        
+        $subject = 'SP Form Manager - Test Email';
+        $message = '<h2>Test Email</h2>';
+        $message .= '<p>This is a test email from SP Form Manager.</p>';
+        $message .= '<p>If you received this, your email settings are working correctly!</p>';
+        $message .= '<hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">';
+        $message .= '<p style="font-size: 12px; color: #888;"><strong>Configuration Used:</strong></p>';
+        $message .= '<ul style="font-size: 12px; color: #888;">';
+        $message .= '<li>SMTP Enabled: ' . ($smtp_enabled ? 'Yes' : 'No (using PHP mail)') . '</li>';
+        
+        if ($smtp_enabled) {
+            $message .= '<li>SMTP Host: ' . esc_html(get_option('spfm_smtp_host', 'Not set')) . '</li>';
+            $message .= '<li>SMTP Port: ' . esc_html(get_option('spfm_smtp_port', '587')) . '</li>';
+            $message .= '<li>Encryption: ' . esc_html(get_option('spfm_smtp_encryption', 'tls')) . '</li>';
+        }
+        
+        $message .= '<li>From: ' . esc_html($from_name) . ' &lt;' . esc_html($from_email) . '&gt;</li>';
+        $message .= '</ul>';
+        
+        $headers = array(
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . $from_name . ' <' . $from_email . '>'
+        );
+        
+        $html_message = self::get_email_template($subject, $message);
+        
+        $result = wp_mail($to, $subject, $html_message, $headers);
+        
+        if (!$result) {
+            $error = self::$phpmailer_error;
+            if (empty($error)) {
+                $error = 'Unknown error. Check your server\'s mail configuration.';
+            }
+            return array(
+                'success' => false,
+                'message' => $error
+            );
+        }
+        
+        return array(
+            'success' => true,
+            'message' => 'Test email sent successfully to ' . $to
+        );
     }
     
     /**

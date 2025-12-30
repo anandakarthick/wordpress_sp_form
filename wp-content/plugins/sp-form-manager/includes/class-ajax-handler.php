@@ -783,15 +783,13 @@ class SPFM_Ajax_Handler {
             return;
         }
         
-        $subject = 'SP Form Manager - Test Email';
-        $message = '<h2>Test Email</h2><p>This is a test email from SP Form Manager.</p><p>If you received this, your email settings are working correctly!</p>';
+        // Use the detailed test email method
+        $result = SPFM_Settings::send_test_email($email);
         
-        $result = SPFM_Settings::send_email($email, $subject, $message);
-        
-        if ($result) {
-            wp_send_json_success(array('message' => 'Test email sent successfully!'));
+        if ($result['success']) {
+            wp_send_json_success(array('message' => $result['message']));
         } else {
-            wp_send_json_error(array('message' => 'Failed to send test email. Check your settings.'));
+            wp_send_json_error(array('message' => $result['message']));
         }
     }
     
