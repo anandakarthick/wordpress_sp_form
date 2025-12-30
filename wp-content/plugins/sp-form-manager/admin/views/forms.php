@@ -328,19 +328,57 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                         <div class="card-body">
                             <p class="section-description">Choose which templates customers can select from. Click to toggle selection.</p>
                             
+                            <?php
+                            // Category data for previews
+                            $category_data = array(
+                                'hospital' => array('icon' => '🏥', 'color' => '#0891b2', 'preview' => 'multi-dept'),
+                                'dental' => array('icon' => '🦷', 'color' => '#0ea5e9', 'preview' => 'smile'),
+                                'eye_care' => array('icon' => '👁️', 'color' => '#8b5cf6', 'preview' => 'vision'),
+                                'pediatric' => array('icon' => '👶', 'color' => '#f97316', 'preview' => 'playful'),
+                                'cardiology' => array('icon' => '❤️', 'color' => '#dc2626', 'preview' => 'heart'),
+                                'mental_health' => array('icon' => '🧠', 'color' => '#10b981', 'preview' => 'calm'),
+                                'orthopedic' => array('icon' => '🦴', 'color' => '#2563eb', 'preview' => 'motion'),
+                                'diagnostic' => array('icon' => '🔬', 'color' => '#0d9488', 'preview' => 'tech')
+                            );
+                            ?>
                             <div class="templates-selector">
                                 <?php foreach ($available_themes as $theme): 
                                     $is_selected = in_array($theme->id, $selected_themes);
+                                    $cat_data = $category_data[$theme->category] ?? array('icon' => '🏥', 'color' => '#0891b2', 'preview' => 'default');
                                 ?>
                                     <div class="template-select-card <?php echo $is_selected ? 'selected' : ''; ?>" 
                                          data-theme-id="<?php echo $theme->id; ?>">
                                         <div class="select-indicator">
                                             <span class="dashicons dashicons-yes-alt"></span>
                                         </div>
-                                        <div class="template-preview-mini" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?> 0%, <?php echo esc_attr($theme->secondary_color); ?> 100%);"></div>
+                                        <div class="template-preview" style="--primary: <?php echo esc_attr($theme->primary_color); ?>; --secondary: <?php echo esc_attr($theme->secondary_color); ?>; --accent: <?php echo esc_attr($theme->accent_color); ?>; --bg: <?php echo esc_attr($theme->background_color); ?>;">
+                                            <?php 
+                                            $preview_file = SPFM_PLUGIN_PATH . 'admin/views/partials/template-preview-' . $cat_data['preview'] . '.php';
+                                            if (file_exists($preview_file)) {
+                                                include $preview_file;
+                                            } else {
+                                                include SPFM_PLUGIN_PATH . 'admin/views/partials/template-preview-default.php';
+                                            }
+                                            ?>
+                                        </div>
                                         <div class="template-select-info">
+                                            <div class="template-meta-row">
+                                                <span class="template-category-badge" style="background: <?php echo esc_attr($cat_data['color']); ?>;">
+                                                    <?php echo $cat_data['icon']; ?> <?php echo esc_html($themes_handler->get_categories()[$theme->category] ?? $theme->category); ?>
+                                                </span>
+                                            </div>
                                             <h4><?php echo esc_html($theme->name); ?></h4>
-                                            <span class="category"><?php echo esc_html($themes_handler->get_categories()[$theme->category] ?? $theme->category); ?></span>
+                                            <div class="template-colors-row">
+                                                <span class="color-dot" style="background: <?php echo esc_attr($theme->primary_color); ?>;" title="Primary"></span>
+                                                <span class="color-dot" style="background: <?php echo esc_attr($theme->secondary_color); ?>;" title="Secondary"></span>
+                                                <span class="color-dot" style="background: <?php echo esc_attr($theme->accent_color); ?>;" title="Accent"></span>
+                                            </div>
+                                        </div>
+                                        <div class="template-card-actions">
+                                            <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=preview&id=' . $theme->id); ?>" 
+                                               target="_blank" class="preview-link" onclick="event.stopPropagation();">
+                                                <span class="dashicons dashicons-visibility"></span> Preview
+                                            </a>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -898,70 +936,130 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
     font-size: 14px;
 }
 
-/* Templates Selector */
+/* Templates Selector - Exact match with Templates page */
 .templates-selector {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 25px;
 }
 .template-select-card {
     position: relative;
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 15px;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 .template-select-card:hover {
-    border-color: #10b981;
-    transform: translateY(-2px);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
 }
 .template-select-card.selected {
-    border-color: #10b981;
-    background: #f0fdf4;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4), 0 12px 30px rgba(0,0,0,0.12);
 }
 .select-indicator {
     position: absolute;
     top: 12px;
-    right: 12px;
-    width: 26px;
-    height: 26px;
-    background: #e2e8f0;
+    left: 12px;
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.95);
+    border: 2px solid #e2e8f0;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 25;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .template-select-card.selected .select-indicator {
     background: #10b981;
+    border-color: #10b981;
 }
 .select-indicator .dashicons {
+    color: #cbd5e1;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+.template-select-card.selected .select-indicator .dashicons {
     color: #fff;
+}
+
+/* Template Preview - Exact match with Templates page (380px height) */
+.template-select-card .template-preview {
+    height: 380px;
+    position: relative;
+    overflow: hidden;
+    background: #f8fafc;
+}
+
+/* Ensure live-preview from partials fills the container */
+.template-select-card .template-preview .live-preview {
+    height: 100%;
+}
+
+/* Template Select Info */
+.template-select-info {
+    padding: 15px;
+    background: #fff;
+}
+.template-meta-row {
+    margin-bottom: 8px;
+}
+.template-category-badge {
+    display: inline-block;
+    font-size: 10px;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+.template-select-info h4 {
+    margin: 0 0 10px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+.template-colors-row {
+    display: flex;
+    gap: 6px;
+}
+.color-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Template Card Actions */
+.template-card-actions {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+.preview-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.preview-link:hover {
+    background: #10b981;
+    color: #fff;
+}
+.preview-link .dashicons {
     font-size: 16px;
     width: 16px;
     height: 16px;
-    display: none;
-}
-.template-select-card.selected .select-indicator .dashicons {
-    display: block;
-}
-.template-preview-mini {
-    height: 80px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-}
-.template-select-info h4 {
-    margin: 0 0 6px 0;
-    font-size: 14px;
-    color: #1e293b;
-}
-.template-select-info .category {
-    font-size: 11px;
-    background: #e2e8f0;
-    padding: 3px 10px;
-    border-radius: 10px;
-    color: #64748b;
 }
 
 /* Editor Sidebar */
