@@ -16,12 +16,10 @@ $fonts = $themes_handler->get_fonts();
 $preview_mode = isset($_GET['action']) && $_GET['action'] === 'preview' && isset($_GET['id']);
 $edit_mode = isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id']);
 
+// Preview is now handled early in sp-form-manager.php to avoid WordPress admin interference
+// So if we reach here with preview_mode, something went wrong
 if ($preview_mode) {
-    $preview_theme = $themes_handler->get_theme_complete(intval($_GET['id']));
-    if ($preview_theme) {
-        include SPFM_PLUGIN_PATH . 'admin/views/template-preview.php';
-        return;
-    }
+    wp_die('Preview should have been handled earlier. Please try again.');
 }
 
 $themes = $themes_handler->get_all();

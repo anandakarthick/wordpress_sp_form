@@ -2,14 +2,14 @@
 /**
  * Template Preview Page
  * Full-page preview of hospital website template
- * Version 3.0 - Unique Designs for Each Category
+ * Version 3.0 - Standalone Preview
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-// $preview_theme is passed from themes.php
+// $preview_theme is passed from sp-form-manager.php
 $theme = $preview_theme;
 $category = $theme->category;
 
@@ -30,8 +30,10 @@ if (!empty($theme->pages)) {
 }
 
 // Helper function to get value
-function get_preview_value($defaults, $key, $fallback = '') {
-    return isset($defaults[$key]) ? $defaults[$key] : $fallback;
+if (!function_exists('get_preview_value')) {
+    function get_preview_value($defaults, $key, $fallback = '') {
+        return isset($defaults[$key]) ? $defaults[$key] : $fallback;
+    }
 }
 
 $primary = $theme->primary_color;
@@ -56,8 +58,11 @@ $categoryData = array(
     'diagnostic' => array('icon' => '🔬', 'name' => 'Diagnostic Lab')
 );
 $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospital');
-?>
-<!DOCTYPE html>
+
+// Admin URLs
+$back_url = admin_url('admin.php?page=spfm-themes');
+$edit_url = admin_url('admin.php?page=spfm-themes&action=edit&id=' . $theme->id);
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -65,6 +70,25 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
     <title><?php echo esc_html($theme->name); ?> - Template Preview</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            min-height: 100%;
+            background: <?php echo esc_attr($background); ?>;
+        }
+        
+        body {
+            font-family: '<?php echo esc_attr($fontFamily); ?>', sans-serif;
+            color: <?php echo esc_attr($textColor); ?>;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
         :root {
             --primary: <?php echo esc_attr($primary); ?>;
             --secondary: <?php echo esc_attr($secondary); ?>;
@@ -73,100 +97,87 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             --text: <?php echo esc_attr($textColor); ?>;
             --header-bg: <?php echo esc_attr($headerBg); ?>;
             --footer-bg: <?php echo esc_attr($footerBg); ?>;
-            --admin-bar-height: 70px;
         }
         
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-        }
-        
-        html {
-            height: 100%;
-            overflow-x: hidden;
-        }
-        
-        body {
-            font-family: '<?php echo esc_attr($fontFamily); ?>', sans-serif;
-            color: var(--text);
-            background: var(--background);
-            line-height: 1.6;
-            min-height: 100%;
-            overflow-x: hidden;
-            overflow-y: auto;
-        }
-        
-        h1, h2, h3, h4 {
+        h1, h2, h3, h4, h5, h6 {
             font-family: '<?php echo esc_attr($headingFont); ?>', sans-serif;
+            margin: 0;
         }
         
-        /* Admin Bar - Fixed at top */
-        .admin-bar {
+        a { text-decoration: none; }
+        ul { list-style: none; }
+        
+        /* Admin Bar */
+        .preview-admin-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: var(--admin-bar-height);
+            height: 60px;
             background: linear-gradient(135deg, #1e293b, #0f172a);
             color: #fff;
-            padding: 0 30px;
+            padding: 0 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 99999;
+            z-index: 999999;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .admin-bar .left {
+        .preview-admin-bar .left {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
-        .admin-bar .template-name {
-            font-size: 18px;
+        .preview-admin-bar .template-name {
+            font-size: 16px;
             font-weight: 600;
             display: flex;
             align-items: center;
+            gap: 8px;
+            color: #fff;
+        }
+        .preview-admin-bar .category-badge {
+            font-size: 11px;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 15px;
+            color: #fff;
+        }
+        .preview-admin-bar .right {
+            display: flex;
             gap: 10px;
         }
-        .admin-bar .category-badge {
-            font-size: 12px;
-            background: rgba(255,255,255,0.15);
-            padding: 5px 14px;
-            border-radius: 20px;
-        }
-        .admin-bar .right {
-            display: flex;
-            gap: 12px;
-        }
-        .admin-bar .btn {
-            padding: 10px 22px;
-            border-radius: 8px;
-            font-size: 14px;
+        .preview-admin-bar .btn {
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-size: 13px;
             font-weight: 600;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             transition: all 0.3s;
+            cursor: pointer;
         }
-        .admin-bar .btn-back {
+        .preview-admin-bar .btn-back {
             background: rgba(255,255,255,0.1);
             color: #fff;
         }
-        .admin-bar .btn-back:hover { background: rgba(255,255,255,0.2); }
-        .admin-bar .btn-edit {
+        .preview-admin-bar .btn-back:hover { 
+            background: rgba(255,255,255,0.2); 
+        }
+        .preview-admin-bar .btn-edit {
             background: var(--primary);
             color: #fff;
         }
-        .admin-bar .btn-edit:hover { opacity: 0.9; }
+        .preview-admin-bar .btn-edit:hover { 
+            opacity: 0.9; 
+        }
         
-        /* Preview Content Wrapper - Below admin bar */
-        .preview-wrapper {
-            margin-top: var(--admin-bar-height);
-            min-height: calc(100vh - var(--admin-bar-height));
-            position: relative;
-            z-index: 1;
+        /* Main Content Wrapper */
+        .preview-main {
+            margin-top: 60px;
+            width: 100%;
         }
         
         /* Common Styles */
@@ -197,7 +208,7 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             align-items: center;
             box-shadow: 0 2px 15px rgba(0,0,0,0.05);
             position: sticky;
-            top: var(--admin-bar-height);
+            top: 60px;
             z-index: 1000;
             flex-wrap: wrap;
             gap: 15px;
@@ -247,6 +258,7 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             font-size: 48px;
             font-weight: 800;
             margin-bottom: 20px;
+            color: #fff;
         }
         .hero p {
             font-size: 20px;
@@ -255,6 +267,7 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+            color: #fff;
         }
         .hero-btns {
             display: flex;
@@ -291,7 +304,6 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
         section { 
             padding: 80px 30px; 
             position: relative;
-            z-index: 1;
         }
         .section-title {
             text-align: center;
@@ -363,10 +375,12 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
         .stat-num {
             font-size: 48px;
             font-weight: 800;
+            color: #fff;
         }
         .stat-label {
             font-size: 14px;
             opacity: 0.9;
+            color: #fff;
         }
         
         /* Footer */
@@ -374,8 +388,6 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             background: var(--footer-bg);
             color: #fff;
             padding: 60px 30px 30px;
-            position: relative;
-            z-index: 1;
         }
         .footer-grid {
             display: grid;
@@ -390,12 +402,14 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             padding-bottom: 10px;
             border-bottom: 2px solid var(--primary);
             display: inline-block;
+            color: #fff;
         }
         .footer p, .footer li {
             opacity: 0.8;
             font-size: 14px;
             margin-bottom: 8px;
             line-height: 1.7;
+            color: #fff;
         }
         .footer ul { list-style: none; }
         .footer a {
@@ -409,6 +423,7 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             text-align: center;
             opacity: 0.6;
             font-size: 13px;
+            color: #fff;
         }
         
         /* Alert Banner */
@@ -440,10 +455,12 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
         }
         .promo-banner h3 {
             font-size: 20px;
+            color: #fff;
         }
         .promo-banner .price {
             font-size: 24px;
             font-weight: 800;
+            color: #fff;
         }
         .promo-banner .btn-white {
             background: #fff;
@@ -599,6 +616,7 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
         .cta-section h2 {
             font-size: 36px;
             margin-bottom: 15px;
+            color: #fff;
         }
         .cta-section p {
             font-size: 18px;
@@ -607,30 +625,24 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
+            color: #fff;
         }
         
         /* Responsive */
         @media (max-width: 768px) {
-            :root {
-                --admin-bar-height: auto;
-            }
-            
-            .admin-bar {
-                position: relative;
+            .preview-admin-bar {
                 flex-direction: column;
-                gap: 15px;
-                padding: 15px;
+                gap: 10px;
+                padding: 10px 15px;
                 height: auto;
             }
-            .admin-bar .left, .admin-bar .right {
+            .preview-admin-bar .left, .preview-admin-bar .right {
                 flex-wrap: wrap;
                 justify-content: center;
             }
-            
-            .preview-wrapper {
-                margin-top: 0;
+            .preview-main {
+                margin-top: 100px;
             }
-            
             .header {
                 position: relative;
                 top: 0;
@@ -661,21 +673,17 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             }
             .promo-banner {
                 flex-direction: column;
-                gap: 15px;
                 text-align: center;
             }
-            .cards-grid {
-                grid-template-columns: 1fr !important;
-            }
-            .team-grid {
-                grid-template-columns: 1fr !important;
+            .cards-grid, .team-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Admin Bar -->
-    <div class="admin-bar">
+    <!-- Admin Preview Bar -->
+    <div class="preview-admin-bar">
         <div class="left">
             <div class="template-name">
                 <span><?php echo $catInfo['icon']; ?></span>
@@ -684,13 +692,13 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             <span class="category-badge"><?php echo esc_html(ucwords(str_replace('_', ' ', $category))); ?></span>
         </div>
         <div class="right">
-            <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="btn btn-back">← Back to Templates</a>
-            <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=edit&id=' . $theme->id); ?>" class="btn btn-edit">✏️ Edit Template</a>
+            <a href="<?php echo esc_url($back_url); ?>" class="btn btn-back">← Back to Templates</a>
+            <a href="<?php echo esc_url($edit_url); ?>" class="btn btn-edit">✏️ Edit Template</a>
         </div>
     </div>
 
-    <!-- Preview Content Wrapper -->
-    <div class="preview-wrapper">
+    <!-- Main Preview Content -->
+    <div class="preview-main">
         <?php 
         // Include category-specific preview
         $preview_file = __DIR__ . '/previews/preview-' . str_replace('_', '-', $category) . '.php';
@@ -701,7 +709,5 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
         }
         ?>
     </div>
-
 </body>
 </html>
-<?php exit; ?>

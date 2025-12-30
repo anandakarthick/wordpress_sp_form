@@ -66,6 +66,9 @@ class SP_Form_Manager {
         // Check if tables need to be created
         add_action('admin_init', array($this, 'check_tables'));
         
+        // Handle template preview early before admin page loads
+        add_action('admin_init', array($this, 'handle_template_preview'), 1);
+        
         // Flush rewrite rules if needed
         add_action('init', array($this, 'maybe_flush_rules'), 20);
         
@@ -88,6 +91,31 @@ class SP_Form_Manager {
         $db_version = get_option('spfm_db_version', '0');
         if (version_compare($db_version, '2.0.0', '<')) {
             SPFM_Database::create_tables();
+        }
+    }
+    
+    /**
+     * Handle template preview early before WordPress admin loads
+     */
+    public function handle_template_preview() {
+        // Check if this is a preview request
+        if (isset($_GET['page']) && $_GET['page'] === 'spfm-themes' && 
+            isset($_GET['action']) && $_GET['action'] === 'preview' && 
+            isset($_GET['id'])) {
+            
+            $themes_handler = SPFM_Themes::get_instance();
+            $preview_theme = $themes_handler->get_theme_complete(intval($_GET['id']));
+            
+            if ($preview_theme) {
+                // Clear any output buffers
+                while (ob_get_level()) {
+                    ob_end_clean();
+                }
+                
+                // Include the preview file directly
+                include SPFM_PLUGIN_PATH . 'admin/views/template-preview.php';
+                exit;
+            }
         }
     }
     
