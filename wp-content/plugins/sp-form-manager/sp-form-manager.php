@@ -58,6 +58,7 @@ class SP_Form_Manager {
         
         add_action('init', array($this, 'init'));
         add_action('init', array($this, 'register_rewrite_rules'));
+        add_filter('query_vars', array($this, 'add_query_vars'));
         add_action('template_redirect', array($this, 'handle_form_request'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
@@ -67,12 +68,16 @@ class SP_Form_Manager {
         
         // Flush rewrite rules if needed
         add_action('init', array($this, 'maybe_flush_rules'), 20);
+        
+        // Fallback: Handle form via GET parameter
+        add_action('wp_loaded', array($this, 'handle_form_fallback'));
     }
     
     public function activate() {
         SPFM_Database::create_tables();
         $this->register_rewrite_rules();
         flush_rewrite_rules();
+        update_option('spfm_flush_rules', true);
     }
     
     public function deactivate() {
@@ -92,8 +97,11 @@ class SP_Form_Manager {
             'index.php?spfm_form_token=$matches[1]',
             'top'
         );
-        
-        add_rewrite_tag('%spfm_form_token%', '([a-zA-Z0-9]+)');
+    }
+    
+    public function add_query_vars($vars) {
+        $vars[] = 'spfm_form_token';
+        return $vars;
     }
     
     public function maybe_flush_rules() {
@@ -107,6 +115,19 @@ class SP_Form_Manager {
         $token = get_query_var('spfm_form_token');
         
         if (!empty($token)) {
+            $share_handler = SPFM_Share::get_instance();
+            echo $share_handler->render_customer_form($token);
+            exit;
+        }
+    }
+    
+    /**
+     * Fallback handler using GET parameter
+     * URL format: /?spfm_token=XXXXXX
+     */
+    public function handle_form_fallback() {
+        if (isset($_GET['spfm_token']) && !empty($_GET['spfm_token'])) {
+            $token = sanitize_text_field($_GET['spfm_token']);
             $share_handler = SPFM_Share::get_instance();
             echo $share_handler->render_customer_form($token);
             exit;

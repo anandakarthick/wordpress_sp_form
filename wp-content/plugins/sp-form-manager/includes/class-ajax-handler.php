@@ -157,10 +157,22 @@ class SPFM_Ajax_Handler {
         
         $themes = SPFM_Themes::get_instance();
         
+        // Handle features array
+        $features = array();
+        if (isset($_POST['features']) && is_array($_POST['features'])) {
+            foreach ($_POST['features'] as $feature) {
+                $feature = sanitize_text_field($feature);
+                if (!empty($feature)) {
+                    $features[] = $feature;
+                }
+            }
+        }
+        
         $data = array(
             'name' => sanitize_text_field($_POST['name'] ?? ''),
             'description' => sanitize_textarea_field($_POST['description'] ?? ''),
             'category' => sanitize_text_field($_POST['category'] ?? 'business'),
+            'preview_image' => esc_url_raw($_POST['preview_image'] ?? ''),
             'primary_color' => sanitize_hex_color($_POST['primary_color'] ?? '#667eea'),
             'secondary_color' => sanitize_hex_color($_POST['secondary_color'] ?? '#764ba2'),
             'accent_color' => sanitize_hex_color($_POST['accent_color'] ?? '#28a745'),
@@ -170,7 +182,8 @@ class SPFM_Ajax_Handler {
             'footer_bg_color' => sanitize_hex_color($_POST['footer_bg_color'] ?? '#1a1a2e'),
             'font_family' => sanitize_text_field($_POST['font_family'] ?? 'Poppins'),
             'heading_font' => sanitize_text_field($_POST['heading_font'] ?? 'Poppins'),
-            'status' => isset($_POST['status']) ? intval($_POST['status']) : 1
+            'features' => $features,
+            'status' => isset($_POST['status']) ? 1 : 0
         );
         
         $id = isset($_POST['id']) && !empty($_POST['id']) ? intval($_POST['id']) : 0;
@@ -179,6 +192,10 @@ class SPFM_Ajax_Handler {
             $result = $themes->update($id, $data);
             $message = 'Theme updated successfully.';
         } else {
+            // Handle duplicate from template
+            if (!empty($_POST['duplicate_from'])) {
+                $data['duplicate_from'] = intval($_POST['duplicate_from']);
+            }
             $result = $themes->create($data);
             $message = 'Theme created successfully.';
         }

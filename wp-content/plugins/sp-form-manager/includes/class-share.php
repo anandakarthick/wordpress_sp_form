@@ -32,6 +32,14 @@ class SPFM_Share {
     }
     
     /**
+     * Get share URL - uses query parameter format for maximum compatibility
+     */
+    public function get_share_url($token) {
+        // Use query parameter format - works without rewrite rules
+        return home_url('/?spfm_token=' . $token);
+    }
+    
+    /**
      * Create a new share
      */
     public function create_share($data) {
@@ -57,7 +65,7 @@ class SPFM_Share {
         return array(
             'id' => $wpdb->insert_id,
             'token' => $token,
-            'url' => home_url('/spfm-form/' . $token . '/')
+            'url' => $this->get_share_url($token)
         );
     }
     

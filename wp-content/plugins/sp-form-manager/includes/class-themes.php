@@ -1,6 +1,6 @@
 <?php
 /**
- * Website Themes/Templates Handler Class
+ * Themes Handler Class
  */
 
 if (!defined('ABSPATH')) {
@@ -28,116 +28,140 @@ class SPFM_Themes {
         $this->sections_table = $wpdb->prefix . 'spfm_page_sections';
     }
     
+    /**
+     * Get all themes with optional filters
+     */
     public function get_all($args = array()) {
         global $wpdb;
         
         $defaults = array(
-            'per_page' => 50,
-            'page' => 1,
-            'orderby' => 'name',
-            'order' => 'ASC',
-            'search' => '',
             'status' => '',
             'category' => '',
-            'is_template' => ''
+            'is_template' => '',
+            'search' => '',
+            'per_page' => 20,
+            'page' => 1,
+            'orderby' => 'created_at',
+            'order' => 'DESC'
         );
         
         $args = wp_parse_args($args, $defaults);
-        $offset = ($args['page'] - 1) * $args['per_page'];
         
-        $where = "WHERE 1=1";
-        
-        if (!empty($args['search'])) {
-            $search = '%' . $wpdb->esc_like($args['search']) . '%';
-            $where .= $wpdb->prepare(" AND (name LIKE %s OR description LIKE %s)", $search, $search);
-        }
+        $where = array('1=1');
+        $values = array();
         
         if ($args['status'] !== '') {
-            $where .= $wpdb->prepare(" AND status = %d", $args['status']);
+            $where[] = 'status = %d';
+            $values[] = intval($args['status']);
         }
         
-        if (!empty($args['category'])) {
-            $where .= $wpdb->prepare(" AND category = %s", $args['category']);
+        if ($args['category']) {
+            $where[] = 'category = %s';
+            $values[] = $args['category'];
         }
         
         if ($args['is_template'] !== '') {
-            $where .= $wpdb->prepare(" AND is_template = %d", $args['is_template']);
+            $where[] = 'is_template = %d';
+            $values[] = intval($args['is_template']);
         }
+        
+        if ($args['search']) {
+            $where[] = '(name LIKE %s OR description LIKE %s)';
+            $search = '%' . $wpdb->esc_like($args['search']) . '%';
+            $values[] = $search;
+            $values[] = $search;
+        }
+        
+        $where_clause = implode(' AND ', $where);
+        $offset = ($args['page'] - 1) * $args['per_page'];
         
         $orderby = sanitize_sql_orderby($args['orderby'] . ' ' . $args['order']);
-        if (!$orderby) {
-            $orderby = 'name ASC';
+        
+        $sql = "SELECT * FROM {$this->table} WHERE $where_clause ORDER BY $orderby LIMIT %d OFFSET %d";
+        $values[] = $args['per_page'];
+        $values[] = $offset;
+        
+        if (!empty($values)) {
+            $sql = $wpdb->prepare($sql, $values);
         }
         
-        $sql = "SELECT * FROM {$this->table} $where ORDER BY $orderby LIMIT %d OFFSET %d";
-        
-        return $wpdb->get_results($wpdb->prepare($sql, $args['per_page'], $offset));
+        return $wpdb->get_results($sql);
     }
     
+    /**
+     * Get only active templates
+     */
     public function get_templates() {
         global $wpdb;
-        return $wpdb->get_results("SELECT * FROM {$this->table} WHERE is_template = 1 AND status = 1 ORDER BY name ASC");
+        return $wpdb->get_results(
+            "SELECT * FROM {$this->table} WHERE is_template = 1 AND status = 1 ORDER BY name ASC"
+        );
     }
     
-    public function get_all_active() {
-        global $wpdb;
-        return $wpdb->get_results("SELECT * FROM {$this->table} WHERE status = 1 ORDER BY is_template DESC, name ASC");
-    }
-    
+    /**
+     * Get theme by ID
+     */
     public function get_by_id($id) {
         global $wpdb;
-        return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->table} WHERE id = %d", $id));
-    }
-    
-    public function get_by_ids($ids) {
-        global $wpdb;
-        if (empty($ids)) return array();
-        $placeholders = implode(',', array_fill(0, count($ids), '%d'));
-        return $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$this->table} WHERE id IN ($placeholders) AND status = 1 ORDER BY name ASC",
-            ...$ids
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$this->table} WHERE id = %d",
+            $id
         ));
     }
     
-    // Get all pages for a theme
+    /**
+     * Get themes by IDs
+     */
+    public function get_by_ids($ids) {
+        global $wpdb;
+        
+        if (empty($ids)) return array();
+        
+        $ids = array_map('intval', $ids);
+        $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+        
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$this->table} WHERE id IN ($placeholders) AND status = 1",
+            $ids
+        ));
+    }
+    
+    /**
+     * Get theme pages
+     */
     public function get_theme_pages($theme_id) {
         global $wpdb;
         return $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$this->pages_table} WHERE theme_id = %d AND status = 1 ORDER BY page_order ASC",
+            "SELECT * FROM {$this->pages_table} WHERE theme_id = %d ORDER BY page_order ASC",
             $theme_id
         ));
     }
     
-    // Get page by ID
-    public function get_page_by_id($page_id) {
-        global $wpdb;
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$this->pages_table} WHERE id = %d",
-            $page_id
-        ));
-    }
-    
-    // Get sections for a page
+    /**
+     * Get page sections
+     */
     public function get_page_sections($page_id) {
         global $wpdb;
         $sections = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$this->sections_table} WHERE page_id = %d AND status = 1 ORDER BY section_order ASC",
+            "SELECT * FROM {$this->sections_table} WHERE page_id = %d ORDER BY section_order ASC",
             $page_id
         ));
         
         foreach ($sections as &$section) {
-            $section->fields = json_decode($section->fields, true);
+            $section->fields = json_decode($section->fields, true) ?: array();
         }
         
         return $sections;
     }
     
-    // Get complete theme with pages and sections
+    /**
+     * Get complete theme with pages and sections
+     */
     public function get_theme_complete($theme_id) {
         $theme = $this->get_by_id($theme_id);
+        
         if (!$theme) return null;
         
-        $theme->features = json_decode($theme->features, true);
         $theme->pages = $this->get_theme_pages($theme_id);
         
         foreach ($theme->pages as &$page) {
@@ -147,6 +171,9 @@ class SPFM_Themes {
         return $theme;
     }
     
+    /**
+     * Create a new theme
+     */
     public function create($data) {
         global $wpdb;
         
@@ -165,44 +192,100 @@ class SPFM_Themes {
             'footer_bg_color' => sanitize_hex_color($data['footer_bg_color'] ?? '#1a1a2e'),
             'font_family' => sanitize_text_field($data['font_family'] ?? 'Poppins'),
             'heading_font' => sanitize_text_field($data['heading_font'] ?? 'Poppins'),
-            'features' => json_encode($data['features'] ?? array()),
-            'is_template' => intval($data['is_template'] ?? 0),
-            'status' => intval($data['status'] ?? 1)
+            'features' => isset($data['features']) ? json_encode($data['features']) : '[]',
+            'is_template' => isset($data['is_template']) ? intval($data['is_template']) : 0,
+            'status' => isset($data['status']) ? intval($data['status']) : 1
         );
         
         $result = $wpdb->insert($this->table, $insert_data);
         
-        return $result === false ? false : $wpdb->insert_id;
+        if ($result === false) {
+            return false;
+        }
+        
+        $theme_id = $wpdb->insert_id;
+        
+        // If duplicating from another template
+        if (!empty($data['duplicate_from'])) {
+            $this->duplicate_pages($data['duplicate_from'], $theme_id);
+        }
+        
+        return $theme_id;
     }
     
+    /**
+     * Update a theme
+     */
     public function update($id, $data) {
         global $wpdb;
         
-        $update_data = array(
-            'name' => sanitize_text_field($data['name']),
-            'description' => sanitize_textarea_field($data['description'] ?? ''),
-            'category' => sanitize_text_field($data['category'] ?? 'business'),
-            'preview_image' => esc_url_raw($data['preview_image'] ?? ''),
-            'thumbnail' => esc_url_raw($data['thumbnail'] ?? ''),
-            'primary_color' => sanitize_hex_color($data['primary_color'] ?? '#667eea'),
-            'secondary_color' => sanitize_hex_color($data['secondary_color'] ?? '#764ba2'),
-            'accent_color' => sanitize_hex_color($data['accent_color'] ?? '#28a745'),
-            'background_color' => sanitize_hex_color($data['background_color'] ?? '#ffffff'),
-            'text_color' => sanitize_hex_color($data['text_color'] ?? '#333333'),
-            'header_bg_color' => sanitize_hex_color($data['header_bg_color'] ?? '#ffffff'),
-            'footer_bg_color' => sanitize_hex_color($data['footer_bg_color'] ?? '#1a1a2e'),
-            'font_family' => sanitize_text_field($data['font_family'] ?? 'Poppins'),
-            'heading_font' => sanitize_text_field($data['heading_font'] ?? 'Poppins'),
-            'status' => intval($data['status'] ?? 1)
-        );
+        $update_data = array();
         
+        if (isset($data['name'])) {
+            $update_data['name'] = sanitize_text_field($data['name']);
+        }
+        if (isset($data['description'])) {
+            $update_data['description'] = sanitize_textarea_field($data['description']);
+        }
+        if (isset($data['category'])) {
+            $update_data['category'] = sanitize_text_field($data['category']);
+        }
+        if (isset($data['preview_image'])) {
+            $update_data['preview_image'] = esc_url_raw($data['preview_image']);
+        }
+        if (isset($data['thumbnail'])) {
+            $update_data['thumbnail'] = esc_url_raw($data['thumbnail']);
+        }
+        if (isset($data['primary_color'])) {
+            $update_data['primary_color'] = sanitize_hex_color($data['primary_color']);
+        }
+        if (isset($data['secondary_color'])) {
+            $update_data['secondary_color'] = sanitize_hex_color($data['secondary_color']);
+        }
+        if (isset($data['accent_color'])) {
+            $update_data['accent_color'] = sanitize_hex_color($data['accent_color']);
+        }
+        if (isset($data['background_color'])) {
+            $update_data['background_color'] = sanitize_hex_color($data['background_color']);
+        }
+        if (isset($data['text_color'])) {
+            $update_data['text_color'] = sanitize_hex_color($data['text_color']);
+        }
+        if (isset($data['header_bg_color'])) {
+            $update_data['header_bg_color'] = sanitize_hex_color($data['header_bg_color']);
+        }
+        if (isset($data['footer_bg_color'])) {
+            $update_data['footer_bg_color'] = sanitize_hex_color($data['footer_bg_color']);
+        }
+        if (isset($data['font_family'])) {
+            $update_data['font_family'] = sanitize_text_field($data['font_family']);
+        }
+        if (isset($data['heading_font'])) {
+            $update_data['heading_font'] = sanitize_text_field($data['heading_font']);
+        }
         if (isset($data['features'])) {
-            $update_data['features'] = json_encode($data['features']);
+            $update_data['features'] = json_encode(array_filter($data['features']));
+        }
+        if (isset($data['status'])) {
+            $update_data['status'] = intval($data['status']);
         }
         
-        return $wpdb->update($this->table, $update_data, array('id' => $id)) !== false;
+        if (empty($update_data)) {
+            return true;
+        }
+        
+        $result = $wpdb->update(
+            $this->table,
+            $update_data,
+            array('id' => $id)
+        );
+        
+        return $result !== false ? $id : false;
     }
     
+    /**
+     * Delete a theme
+     */
     public function delete($id) {
         global $wpdb;
         
@@ -219,37 +302,68 @@ class SPFM_Themes {
         return $wpdb->delete($this->table, array('id' => $id));
     }
     
+    /**
+     * Toggle theme status
+     */
     public function toggle_status($id) {
         global $wpdb;
-        
-        $current_status = $wpdb->get_var($wpdb->prepare("SELECT status FROM {$this->table} WHERE id = %d", $id));
-        $new_status = $current_status ? 0 : 1;
-        
-        return $wpdb->update($this->table, array('status' => $new_status), array('id' => $id));
-    }
-    
-    public function duplicate_template($id) {
-        $theme = $this->get_theme_complete($id);
-        
+        $theme = $this->get_by_id($id);
         if (!$theme) return false;
         
-        global $wpdb;
+        return $wpdb->update(
+            $this->table,
+            array('status' => $theme->status ? 0 : 1),
+            array('id' => $id)
+        );
+    }
+    
+    /**
+     * Duplicate template to new theme
+     */
+    public function duplicate_template($id) {
+        $source = $this->get_theme_complete($id);
+        if (!$source) return false;
         
         // Create new theme
-        $new_theme_data = (array) $theme;
-        unset($new_theme_data['id'], $new_theme_data['pages']);
-        $new_theme_data['name'] = $theme->name . ' (Copy)';
-        $new_theme_data['is_template'] = 0;
-        $new_theme_data['features'] = $theme->features;
-        
-        $new_theme_id = $this->create($new_theme_data);
+        $new_theme_id = $this->create(array(
+            'name' => $source->name . ' (Copy)',
+            'description' => $source->description,
+            'category' => $source->category,
+            'preview_image' => $source->preview_image,
+            'primary_color' => $source->primary_color,
+            'secondary_color' => $source->secondary_color,
+            'accent_color' => $source->accent_color,
+            'background_color' => $source->background_color,
+            'text_color' => $source->text_color,
+            'header_bg_color' => $source->header_bg_color,
+            'footer_bg_color' => $source->footer_bg_color,
+            'font_family' => $source->font_family,
+            'heading_font' => $source->heading_font,
+            'features' => json_decode($source->features, true),
+            'is_template' => 0,
+            'status' => 1
+        ));
         
         if (!$new_theme_id) return false;
         
-        // Copy pages
-        foreach ($theme->pages as $page) {
+        // Duplicate pages
+        $this->duplicate_pages($id, $new_theme_id);
+        
+        return $new_theme_id;
+    }
+    
+    /**
+     * Duplicate pages from one theme to another
+     */
+    private function duplicate_pages($source_id, $target_id) {
+        global $wpdb;
+        
+        $pages = $this->get_theme_pages($source_id);
+        
+        foreach ($pages as $page) {
+            // Insert new page
             $wpdb->insert($this->pages_table, array(
-                'theme_id' => $new_theme_id,
+                'theme_id' => $target_id,
                 'page_name' => $page->page_name,
                 'page_slug' => $page->page_slug,
                 'page_icon' => $page->page_icon,
@@ -260,8 +374,9 @@ class SPFM_Themes {
             ));
             $new_page_id = $wpdb->insert_id;
             
-            // Copy sections
-            foreach ($page->sections as $section) {
+            // Duplicate sections
+            $sections = $this->get_page_sections($page->id);
+            foreach ($sections as $section) {
                 $wpdb->insert($this->sections_table, array(
                     'page_id' => $new_page_id,
                     'section_name' => $section->section_name,
@@ -273,41 +388,45 @@ class SPFM_Themes {
                 ));
             }
         }
-        
-        return $new_theme_id;
     }
     
+    /**
+     * Get available categories
+     */
     public function get_categories() {
         return array(
-            'business' => 'Business & Corporate',
-            'portfolio' => 'Portfolio & Creative',
-            'ecommerce' => 'E-Commerce & Shop',
-            'restaurant' => 'Restaurant & Food',
-            'medical' => 'Medical & Healthcare',
+            'business' => 'Business',
+            'portfolio' => 'Portfolio',
+            'ecommerce' => 'E-Commerce',
+            'restaurant' => 'Restaurant',
+            'medical' => 'Medical',
             'realestate' => 'Real Estate',
-            'education' => 'Education & School',
-            'fitness' => 'Fitness & Sports',
-            'travel' => 'Travel & Tourism',
-            'technology' => 'Technology & IT',
-            'blog' => 'Blog & Magazine',
-            'nonprofit' => 'Non-Profit & Charity'
+            'education' => 'Education',
+            'fitness' => 'Fitness',
+            'travel' => 'Travel',
+            'technology' => 'Technology',
+            'blog' => 'Blog',
+            'nonprofit' => 'Non-Profit'
         );
     }
     
+    /**
+     * Get available fonts
+     */
     public function get_fonts() {
         return array(
-            'Poppins' => 'Poppins',
-            'Inter' => 'Inter',
-            'Roboto' => 'Roboto',
-            'Open Sans' => 'Open Sans',
-            'Lato' => 'Lato',
-            'Montserrat' => 'Montserrat',
-            'Nunito' => 'Nunito',
-            'Source Sans Pro' => 'Source Sans Pro',
-            'Playfair Display' => 'Playfair Display',
-            'Merriweather' => 'Merriweather',
-            'Oswald' => 'Oswald',
-            'Raleway' => 'Raleway'
+            'Poppins',
+            'Inter',
+            'Roboto',
+            'Open Sans',
+            'Lato',
+            'Montserrat',
+            'Nunito',
+            'Source Sans Pro',
+            'Playfair Display',
+            'Merriweather',
+            'Oswald',
+            'Raleway'
         );
     }
 }
