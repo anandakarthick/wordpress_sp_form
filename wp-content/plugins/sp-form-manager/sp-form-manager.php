@@ -2,8 +2,8 @@
 /**
  * Plugin Name: SP Form Manager
  * Plugin URI: https://example.com/sp-form-manager
- * Description: A custom form management system with separate login, customers, themes, and forms with custom fields. Share forms via Email/WhatsApp.
- * Version: 1.1.0
+ * Description: Website template order system - Let customers choose templates, fill content, customize colors, and submit orders.
+ * Version: 2.0.0
  * Author: Developer
  * License: GPL v2 or later
  * Text Domain: sp-form-manager
@@ -15,9 +15,10 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('SPFM_VERSION', '1.1.0');
+define('SPFM_VERSION', '2.0.0');
 define('SPFM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SPFM_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('SPFM_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('SPFM_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 /**
@@ -56,15 +57,21 @@ class SP_Form_Manager {
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
         
         add_action('init', array($this, 'init'));
+        add_action('init', array($this, 'register_rewrite_rules'));
+        add_action('template_redirect', array($this, 'handle_form_request'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         
         // Check if tables need to be created
         add_action('admin_init', array($this, 'check_tables'));
+        
+        // Flush rewrite rules if needed
+        add_action('init', array($this, 'maybe_flush_rules'), 20);
     }
     
     public function activate() {
         SPFM_Database::create_tables();
+        $this->register_rewrite_rules();
         flush_rewrite_rules();
     }
     
@@ -74,8 +81,35 @@ class SP_Form_Manager {
     
     public function check_tables() {
         $db_version = get_option('spfm_db_version', '0');
-        if (version_compare($db_version, SPFM_VERSION, '<')) {
+        if (version_compare($db_version, '2.0.0', '<')) {
             SPFM_Database::create_tables();
+        }
+    }
+    
+    public function register_rewrite_rules() {
+        add_rewrite_rule(
+            '^spfm-form/([a-zA-Z0-9]+)/?$',
+            'index.php?spfm_form_token=$matches[1]',
+            'top'
+        );
+        
+        add_rewrite_tag('%spfm_form_token%', '([a-zA-Z0-9]+)');
+    }
+    
+    public function maybe_flush_rules() {
+        if (get_option('spfm_flush_rules', false)) {
+            flush_rewrite_rules();
+            delete_option('spfm_flush_rules');
+        }
+    }
+    
+    public function handle_form_request() {
+        $token = get_query_var('spfm_form_token');
+        
+        if (!empty($token)) {
+            $share_handler = SPFM_Share::get_instance();
+            echo $share_handler->render_customer_form($token);
+            exit;
         }
     }
     
@@ -91,24 +125,6 @@ class SP_Form_Manager {
         SPFM_Admin::get_instance();
         SPFM_Share::get_instance();
         SPFM_Ajax_Handler::get_instance();
-        
-        // Register form shortcode
-        add_shortcode('spfm_form', array($this, 'render_form_shortcode'));
-    }
-    
-    public function render_form_shortcode($atts) {
-        $atts = shortcode_atts(array(
-            'id' => 0
-        ), $atts);
-        
-        $form_id = intval($atts['id']);
-        
-        if (!$form_id) {
-            return '<p>Please specify a form ID.</p>';
-        }
-        
-        $forms = SPFM_Forms::get_instance();
-        return $forms->render_form($form_id);
     }
     
     public function enqueue_frontend_assets() {

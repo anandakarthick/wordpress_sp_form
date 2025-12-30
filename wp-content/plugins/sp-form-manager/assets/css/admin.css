@@ -1,339 +1,67 @@
-/* SP Form Manager - Admin Styles */
+/**
+ * SP Form Manager - Admin Styles
+ */
 
+/* Common Admin Styles */
 .spfm-admin-wrap {
     margin-right: 20px;
 }
 
-/* Dashboard Cards */
-.spfm-dashboard-cards {
+.spfm-admin-wrap h1 {
     display: flex;
-    gap: 20px;
-    margin: 30px 0;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
 }
 
-.spfm-card {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 25px;
-    min-width: 250px;
-    flex: 1;
-    position: relative;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.spfm-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.spfm-card-icon {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-}
-
-.spfm-card-icon .dashicons {
-    font-size: 40px;
-    width: 40px;
-    height: 40px;
-    color: #007cba;
-    opacity: 0.3;
-}
-
-.spfm-card-content h3 {
-    font-size: 36px;
-    margin: 0 0 5px 0;
-    color: #007cba;
-}
-
-.spfm-card-content p {
-    margin: 0;
-    color: #666;
-}
-
-.spfm-card-link {
-    display: inline-block;
-    margin-top: 15px;
-    color: #007cba;
+.spfm-admin-wrap .page-title-action {
     text-decoration: none;
 }
 
-.spfm-card-link:hover {
-    text-decoration: underline;
+/* Buttons */
+.spfm-admin-wrap .button-hero {
+    padding: 12px 25px !important;
+    height: auto !important;
 }
 
-/* Quick Actions */
-.spfm-quick-actions {
+/* Cards */
+.spfm-card {
     background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 20px;
-    margin: 20px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
 }
 
-.spfm-action-buttons {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+/* Tables */
+.spfm-admin-wrap .wp-list-table th {
+    font-weight: 600;
 }
 
-.spfm-action-buttons .button .dashicons {
-    margin-right: 5px;
+.spfm-admin-wrap .wp-list-table td {
     vertical-align: middle;
 }
 
-/* Status Badges */
-.spfm-status {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.spfm-status-active {
-    background: #d4edda;
-    color: #155724;
-}
-
-.spfm-status-inactive {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-/* Form Container */
-.spfm-form-container {
-    background: #fff;
-    padding: 25px;
-    margin-top: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.spfm-admin-form .form-table th {
-    width: 180px;
-}
-
-.required {
-    color: #dc3545;
-}
-
-/* Search Form */
-.spfm-search-form {
-    float: right;
+/* Forms */
+.spfm-admin-wrap .form-field {
     margin-bottom: 15px;
 }
 
-.spfm-search-form input[type="search"] {
-    padding: 5px 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-/* Color Preview */
-.spfm-color-preview {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    vertical-align: middle;
-    margin-right: 5px;
-}
-
-/* Theme Preview */
-.spfm-theme-preview {
-    border: 1px solid #ddd;
-    padding: 30px;
-    border-radius: 8px;
-    margin: 20px 0;
-    transition: all 0.3s;
-}
-
-.preview-form h4 {
-    margin-top: 0;
-}
-
-.preview-field {
-    margin-bottom: 15px;
-}
-
-.preview-field label {
+.spfm-admin-wrap .form-field label {
     display: block;
     margin-bottom: 5px;
     font-weight: 500;
 }
 
-.preview-field input {
+.spfm-admin-wrap .form-field input,
+.spfm-admin-wrap .form-field select,
+.spfm-admin-wrap .form-field textarea {
     width: 100%;
-    max-width: 300px;
-    padding: 10px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-}
-
-.preview-btn-primary,
-.preview-btn-secondary {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-right: 10px;
-    font-weight: 500;
-    transition: opacity 0.3s;
-}
-
-.preview-btn-primary:hover,
-.preview-btn-secondary:hover {
-    opacity: 0.9;
-}
-
-/* Fields Container */
-.spfm-fields-container {
-    display: flex;
-    gap: 30px;
-    margin-top: 20px;
-}
-
-.spfm-fields-list {
-    flex: 2;
-}
-
-.spfm-form-preview {
-    flex: 1;
-    background: #fff;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-/* Drag Handle */
-.drag-handle {
-    cursor: move;
-    color: #999;
-}
-
-.drag-handle .dashicons {
-    vertical-align: middle;
-}
-
-#sortable-fields tr.ui-sortable-helper {
-    background: #f0f0f0;
-}
-
-/* Info Section */
-.spfm-info-section {
-    background: #f8f9fa;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    margin: 20px 0;
-}
-
-.spfm-info-section ul {
-    margin-left: 20px;
-}
-
-.spfm-info-section code {
-    background: #e9ecef;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-family: monospace;
-}
-
-/* Shortcode Info */
-.spfm-shortcode-info {
-    background: #f8f9fa;
-    padding: 20px;
-    margin-top: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-.spfm-shortcode-info code {
-    display: inline-block;
-    background: #e9ecef;
-    padding: 12px 18px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: monospace;
-}
-
-/* Role Badges */
-.spfm-role {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.spfm-role-admin {
-    background: #cce5ff;
-    color: #004085;
-}
-
-.spfm-role-user {
-    background: #e9ecef;
-    color: #495057;
-}
-
-/* Tables */
-.wp-list-table {
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.wp-list-table th {
-    background: #f8f9fa;
-}
-
-.wp-list-table tbody tr:hover {
-    background: #f8f9fa;
-}
-
-/* Buttons */
-.button-link-delete {
-    color: #dc3545 !important;
-}
-
-.button-link-delete:hover {
-    color: #a71d2a !important;
-    background: #f8d7da !important;
-    border-color: #dc3545 !important;
-}
-
-/* Pagination */
-.tablenav-pages {
-    margin-top: 15px;
-}
-
-.pagination-links .button {
-    margin: 0 2px;
+    max-width: 400px;
 }
 
 /* Responsive */
-@media (max-width: 992px) {
-    .spfm-dashboard-cards {
-        flex-direction: column;
-    }
-    
-    .spfm-fields-container {
-        flex-direction: column;
-    }
-    
-    .spfm-admin-form .form-table th {
-        width: 100%;
-        display: block;
-        padding-bottom: 5px;
-    }
-    
-    .spfm-admin-form .form-table td {
-        display: block;
-        padding-left: 0;
+@media (max-width: 782px) {
+    .spfm-admin-wrap {
+        margin-right: 10px;
     }
 }

@@ -28,16 +28,15 @@ class SPFM_Customers {
         global $wpdb;
         
         $defaults = array(
-            'per_page' => 20,
+            'per_page' => 50,
             'page' => 1,
-            'orderby' => 'created_at',
-            'order' => 'DESC',
+            'orderby' => 'name',
+            'order' => 'ASC',
             'search' => '',
             'status' => ''
         );
         
         $args = wp_parse_args($args, $defaults);
-        
         $offset = ($args['page'] - 1) * $args['per_page'];
         
         $where = "WHERE 1=1";
@@ -53,7 +52,7 @@ class SPFM_Customers {
         
         $orderby = sanitize_sql_orderby($args['orderby'] . ' ' . $args['order']);
         if (!$orderby) {
-            $orderby = 'created_at DESC';
+            $orderby = 'name ASC';
         }
         
         $sql = "SELECT * FROM {$this->table} $where ORDER BY $orderby LIMIT %d OFFSET %d";
@@ -61,26 +60,25 @@ class SPFM_Customers {
         return $wpdb->get_results($wpdb->prepare($sql, $args['per_page'], $offset));
     }
     
-    public function get_total($args = array()) {
-        global $wpdb;
-        
-        $where = "WHERE 1=1";
-        
-        if (!empty($args['search'])) {
-            $search = '%' . $wpdb->esc_like($args['search']) . '%';
-            $where .= $wpdb->prepare(" AND (name LIKE %s OR email LIKE %s OR company LIKE %s)", $search, $search, $search);
-        }
-        
-        if (isset($args['status']) && $args['status'] !== '') {
-            $where .= $wpdb->prepare(" AND status = %d", $args['status']);
-        }
-        
-        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$this->table} $where");
-    }
-    
     public function get_by_id($id) {
         global $wpdb;
         return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->table} WHERE id = %d", $id));
+    }
+    
+    public function get_by_email($email) {
+        global $wpdb;
+        return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->table} WHERE email = %s", $email));
+    }
+    
+    public function get_total($status = '') {
+        global $wpdb;
+        
+        $where = "";
+        if ($status !== '') {
+            $where = $wpdb->prepare(" WHERE status = %d", $status);
+        }
+        
+        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$this->table}" . $where);
     }
     
     public function create($data) {
@@ -89,34 +87,20 @@ class SPFM_Customers {
         $insert_data = array(
             'name' => sanitize_text_field($data['name']),
             'email' => sanitize_email($data['email']),
-            'phone' => sanitize_text_field(isset($data['phone']) ? $data['phone'] : ''),
-            'company' => sanitize_text_field(isset($data['company']) ? $data['company'] : ''),
-            'address' => sanitize_textarea_field(isset($data['address']) ? $data['address'] : ''),
-            'city' => sanitize_text_field(isset($data['city']) ? $data['city'] : ''),
-            'state' => sanitize_text_field(isset($data['state']) ? $data['state'] : ''),
-            'country' => sanitize_text_field(isset($data['country']) ? $data['country'] : ''),
-            'zip_code' => sanitize_text_field(isset($data['zip_code']) ? $data['zip_code'] : ''),
-            'notes' => sanitize_textarea_field(isset($data['notes']) ? $data['notes'] : ''),
-            'status' => isset($data['status']) ? intval($data['status']) : 1,
-            'created_by' => 0
+            'phone' => sanitize_text_field($data['phone'] ?? ''),
+            'company' => sanitize_text_field($data['company'] ?? ''),
+            'address' => sanitize_textarea_field($data['address'] ?? ''),
+            'city' => sanitize_text_field($data['city'] ?? ''),
+            'state' => sanitize_text_field($data['state'] ?? ''),
+            'country' => sanitize_text_field($data['country'] ?? ''),
+            'zip_code' => sanitize_text_field($data['zip_code'] ?? ''),
+            'notes' => sanitize_textarea_field($data['notes'] ?? ''),
+            'status' => isset($data['status']) ? intval($data['status']) : 1
         );
         
-        // Get current user ID if available
-        if (class_exists('SPFM_Auth') && method_exists('SPFM_Auth', 'get_current_user_id')) {
-            $insert_data['created_by'] = SPFM_Auth::get_current_user_id();
-        }
+        $result = $wpdb->insert($this->table, $insert_data);
         
-        $format = array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d');
-        
-        $result = $wpdb->insert($this->table, $insert_data, $format);
-        
-        if ($result === false) {
-            // Log the error for debugging
-            error_log('SPFM Customer Insert Error: ' . $wpdb->last_error);
-            return false;
-        }
-        
-        return $wpdb->insert_id;
+        return $result === false ? false : $wpdb->insert_id;
     }
     
     public function update($id, $data) {
@@ -125,41 +109,23 @@ class SPFM_Customers {
         $update_data = array(
             'name' => sanitize_text_field($data['name']),
             'email' => sanitize_email($data['email']),
-            'phone' => sanitize_text_field(isset($data['phone']) ? $data['phone'] : ''),
-            'company' => sanitize_text_field(isset($data['company']) ? $data['company'] : ''),
-            'address' => sanitize_textarea_field(isset($data['address']) ? $data['address'] : ''),
-            'city' => sanitize_text_field(isset($data['city']) ? $data['city'] : ''),
-            'state' => sanitize_text_field(isset($data['state']) ? $data['state'] : ''),
-            'country' => sanitize_text_field(isset($data['country']) ? $data['country'] : ''),
-            'zip_code' => sanitize_text_field(isset($data['zip_code']) ? $data['zip_code'] : ''),
-            'notes' => sanitize_textarea_field(isset($data['notes']) ? $data['notes'] : ''),
+            'phone' => sanitize_text_field($data['phone'] ?? ''),
+            'company' => sanitize_text_field($data['company'] ?? ''),
+            'address' => sanitize_textarea_field($data['address'] ?? ''),
+            'city' => sanitize_text_field($data['city'] ?? ''),
+            'state' => sanitize_text_field($data['state'] ?? ''),
+            'country' => sanitize_text_field($data['country'] ?? ''),
+            'zip_code' => sanitize_text_field($data['zip_code'] ?? ''),
+            'notes' => sanitize_textarea_field($data['notes'] ?? ''),
             'status' => isset($data['status']) ? intval($data['status']) : 1
         );
         
-        $format = array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d');
-        
-        $result = $wpdb->update($this->table, $update_data, array('id' => $id), $format, array('%d'));
-        
-        if ($result === false) {
-            error_log('SPFM Customer Update Error: ' . $wpdb->last_error);
-            return false;
-        }
-        
-        return true;
+        return $wpdb->update($this->table, $update_data, array('id' => $id)) !== false;
     }
     
     public function delete($id) {
         global $wpdb;
-        return $wpdb->delete($this->table, array('id' => $id), array('%d'));
-    }
-    
-    public function bulk_delete($ids) {
-        global $wpdb;
-        
-        $ids = array_map('intval', $ids);
-        $ids_string = implode(',', $ids);
-        
-        return $wpdb->query("DELETE FROM {$this->table} WHERE id IN ($ids_string)");
+        return $wpdb->delete($this->table, array('id' => $id));
     }
     
     public function toggle_status($id) {
@@ -168,6 +134,6 @@ class SPFM_Customers {
         $current_status = $wpdb->get_var($wpdb->prepare("SELECT status FROM {$this->table} WHERE id = %d", $id));
         $new_status = $current_status ? 0 : 1;
         
-        return $wpdb->update($this->table, array('status' => $new_status), array('id' => $id), array('%d'), array('%d'));
+        return $wpdb->update($this->table, array('status' => $new_status), array('id' => $id));
     }
 }

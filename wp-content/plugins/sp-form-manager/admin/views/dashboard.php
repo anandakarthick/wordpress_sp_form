@@ -3,201 +3,235 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-global $wpdb;
-
-$customers_handler = SPFM_Customers::get_instance();
-$themes_handler = SPFM_Themes::get_instance();
 $forms_handler = SPFM_Forms::get_instance();
+$themes_handler = SPFM_Themes::get_instance();
+$customers_handler = SPFM_Customers::get_instance();
 
+// Get stats
+$total_forms = count($forms_handler->get_all(array('per_page' => 1000)));
+$total_templates = count($themes_handler->get_templates());
 $total_customers = $customers_handler->get_total();
-$total_themes = $themes_handler->get_total();
-$total_forms = $forms_handler->get_total();
-$total_submissions = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}spfm_form_submissions");
-$new_submissions = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}spfm_form_submissions WHERE status = 'new'");
+$submission_stats = $forms_handler->get_submission_stats();
 
-// Recent submissions
-$recent_submissions = $wpdb->get_results("
-    SELECT s.*, f.name as form_name 
-    FROM {$wpdb->prefix}spfm_form_submissions s
-    LEFT JOIN {$wpdb->prefix}spfm_forms f ON s.form_id = f.id
-    ORDER BY s.created_at DESC LIMIT 5
-");
-
-// Recent forms
-$recent_forms = $forms_handler->get_all(array('per_page' => 5));
+// Get recent submissions
+$recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
 ?>
 
 <div class="wrap spfm-admin-wrap">
-    <h1>SP Form Manager Dashboard</h1>
+    <h1 class="wp-heading-inline">
+        <span class="dashicons dashicons-layout"></span> SP Form Manager
+    </h1>
     
-    <div class="spfm-dashboard">
-        <!-- Welcome Banner -->
-        <div class="welcome-banner">
+    <div class="dashboard-container">
+        <!-- Welcome Card -->
+        <div class="welcome-card">
             <div class="welcome-content">
-                <h2>Welcome to SP Form Manager!</h2>
-                <p>Create and share beautiful forms with your customers. Track submissions and customize themes easily.</p>
+                <h2>Welcome to SP Form Manager</h2>
+                <p>Create website order forms, share with customers, and let them choose their perfect template.</p>
                 <div class="welcome-actions">
-                    <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="button button-primary">
-                        <span class="dashicons dashicons-plus-alt2"></span> Create New Form
+                    <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="button button-primary button-hero">
+                        <span class="dashicons dashicons-plus-alt"></span> Create Order Form
                     </a>
-                    <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="button">
-                        <span class="dashicons dashicons-art"></span> Browse Themes
+                    <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="button button-hero">
+                        <span class="dashicons dashicons-admin-appearance"></span> View Templates
                     </a>
                 </div>
             </div>
             <div class="welcome-illustration">
-                <span class="dashicons dashicons-forms"></span>
+                <div class="illustration-mockup">
+                    <div class="mockup-browser">
+                        <div class="browser-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <div class="browser-content">
+                            <div class="content-header"></div>
+                            <div class="content-body">
+                                <div class="content-card"></div>
+                                <div class="content-card"></div>
+                                <div class="content-card"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <!-- Stats Cards -->
-        <div class="spfm-dashboard-cards">
-            <div class="spfm-card">
-                <div class="card-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <span class="dashicons dashicons-media-document"></span>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value"><?php echo $total_forms; ?></span>
+                    <span class="stat-label">Order Forms</span>
+                </div>
+                <a href="<?php echo admin_url('admin.php?page=spfm-forms'); ?>" class="stat-link">
+                    View All <span class="dashicons dashicons-arrow-right-alt2"></span>
+                </a>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                    <span class="dashicons dashicons-admin-appearance"></span>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value"><?php echo $total_templates; ?></span>
+                    <span class="stat-label">Website Templates</span>
+                </div>
+                <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="stat-link">
+                    View All <span class="dashicons dashicons-arrow-right-alt2"></span>
+                </a>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                    <span class="dashicons dashicons-text-page"></span>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value"><?php echo $submission_stats['total']; ?></span>
+                    <span class="stat-label">Total Submissions</span>
+                </div>
+                <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="stat-link">
+                    View All <span class="dashicons dashicons-arrow-right-alt2"></span>
+                </a>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
                     <span class="dashicons dashicons-groups"></span>
                 </div>
-                <div class="card-content">
-                    <h3><?php echo $total_customers; ?></h3>
-                    <p>Customers</p>
+                <div class="stat-info">
+                    <span class="stat-value"><?php echo $total_customers; ?></span>
+                    <span class="stat-label">Customers</span>
                 </div>
-                <a href="<?php echo admin_url('admin.php?page=spfm-customers'); ?>" class="card-link">View All →</a>
-            </div>
-            
-            <div class="spfm-card">
-                <div class="card-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                    <span class="dashicons dashicons-art"></span>
-                </div>
-                <div class="card-content">
-                    <h3><?php echo $total_themes; ?></h3>
-                    <p>Themes</p>
-                </div>
-                <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="card-link">View All →</a>
-            </div>
-            
-            <div class="spfm-card">
-                <div class="card-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-                    <span class="dashicons dashicons-feedback"></span>
-                </div>
-                <div class="card-content">
-                    <h3><?php echo $total_forms; ?></h3>
-                    <p>Forms</p>
-                </div>
-                <a href="<?php echo admin_url('admin.php?page=spfm-forms'); ?>" class="card-link">View All →</a>
-            </div>
-            
-            <div class="spfm-card">
-                <div class="card-icon" style="background: linear-gradient(135deg, #28a745, #20c997);">
-                    <span class="dashicons dashicons-format-aside"></span>
-                </div>
-                <div class="card-content">
-                    <h3><?php echo $total_submissions; ?></h3>
-                    <p>Submissions</p>
-                    <?php if ($new_submissions > 0): ?>
-                        <span class="new-badge"><?php echo $new_submissions; ?> new</span>
-                    <?php endif; ?>
-                </div>
-                <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="card-link">View All →</a>
+                <a href="<?php echo admin_url('admin.php?page=spfm-customers'); ?>" class="stat-link">
+                    View All <span class="dashicons dashicons-arrow-right-alt2"></span>
+                </a>
             </div>
         </div>
         
         <!-- Two Column Layout -->
         <div class="dashboard-columns">
             <!-- Recent Submissions -->
-            <div class="dashboard-column">
-                <div class="dashboard-widget">
-                    <div class="widget-header">
-                        <h3><span class="dashicons dashicons-format-aside"></span> Recent Submissions</h3>
-                        <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="view-all">View All</a>
-                    </div>
-                    <div class="widget-body">
-                        <?php if (empty($recent_submissions)): ?>
-                            <p class="no-items">No submissions yet.</p>
-                        <?php else: ?>
-                            <ul class="submission-list">
-                                <?php foreach ($recent_submissions as $s): ?>
-                                    <?php 
-                                    $data = json_decode($s->submission_data, true);
-                                    $preview = '';
-                                    if ($data) {
-                                        $first = reset($data);
-                                        $preview = is_array($first['value']) ? implode(', ', $first['value']) : substr($first['value'], 0, 40);
-                                    }
-                                    ?>
-                                    <li>
-                                        <a href="<?php echo admin_url('admin.php?page=spfm-submissions&action=view&id=' . $s->id); ?>">
-                                            <div class="submission-info">
-                                                <strong><?php echo esc_html($s->form_name); ?></strong>
-                                                <span class="preview"><?php echo esc_html($preview); ?><?php echo strlen($preview) >= 40 ? '...' : ''; ?></span>
-                                            </div>
-                                            <span class="submission-time"><?php echo human_time_diff(strtotime($s->created_at), current_time('timestamp')); ?> ago</span>
-                                        </a>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        <?php endif; ?>
-                    </div>
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><span class="dashicons dashicons-text-page"></span> Recent Submissions</h3>
+                    <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="view-all">View All</a>
+                </div>
+                <div class="card-body">
+                    <?php if (empty($recent_submissions)): ?>
+                        <div class="empty-state-mini">
+                            <span class="dashicons dashicons-text-page"></span>
+                            <p>No submissions yet</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="submissions-list">
+                            <?php foreach ($recent_submissions as $sub): 
+                                $customer_info = json_decode($sub->customer_info, true) ?: array();
+                            ?>
+                                <div class="submission-item">
+                                    <div class="submission-icon">
+                                        <span class="template-colors">
+                                            <span style="background: <?php echo esc_attr($sub->primary_color); ?>;"></span>
+                                            <span style="background: <?php echo esc_attr($sub->secondary_color); ?>;"></span>
+                                        </span>
+                                    </div>
+                                    <div class="submission-info">
+                                        <strong><?php echo esc_html($customer_info['name'] ?? 'Unknown'); ?></strong>
+                                        <small><?php echo esc_html($sub->theme_name); ?></small>
+                                    </div>
+                                    <div class="submission-meta">
+                                        <span class="status-badge status-<?php echo $sub->status; ?>"><?php echo ucfirst($sub->status); ?></span>
+                                        <small><?php echo human_time_diff(strtotime($sub->created_at), current_time('timestamp')); ?> ago</small>
+                                    </div>
+                                    <a href="<?php echo admin_url('admin.php?page=spfm-submissions&action=view&id=' . $sub->id); ?>" class="button button-small">
+                                        View
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
             
-            <!-- Recent Forms -->
-            <div class="dashboard-column">
-                <div class="dashboard-widget">
-                    <div class="widget-header">
-                        <h3><span class="dashicons dashicons-feedback"></span> Your Forms</h3>
-                        <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="add-new">+ New</a>
-                    </div>
-                    <div class="widget-body">
-                        <?php if (empty($recent_forms)): ?>
-                            <p class="no-items">No forms created yet. <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>">Create your first form</a></p>
-                        <?php else: ?>
-                            <ul class="form-list">
-                                <?php foreach ($recent_forms as $f): ?>
-                                    <?php $field_count = count($forms_handler->get_fields($f->id)); ?>
-                                    <li>
-                                        <div class="form-info">
-                                            <strong><?php echo esc_html($f->name); ?></strong>
-                                            <span class="meta">
-                                                <?php echo $field_count; ?> fields
-                                                • 
-                                                <?php echo $f->status ? '<span class="status-active">Active</span>' : '<span class="status-inactive">Inactive</span>'; ?>
-                                            </span>
-                                        </div>
-                                        <div class="form-actions">
-                                            <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=share&id=' . $f->id); ?>" class="button button-small button-primary">Share</a>
-                                            <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=edit&id=' . $f->id); ?>" class="button button-small">Edit</a>
-                                        </div>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        <?php endif; ?>
+            <!-- Quick Actions -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><span class="dashicons dashicons-admin-tools"></span> Quick Actions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="action-btn">
+                            <span class="action-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                <span class="dashicons dashicons-plus-alt"></span>
+                            </span>
+                            <span class="action-text">
+                                <strong>New Order Form</strong>
+                                <small>Create a new website order form</small>
+                            </span>
+                        </a>
+                        
+                        <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=add'); ?>" class="action-btn">
+                            <span class="action-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                <span class="dashicons dashicons-admin-users"></span>
+                            </span>
+                            <span class="action-text">
+                                <strong>Add Customer</strong>
+                                <small>Register a new customer</small>
+                            </span>
+                        </a>
+                        
+                        <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="action-btn">
+                            <span class="action-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                                <span class="dashicons dashicons-admin-appearance"></span>
+                            </span>
+                            <span class="action-text">
+                                <strong>Browse Templates</strong>
+                                <small>View available website templates</small>
+                            </span>
+                        </a>
+                        
+                        <a href="<?php echo admin_url('admin.php?page=spfm-settings'); ?>" class="action-btn">
+                            <span class="action-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+                                <span class="dashicons dashicons-admin-settings"></span>
+                            </span>
+                            <span class="action-text">
+                                <strong>Settings</strong>
+                                <small>Configure email & notifications</small>
+                            </span>
+                        </a>
                     </div>
                 </div>
-                
-                <!-- Quick Actions -->
-                <div class="dashboard-widget">
-                    <div class="widget-header">
-                        <h3><span class="dashicons dashicons-performance"></span> Quick Actions</h3>
-                    </div>
-                    <div class="widget-body">
-                        <div class="quick-actions">
-                            <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=add'); ?>" class="quick-action">
-                                <span class="dashicons dashicons-plus-alt"></span>
-                                Add Customer
-                            </a>
-                            <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="quick-action">
-                                <span class="dashicons dashicons-plus-alt"></span>
-                                Create Form
-                            </a>
-                            <a href="<?php echo admin_url('admin.php?page=spfm-settings'); ?>" class="quick-action">
-                                <span class="dashicons dashicons-admin-settings"></span>
-                                Settings
-                            </a>
-                            <a href="<?php echo home_url('/spfm-login/'); ?>" target="_blank" class="quick-action">
-                                <span class="dashicons dashicons-external"></span>
-                                Frontend Login
-                            </a>
-                        </div>
-                    </div>
+            </div>
+        </div>
+        
+        <!-- How It Works -->
+        <div class="how-it-works">
+            <h3><span class="dashicons dashicons-info"></span> How It Works</h3>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <h4>Create Order Form</h4>
+                    <p>Select which website templates customers can choose from</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <h4>Share with Customer</h4>
+                    <p>Send the form link via email, WhatsApp, or copy the link</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <h4>Customer Fills Content</h4>
+                    <p>Customer selects template, customizes colors, fills page content</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <h4>Review Submission</h4>
+                    <p>View complete submission with preview and customer data</p>
                 </div>
             </div>
         </div>
@@ -205,253 +239,369 @@ $recent_forms = $forms_handler->get_all(array('per_page' => 5));
 </div>
 
 <style>
-.spfm-dashboard {
+.dashboard-container {
     margin-top: 20px;
 }
-.welcome-banner {
+
+/* Welcome Card */
+.welcome-card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
     border-radius: 15px;
-    padding: 35px;
+    padding: 40px;
+    color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    overflow: hidden;
 }
 .welcome-content h2 {
-    color: #fff;
     margin: 0 0 10px 0;
-    font-size: 26px;
+    font-size: 28px;
+    color: #fff;
 }
 .welcome-content p {
-    margin: 0 0 20px 0;
+    margin: 0 0 25px 0;
     opacity: 0.9;
-    font-size: 15px;
+    font-size: 16px;
+    max-width: 500px;
 }
 .welcome-actions {
     display: flex;
-    gap: 10px;
+    gap: 15px;
 }
 .welcome-actions .button {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
 }
 .welcome-actions .button-primary {
     background: #fff;
     color: #667eea;
-    border: none;
+    border-color: #fff;
 }
 .welcome-actions .button:not(.button-primary) {
     background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.3);
     color: #fff;
-    border: 1px solid rgba(255,255,255,0.3);
 }
-.welcome-illustration .dashicons {
-    font-size: 100px;
-    width: 100px;
-    height: 100px;
-    opacity: 0.3;
+.welcome-illustration {
+    flex-shrink: 0;
 }
-.spfm-dashboard-cards {
+.illustration-mockup {
+    transform: rotate(-5deg);
+}
+.mockup-browser {
+    width: 300px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+.browser-dots {
+    background: #f0f0f0;
+    padding: 10px 15px;
+    display: flex;
+    gap: 6px;
+}
+.browser-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ddd;
+}
+.browser-content {
+    padding: 15px;
+}
+.content-header {
+    height: 30px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+.content-body {
+    display: flex;
+    gap: 10px;
+}
+.content-card {
+    flex: 1;
+    height: 50px;
+    background: #e9ecef;
+    border-radius: 6px;
+}
+
+/* Stats Grid */
+.stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     margin-bottom: 30px;
 }
-.spfm-card {
+.stat-card {
     background: #fff;
     border-radius: 12px;
-    padding: 25px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    transition: transform 0.3s, box-shadow 0.3s;
+    padding: 20px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    position: relative;
 }
-.spfm-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-}
-.card-icon {
-    width: 55px;
-    height: 55px;
+.stat-icon {
+    width: 50px;
+    height: 50px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 15px;
 }
-.card-icon .dashicons {
+.stat-icon .dashicons {
     color: #fff;
-    font-size: 26px;
-    width: 26px;
-    height: 26px;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
 }
-.card-content h3 {
-    margin: 0;
+.stat-value {
+    display: block;
     font-size: 32px;
+    font-weight: 700;
     color: #333;
 }
-.card-content p {
-    margin: 5px 0 0;
+.stat-label {
+    font-size: 14px;
     color: #666;
 }
-.new-badge {
-    display: inline-block;
-    background: #dc3545;
-    color: #fff;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 11px;
-    margin-left: 5px;
-}
-.card-link {
-    margin-top: auto;
-    padding-top: 15px;
+.stat-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
     color: #667eea;
     text-decoration: none;
-    font-weight: 500;
+    margin-top: 15px;
 }
-.card-link:hover {
-    text-decoration: underline;
-}
+
+/* Dashboard Columns */
 .dashboard-columns {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.5fr 1fr;
     gap: 25px;
+    margin-bottom: 30px;
 }
-.dashboard-widget {
+.dashboard-card {
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
 }
-.widget-header {
+.card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 18px 20px;
+    padding: 20px;
     border-bottom: 1px solid #eee;
 }
-.widget-header h3 {
+.card-header h3 {
     margin: 0;
+    font-size: 16px;
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 16px;
 }
-.view-all, .add-new {
+.card-header .dashicons {
+    color: #667eea;
+}
+.view-all {
+    font-size: 13px;
     color: #667eea;
     text-decoration: none;
-    font-size: 13px;
 }
-.add-new {
-    background: #667eea;
-    color: #fff;
-    padding: 5px 12px;
-    border-radius: 5px;
-}
-.widget-body {
+.card-body {
     padding: 20px;
 }
-.no-items {
-    color: #999;
-    text-align: center;
-    padding: 20px;
-}
-.submission-list, .form-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-.submission-list li, .form-list li {
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-.submission-list li:last-child, .form-list li:last-child {
-    border-bottom: 0;
-}
-.submission-list a {
+
+/* Submissions List */
+.submissions-list {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 15px;
+}
+.submission-item {
+    display: flex;
     align-items: center;
-    text-decoration: none;
-    color: #333;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+.template-colors {
+    display: flex;
+    gap: 3px;
+}
+.template-colors span {
+    width: 15px;
+    height: 30px;
+    border-radius: 4px;
+}
+.submission-info {
+    flex: 1;
 }
 .submission-info strong {
     display: block;
-    margin-bottom: 3px;
 }
-.submission-info .preview {
-    color: #999;
-    font-size: 13px;
+.submission-info small {
+    color: #666;
 }
-.submission-time {
-    color: #999;
-    font-size: 12px;
+.submission-meta {
+    text-align: right;
 }
-.form-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.form-info strong {
+.submission-meta small {
     display: block;
-    margin-bottom: 3px;
-}
-.form-info .meta {
     color: #999;
-    font-size: 12px;
+    margin-top: 5px;
 }
-.status-active { color: #28a745; }
-.status-inactive { color: #dc3545; }
-.form-actions {
-    display: flex;
-    gap: 5px;
+.status-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 15px;
 }
+.status-new { background: #cce5ff; color: #004085; }
+.status-in_progress { background: #fff3cd; color: #856404; }
+.status-completed { background: #d4edda; color: #155724; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+
+/* Quick Actions */
 .quick-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
-.quick-action {
+.action-btn {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 15px;
     padding: 15px;
     background: #f8f9fa;
-    border-radius: 8px;
+    border-radius: 10px;
     text-decoration: none;
-    color: #333;
-    transition: background 0.3s;
+    color: inherit;
+    transition: all 0.3s;
 }
-.quick-action:hover {
-    background: #e9ecef;
+.action-btn:hover {
+    background: #f0f0f0;
+    transform: translateX(5px);
 }
-.quick-action .dashicons {
+.action-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.action-icon .dashicons {
+    color: #fff;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+.action-text strong {
+    display: block;
+    margin-bottom: 2px;
+}
+.action-text small {
+    color: #666;
+}
+
+/* Empty State */
+.empty-state-mini {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+}
+.empty-state-mini .dashicons {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+}
+
+/* How It Works */
+.how-it-works {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+}
+.how-it-works h3 {
+    margin: 0 0 25px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.how-it-works h3 .dashicons {
     color: #667eea;
 }
+.steps-grid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.step-item {
+    flex: 1;
+    text-align: center;
+    padding: 0 20px;
+}
+.step-number {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 auto 15px;
+}
+.step-item h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+.step-item p {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+}
+.step-arrow {
+    font-size: 24px;
+    color: #ddd;
+    flex-shrink: 0;
+}
+
 @media (max-width: 1200px) {
-    .spfm-dashboard-cards {
+    .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
     .dashboard-columns {
         grid-template-columns: 1fr;
     }
-}
-@media (max-width: 768px) {
-    .spfm-dashboard-cards {
-        grid-template-columns: 1fr;
-    }
-    .welcome-banner {
+    .welcome-card {
         flex-direction: column;
         text-align: center;
     }
     .welcome-illustration {
         display: none;
     }
-    .welcome-actions {
-        flex-direction: column;
+    .steps-grid {
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .step-arrow {
+        display: none;
+    }
+    .step-item {
+        flex-basis: calc(50% - 20px);
     }
 }
 </style>

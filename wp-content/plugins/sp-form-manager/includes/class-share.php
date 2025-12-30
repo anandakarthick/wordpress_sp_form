@@ -1,6 +1,6 @@
 <?php
 /**
- * Form Sharing Handler Class
+ * Share Handler Class
  */
 
 if (!defined('ABSPATH')) {
@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) {
 class SPFM_Share {
     
     private static $instance = null;
+    private $table;
     
     public static function get_instance() {
         if (null === self::$instance) {
@@ -19,140 +20,210 @@ class SPFM_Share {
     }
     
     private function __construct() {
-        add_action('init', array($this, 'register_rewrite_rules'));
-        add_filter('query_vars', array($this, 'add_query_vars'));
-        add_action('template_redirect', array($this, 'handle_form_view'));
+        global $wpdb;
+        $this->table = $wpdb->prefix . 'spfm_form_shares';
     }
     
-    public function register_rewrite_rules() {
-        add_rewrite_rule(
-            '^spfm-form/([a-zA-Z0-9]+)/?$',
-            'index.php?spfm_form_token=$matches[1]',
-            'top'
+    /**
+     * Generate unique token
+     */
+    public function generate_token() {
+        return bin2hex(random_bytes(32));
+    }
+    
+    /**
+     * Create a new share
+     */
+    public function create_share($data) {
+        global $wpdb;
+        
+        $token = $this->generate_token();
+        
+        $insert_data = array(
+            'form_id' => intval($data['form_id']),
+            'customer_id' => intval($data['customer_id'] ?? 0),
+            'token' => $token,
+            'shared_via' => sanitize_text_field($data['shared_via'] ?? 'link'),
+            'shared_to' => sanitize_text_field($data['shared_to'] ?? ''),
+            'status' => 'active'
         );
         
-        // Flush rules if needed
-        if (get_option('spfm_flush_rules', false)) {
-            flush_rewrite_rules();
-            delete_option('spfm_flush_rules');
+        $result = $wpdb->insert($this->table, $insert_data);
+        
+        if ($result === false) {
+            return false;
         }
-    }
-    
-    public function add_query_vars($vars) {
-        $vars[] = 'spfm_form_token';
-        return $vars;
-    }
-    
-    public function handle_form_view() {
-        $token = get_query_var('spfm_form_token');
         
-        if (!empty($token)) {
-            $this->render_customer_form($token);
-            exit;
-        }
-    }
-    
-    // Generate unique share token
-    public static function generate_token($form_id, $customer_id = null) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'spfm_form_shares';
-        
-        $token = wp_generate_password(32, false);
-        
-        $wpdb->insert($table, array(
-            'form_id' => $form_id,
-            'customer_id' => $customer_id,
+        return array(
+            'id' => $wpdb->insert_id,
             'token' => $token,
-            'status' => 'active',
-            'created_at' => current_time('mysql')
-        ));
-        
-        return $token;
+            'url' => home_url('/spfm-form/' . $token . '/')
+        );
     }
     
-    // Get share URL
-    public static function get_share_url($token) {
-        return home_url('/spfm-form/' . $token . '/');
-    }
-    
-    // Get share by token
-    public static function get_share_by_token($token) {
+    /**
+     * Get share by token
+     */
+    public function get_by_token($token) {
         global $wpdb;
-        $table = $wpdb->prefix . 'spfm_form_shares';
-        
-        $share = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table WHERE token = %s AND status = 'active'",
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$this->table} WHERE token = %s",
             $token
         ));
-        
-        // Increment view count
-        if ($share) {
-            $wpdb->update(
-                $table,
-                array('views' => $share->views + 1),
-                array('id' => $share->id)
-            );
-        }
-        
-        return $share;
     }
     
-    // Render customer form page
-    private function render_customer_form($token) {
-        $share = self::get_share_by_token($token);
+    /**
+     * Get share by ID
+     */
+    public function get_by_id($id) {
+        global $wpdb;
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$this->table} WHERE id = %d",
+            $id
+        ));
+    }
+    
+    /**
+     * Increment view count
+     */
+    public function increment_views($token) {
+        global $wpdb;
+        return $wpdb->query($wpdb->prepare(
+            "UPDATE {$this->table} SET views = views + 1 WHERE token = %s",
+            $token
+        ));
+    }
+    
+    /**
+     * Update share status
+     */
+    public function update_status($id, $status) {
+        global $wpdb;
+        return $wpdb->update(
+            $this->table,
+            array('status' => sanitize_text_field($status)),
+            array('id' => $id)
+        );
+    }
+    
+    /**
+     * Render customer form
+     */
+    public function render_customer_form($token) {
+        $share = $this->get_by_token($token);
         
         if (!$share) {
-            wp_die('This form link is invalid or has expired.', 'Form Not Found', array('response' => 404));
+            return $this->render_error('Invalid or expired link.');
         }
         
-        $forms = SPFM_Forms::get_instance();
-        $form = $forms->get_by_id($share->form_id);
+        if ($share->status !== 'active') {
+            return $this->render_error('This form link is no longer active.');
+        }
+        
+        // Get form
+        $forms_handler = SPFM_Forms::get_instance();
+        $form = $forms_handler->get_by_id($share->form_id);
         
         if (!$form || !$form->status) {
-            wp_die('This form is no longer available.', 'Form Not Available', array('response' => 404));
+            return $this->render_error('This form is not available.');
         }
         
-        $fields = $forms->get_fields($share->form_id);
-        $themes = SPFM_Themes::get_instance();
-        $all_themes = $themes->get_all_active();
+        // Increment views
+        $this->increment_views($token);
         
-        // Get customizations
-        $customizations = self::get_customizations($token);
-        
-        // Determine current theme (from customizations or form default)
-        $theme_id = isset($customizations['theme_id']) ? $customizations['theme_id'] : $form->theme_id;
-        $current_theme = $theme_id ? $themes->get_by_id($theme_id) : null;
-        
-        // Include the template
-        include SPFM_PLUGIN_DIR . 'templates/customer-form.php';
+        // Load template
+        ob_start();
+        include SPFM_PLUGIN_PATH . 'templates/customer-form.php';
+        return ob_get_clean();
     }
     
-    // Save customer customizations
-    public static function save_customizations($token, $data) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'spfm_form_shares';
-        
-        // Get existing customizations and merge
-        $existing = self::get_customizations($token);
-        $merged = array_merge($existing, array_filter($data));
-        
-        return $wpdb->update(
-            $table,
-            array('customizations' => json_encode($merged)),
-            array('token' => $token)
-        );
+    /**
+     * Render error page
+     */
+    private function render_error($message) {
+        ob_start();
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Error</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+                    background: #f5f5f5;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 100vh;
+                    margin: 0;
+                }
+                .error-container {
+                    background: #fff;
+                    padding: 60px;
+                    border-radius: 15px;
+                    text-align: center;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+                    max-width: 500px;
+                }
+                .error-icon {
+                    width: 80px;
+                    height: 80px;
+                    background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 25px;
+                    font-size: 40px;
+                    color: #fff;
+                }
+                h1 {
+                    color: #333;
+                    margin: 0 0 15px;
+                }
+                p {
+                    color: #666;
+                    font-size: 18px;
+                    margin: 0;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="error-container">
+                <div class="error-icon">!</div>
+                <h1>Oops!</h1>
+                <p><?php echo esc_html($message); ?></p>
+            </div>
+        </body>
+        </html>
+        <?php
+        return ob_get_clean();
     }
     
-    // Get customer customizations
-    public static function get_customizations($token) {
+    /**
+     * Get shares for a form
+     */
+    public function get_form_shares($form_id, $limit = 50) {
         global $wpdb;
-        $table = $wpdb->prefix . 'spfm_form_shares';
-        
-        $result = $wpdb->get_var($wpdb->prepare(
-            "SELECT customizations FROM $table WHERE token = %s",
-            $token
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT s.*, c.name as customer_name, c.email as customer_email 
+             FROM {$this->table} s 
+             LEFT JOIN {$wpdb->prefix}spfm_customers c ON s.customer_id = c.id 
+             WHERE s.form_id = %d 
+             ORDER BY s.created_at DESC 
+             LIMIT %d",
+            $form_id,
+            $limit
         ));
-        
-        return $result ? json_decode($result, true) : array();
+    }
+    
+    /**
+     * Delete share
+     */
+    public function delete($id) {
+        global $wpdb;
+        return $wpdb->delete($this->table, array('id' => $id));
     }
 }

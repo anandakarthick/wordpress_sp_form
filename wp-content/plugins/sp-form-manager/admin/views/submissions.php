@@ -3,487 +3,781 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-global $wpdb;
-
 $forms_handler = SPFM_Forms::get_instance();
+$themes_handler = SPFM_Themes::get_instance();
+
 $action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'list';
-$form_id = isset($_GET['form_id']) ? intval($_GET['form_id']) : 0;
-$submission_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+// Get filter values
+$filter_form = isset($_GET['form_id']) ? intval($_GET['form_id']) : '';
+$filter_status = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
 
 // Get all forms for filter
 $all_forms = $forms_handler->get_all(array('per_page' => 100));
 
 // Get submissions
-$where = "WHERE 1=1";
-if ($form_id) {
-    $where .= $wpdb->prepare(" AND s.form_id = %d", $form_id);
-}
+$submissions = $forms_handler->get_submissions(array(
+    'form_id' => $filter_form,
+    'status' => $filter_status,
+    'per_page' => 50
+));
 
-$submissions = $wpdb->get_results("
-    SELECT s.*, f.name as form_name, c.name as customer_name, c.email as customer_email
-    FROM {$wpdb->prefix}spfm_form_submissions s
-    LEFT JOIN {$wpdb->prefix}spfm_forms f ON s.form_id = f.id
-    LEFT JOIN {$wpdb->prefix}spfm_customers c ON s.customer_id = c.id
-    $where
-    ORDER BY s.created_at DESC
-    LIMIT 100
-");
-
-// Get single submission for view
-$submission = null;
-if ($action === 'view' && $submission_id) {
-    $submission = $wpdb->get_row($wpdb->prepare("
-        SELECT s.*, f.name as form_name, c.name as customer_name, c.email as customer_email, c.phone as customer_phone
-        FROM {$wpdb->prefix}spfm_form_submissions s
-        LEFT JOIN {$wpdb->prefix}spfm_forms f ON s.form_id = f.id
-        LEFT JOIN {$wpdb->prefix}spfm_customers c ON s.customer_id = c.id
-        WHERE s.id = %d
-    ", $submission_id));
-}
+// Get stats
+$stats = $forms_handler->get_submission_stats();
 
 $statuses = array(
     'new' => array('label' => 'New', 'color' => '#007bff'),
-    'pending' => array('label' => 'Pending', 'color' => '#ffc107'),
-    'reviewed' => array('label' => 'Reviewed', 'color' => '#17a2b8'),
+    'in_progress' => array('label' => 'In Progress', 'color' => '#ffc107'),
     'completed' => array('label' => 'Completed', 'color' => '#28a745'),
-    'rejected' => array('label' => 'Rejected', 'color' => '#dc3545')
+    'cancelled' => array('label' => 'Cancelled', 'color' => '#dc3545')
 );
 ?>
 
 <div class="wrap spfm-admin-wrap">
-    <h1 class="wp-heading-inline">Form Submissions</h1>
+    <h1 class="wp-heading-inline">
+        <span class="dashicons dashicons-text-page"></span> Submissions
+    </h1>
     
-    <?php if ($action === 'view' && $submission): ?>
-        <!-- View Single Submission -->
-        <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="page-title-action">Back to Submissions</a>
-        
-        <div class="spfm-submission-detail">
-            <div class="submission-header">
-                <div class="header-info">
-                    <h2><?php echo esc_html($submission->form_name); ?></h2>
-                    <p>
-                        <span class="dashicons dashicons-calendar-alt"></span>
-                        Submitted: <?php echo date('F j, Y g:i A', strtotime($submission->created_at)); ?>
-                    </p>
+    <?php if ($action === 'list'): ?>
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <span class="dashicons dashicons-text-page"></span>
                 </div>
-                <div class="header-status">
-                    <label>Status:</label>
-                    <select id="submission-status" data-id="<?php echo $submission->id; ?>">
-                        <?php foreach ($statuses as $key => $s): ?>
-                            <option value="<?php echo $key; ?>" <?php selected($submission->status, $key); ?>>
-                                <?php echo $s['label']; ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                <div class="stat-info">
+                    <span class="stat-value"><?php echo $stats['total']; ?></span>
+                    <span class="stat-label">Total Submissions</span>
                 </div>
             </div>
-            
-            <?php if ($submission->customer_name): ?>
-                <div class="submission-section">
-                    <h3><span class="dashicons dashicons-businessman"></span> Customer Information</h3>
-                    <table class="submission-table">
-                        <tr>
-                            <th>Name</th>
-                            <td><?php echo esc_html($submission->customer_name); ?></td>
-                        </tr>
-                        <tr>
-                            <th>Email</th>
-                            <td><a href="mailto:<?php echo esc_attr($submission->customer_email); ?>"><?php echo esc_html($submission->customer_email); ?></a></td>
-                        </tr>
-                        <?php if ($submission->customer_phone): ?>
-                            <tr>
-                                <th>Phone</th>
-                                <td><?php echo esc_html($submission->customer_phone); ?></td>
-                            </tr>
-                        <?php endif; ?>
-                    </table>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #007bff, #0056b3);">
+                    <span class="dashicons dashicons-clock"></span>
                 </div>
-            <?php endif; ?>
-            
-            <div class="submission-section">
-                <h3><span class="dashicons dashicons-editor-table"></span> Submission Data</h3>
-                <?php 
-                $data = json_decode($submission->submission_data, true);
-                if ($data):
-                ?>
-                    <table class="submission-table">
-                        <?php foreach ($data as $field_name => $field): ?>
-                            <tr>
-                                <th><?php echo esc_html($field['label']); ?></th>
-                                <td>
-                                    <?php 
-                                    $value = $field['value'];
-                                    if (is_array($value)) {
-                                        echo esc_html(implode(', ', $value));
-                                    } else {
-                                        echo nl2br(esc_html($value));
-                                    }
-                                    ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </table>
-                <?php else: ?>
-                    <p>No submission data available.</p>
-                <?php endif; ?>
+                <div class="stat-info">
+                    <span class="stat-value"><?php echo $stats['new']; ?></span>
+                    <span class="stat-label">New</span>
+                </div>
             </div>
-            
-            <?php 
-            $files = json_decode($submission->uploaded_files, true);
-            if (!empty($files)):
-            ?>
-                <div class="submission-section">
-                    <h3><span class="dashicons dashicons-media-default"></span> Uploaded Files</h3>
-                    <div class="uploaded-files">
-                        <?php foreach ($files as $file): ?>
-                            <div class="file-item">
-                                <span class="dashicons dashicons-media-default"></span>
-                                <a href="<?php echo esc_url($file['url']); ?>" target="_blank">
-                                    <?php echo esc_html($file['label']); ?>
-                                </a>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #28a745, #1e7e34);">
+                    <span class="dashicons dashicons-yes-alt"></span>
                 </div>
-            <?php endif; ?>
-            
-            <?php 
-            $customizations = json_decode($submission->customizations, true);
-            if (!empty($customizations)):
-            ?>
-                <div class="submission-section">
-                    <h3><span class="dashicons dashicons-art"></span> Customer Customizations</h3>
-                    <table class="submission-table">
-                        <?php foreach ($customizations as $key => $value): ?>
-                            <?php if (!empty($value)): ?>
-                                <tr>
-                                    <th><?php echo esc_html(ucwords(str_replace('_', ' ', $key))); ?></th>
-                                    <td>
-                                        <?php if (strpos($key, 'color') !== false): ?>
-                                            <span class="color-preview" style="background: <?php echo esc_attr($value); ?>;"></span>
-                                            <?php echo esc_html($value); ?>
-                                        <?php elseif (strpos($key, 'url') !== false): ?>
-                                            <a href="<?php echo esc_url($value); ?>" target="_blank">View Image</a>
-                                        <?php else: ?>
-                                            <?php echo esc_html($value); ?>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </table>
+                <div class="stat-info">
+                    <span class="stat-value"><?php echo $stats['completed']; ?></span>
+                    <span class="stat-label">Completed</span>
                 </div>
-            <?php endif; ?>
-            
-            <div class="submission-section">
-                <h3><span class="dashicons dashicons-info"></span> Technical Info</h3>
-                <table class="submission-table">
-                    <tr>
-                        <th>IP Address</th>
-                        <td><?php echo esc_html($submission->ip_address); ?></td>
-                    </tr>
-                    <tr>
-                        <th>User Agent</th>
-                        <td><small><?php echo esc_html($submission->user_agent); ?></small></td>
-                    </tr>
-                </table>
-            </div>
-            
-            <div class="submission-actions">
-                <button class="button button-primary button-large" id="print-submission">
-                    <span class="dashicons dashicons-printer"></span> Print
-                </button>
-                <button class="button button-link-delete button-large" id="delete-submission" data-id="<?php echo $submission->id; ?>">
-                    <span class="dashicons dashicons-trash"></span> Delete
-                </button>
             </div>
         </div>
         
-    <?php else: ?>
+        <!-- Filters -->
+        <div class="filters-bar">
+            <form method="get" action="" class="filter-form">
+                <input type="hidden" name="page" value="spfm-submissions">
+                
+                <select name="form_id" class="filter-select">
+                    <option value="">All Forms</option>
+                    <?php foreach ($all_forms as $f): ?>
+                        <option value="<?php echo $f->id; ?>" <?php selected($filter_form, $f->id); ?>>
+                            <?php echo esc_html($f->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                
+                <select name="status" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <?php foreach ($statuses as $key => $status): ?>
+                        <option value="<?php echo $key; ?>" <?php selected($filter_status, $key); ?>>
+                            <?php echo $status['label']; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                
+                <button type="submit" class="button">
+                    <span class="dashicons dashicons-filter"></span> Filter
+                </button>
+                
+                <?php if ($filter_form || $filter_status): ?>
+                    <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="button">Clear</a>
+                <?php endif; ?>
+            </form>
+        </div>
+        
         <!-- Submissions List -->
-        <div class="spfm-submissions-container">
-            <!-- Filters -->
-            <div class="submissions-filters">
-                <form method="get">
-                    <input type="hidden" name="page" value="spfm-submissions">
-                    <select name="form_id">
-                        <option value="">All Forms</option>
-                        <?php foreach ($all_forms as $f): ?>
-                            <option value="<?php echo $f->id; ?>" <?php selected($form_id, $f->id); ?>><?php echo esc_html($f->name); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <button type="submit" class="button">Filter</button>
-                </form>
+        <?php if (empty($submissions)): ?>
+            <div class="empty-state">
+                <span class="dashicons dashicons-text-page"></span>
+                <h3>No Submissions Yet</h3>
+                <p>Submissions will appear here when customers submit their website orders.</p>
             </div>
-            
-            <!-- Stats Cards -->
-            <div class="submissions-stats">
-                <?php
-                $total = count($submissions);
-                $new_count = 0;
-                $completed_count = 0;
-                foreach ($submissions as $s) {
-                    if ($s->status === 'new') $new_count++;
-                    if ($s->status === 'completed') $completed_count++;
-                }
-                ?>
-                <div class="stat-card">
-                    <div class="stat-number"><?php echo $total; ?></div>
-                    <div class="stat-label">Total Submissions</div>
-                </div>
-                <div class="stat-card stat-new">
-                    <div class="stat-number"><?php echo $new_count; ?></div>
-                    <div class="stat-label">New</div>
-                </div>
-                <div class="stat-card stat-completed">
-                    <div class="stat-number"><?php echo $completed_count; ?></div>
-                    <div class="stat-label">Completed</div>
-                </div>
-            </div>
-            
-            <?php if (empty($submissions)): ?>
-                <div class="spfm-empty-state">
-                    <span class="dashicons dashicons-format-aside"></span>
-                    <p>No submissions yet.</p>
-                </div>
-            <?php else: ?>
-                <table class="wp-list-table widefat fixed striped">
+        <?php else: ?>
+            <div class="submissions-table-container">
+                <table class="wp-list-table widefat striped submissions-table">
                     <thead>
                         <tr>
-                            <th width="5%">ID</th>
-                            <th width="20%">Form</th>
-                            <th width="20%">Customer</th>
-                            <th width="20%">Summary</th>
-                            <th width="15%">Date</th>
-                            <th width="10%">Status</th>
-                            <th width="10%">Actions</th>
+                            <th width="50">ID</th>
+                            <th>Customer</th>
+                            <th>Form</th>
+                            <th>Selected Template</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th width="150">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($submissions as $s): ?>
-                            <?php 
-                            $data = json_decode($s->submission_data, true);
-                            $summary = '';
-                            if ($data) {
-                                $first_values = array_slice($data, 0, 2);
-                                $parts = array();
-                                foreach ($first_values as $f) {
-                                    $val = is_array($f['value']) ? implode(', ', $f['value']) : $f['value'];
-                                    $parts[] = substr($val, 0, 30);
-                                }
-                                $summary = implode(' | ', $parts);
-                            }
-                            ?>
+                        <?php foreach ($submissions as $sub): 
+                            $customer_info = json_decode($sub->customer_info, true) ?: array();
+                        ?>
                             <tr>
-                                <td><?php echo $s->id; ?></td>
+                                <td><strong>#<?php echo $sub->id; ?></strong></td>
                                 <td>
-                                    <strong><?php echo esc_html($s->form_name); ?></strong>
+                                    <div class="customer-info">
+                                        <strong><?php echo esc_html($customer_info['name'] ?? 'Unknown'); ?></strong>
+                                        <?php if (!empty($customer_info['email'])): ?>
+                                            <br><small><?php echo esc_html($customer_info['email']); ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td><?php echo esc_html($sub->form_name); ?></td>
+                                <td>
+                                    <div class="template-info">
+                                        <span class="template-colors">
+                                            <span style="background: <?php echo esc_attr($sub->primary_color); ?>;"></span>
+                                            <span style="background: <?php echo esc_attr($sub->secondary_color); ?>;"></span>
+                                        </span>
+                                        <?php echo esc_html($sub->theme_name); ?>
+                                    </div>
                                 </td>
                                 <td>
-                                    <?php if ($s->customer_name): ?>
-                                        <?php echo esc_html($s->customer_name); ?>
-                                        <br><small><?php echo esc_html($s->customer_email); ?></small>
-                                    <?php else: ?>
-                                        <span style="color:#999;">Anonymous</span>
-                                    <?php endif; ?>
+                                    <select class="status-select" data-id="<?php echo $sub->id; ?>" 
+                                            style="border-color: <?php echo $statuses[$sub->status]['color'] ?? '#ccc'; ?>;">
+                                        <?php foreach ($statuses as $key => $status): ?>
+                                            <option value="<?php echo $key; ?>" <?php selected($sub->status, $key); ?>>
+                                                <?php echo $status['label']; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </td>
                                 <td>
-                                    <small><?php echo esc_html($summary); ?><?php echo strlen($summary) >= 60 ? '...' : ''; ?></small>
-                                </td>
-                                <td>
-                                    <span title="<?php echo date('F j, Y g:i A', strtotime($s->created_at)); ?>">
-                                        <?php echo human_time_diff(strtotime($s->created_at), current_time('timestamp')); ?> ago
+                                    <span title="<?php echo date('M j, Y g:i A', strtotime($sub->created_at)); ?>">
+                                        <?php echo human_time_diff(strtotime($sub->created_at), current_time('timestamp')); ?> ago
                                     </span>
                                 </td>
                                 <td>
-                                    <?php $status = isset($statuses[$s->status]) ? $statuses[$s->status] : $statuses['pending']; ?>
-                                    <span class="spfm-status" style="background: <?php echo $status['color']; ?>20; color: <?php echo $status['color']; ?>;">
-                                        <?php echo $status['label']; ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="<?php echo admin_url('admin.php?page=spfm-submissions&action=view&id=' . $s->id); ?>" class="button button-small button-primary">
+                                    <a href="<?php echo admin_url('admin.php?page=spfm-submissions&action=view&id=' . $sub->id); ?>" class="button button-small">
                                         <span class="dashicons dashicons-visibility"></span> View
                                     </a>
+                                    <button class="button button-small button-link-delete delete-submission" data-id="<?php echo $sub->id; ?>">
+                                        <span class="dashicons dashicons-trash"></span>
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-            <?php endif; ?>
+            </div>
+        <?php endif; ?>
+        
+    <?php elseif ($action === 'view' && $id): ?>
+        <?php 
+        $submission = $forms_handler->get_submission_by_id($id);
+        if (!$submission): 
+            echo '<p>Submission not found.</p>';
+            return;
+        endif;
+        
+        $theme = $themes_handler->get_theme_complete($submission->selected_theme_id);
+        $page_contents = json_decode($submission->page_contents, true) ?: array();
+        $color_customizations = json_decode($submission->color_customizations, true) ?: array();
+        $customer_info = json_decode($submission->customer_info, true) ?: array();
+        ?>
+        
+        <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="page-title-action">← Back to Submissions</a>
+        
+        <div class="submission-view">
+            <!-- Header -->
+            <div class="submission-header">
+                <div class="header-main">
+                    <h2>Submission #<?php echo $submission->id; ?></h2>
+                    <p>From: <?php echo esc_html($submission->form_name); ?></p>
+                </div>
+                <div class="header-actions">
+                    <select class="status-select-large" id="submission-status" data-id="<?php echo $submission->id; ?>">
+                        <?php foreach ($statuses as $key => $status): ?>
+                            <option value="<?php echo $key; ?>" <?php selected($submission->status, $key); ?>
+                                    style="background: <?php echo $status['color']; ?>;">
+                                <?php echo $status['label']; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button class="button button-primary" onclick="openPreview()">
+                        <span class="dashicons dashicons-visibility"></span> Preview Website
+                    </button>
+                </div>
+            </div>
+            
+            <div class="submission-content">
+                <!-- Left Column: Details -->
+                <div class="submission-details">
+                    <!-- Customer Info -->
+                    <div class="detail-card">
+                        <h3><span class="dashicons dashicons-admin-users"></span> Customer Information</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>Name</label>
+                                <span><?php echo esc_html($customer_info['name'] ?? '-'); ?></span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Email</label>
+                                <span>
+                                    <a href="mailto:<?php echo esc_attr($customer_info['email'] ?? ''); ?>">
+                                        <?php echo esc_html($customer_info['email'] ?? '-'); ?>
+                                    </a>
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Phone</label>
+                                <span>
+                                    <a href="tel:<?php echo esc_attr($customer_info['phone'] ?? ''); ?>">
+                                        <?php echo esc_html($customer_info['phone'] ?? '-'); ?>
+                                    </a>
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <label>Submitted</label>
+                                <span><?php echo date('F j, Y g:i A', strtotime($submission->created_at)); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Selected Template -->
+                    <div class="detail-card">
+                        <h3><span class="dashicons dashicons-admin-appearance"></span> Selected Template</h3>
+                        <?php if ($theme): ?>
+                            <div class="selected-template">
+                                <div class="template-preview-mini" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?> 0%, <?php echo esc_attr($theme->secondary_color); ?> 100%);">
+                                </div>
+                                <div class="template-info">
+                                    <h4><?php echo esc_html($theme->name); ?></h4>
+                                    <span class="category"><?php echo esc_html(ucfirst($theme->category)); ?></span>
+                                    <p><?php echo count($theme->pages); ?> pages</p>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <p>Template not found.</p>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Color Customizations -->
+                    <?php if (!empty($color_customizations)): ?>
+                        <div class="detail-card">
+                            <h3><span class="dashicons dashicons-art"></span> Color Customizations</h3>
+                            <div class="color-swatches">
+                                <?php foreach ($color_customizations as $key => $color): ?>
+                                    <div class="color-swatch">
+                                        <span style="background: <?php echo esc_attr($color); ?>;"></span>
+                                        <small><?php echo ucwords(str_replace('_', ' ', $key)); ?></small>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <!-- Submission Meta -->
+                    <div class="detail-card">
+                        <h3><span class="dashicons dashicons-info"></span> Submission Details</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>IP Address</label>
+                                <span><?php echo esc_html($submission->ip_address); ?></span>
+                            </div>
+                            <div class="detail-item full-width">
+                                <label>User Agent</label>
+                                <span class="small-text"><?php echo esc_html($submission->user_agent); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Page Contents -->
+                <div class="submission-contents">
+                    <div class="detail-card">
+                        <h3><span class="dashicons dashicons-media-text"></span> Page Contents</h3>
+                        
+                        <?php if ($theme && !empty($theme->pages)): ?>
+                            <div class="page-contents-accordion">
+                                <?php foreach ($theme->pages as $page_index => $page): ?>
+                                    <div class="accordion-item">
+                                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                                            <span class="dashicons <?php echo esc_attr($page->page_icon); ?>"></span>
+                                            <?php echo esc_html($page->page_name); ?>
+                                            <span class="accordion-icon dashicons dashicons-arrow-down"></span>
+                                        </button>
+                                        <div class="accordion-content">
+                                            <?php foreach ($page->sections as $sec_index => $section): ?>
+                                                <div class="section-content">
+                                                    <h5><?php echo esc_html($section->section_name); ?></h5>
+                                                    <div class="fields-list">
+                                                        <?php 
+                                                        if (!empty($section->fields)):
+                                                            foreach ($section->fields as $field): 
+                                                                $field_key = "page_{$page_index}_sec_{$sec_index}_{$field['name']}";
+                                                                $value = $page_contents[$field_key] ?? '';
+                                                                
+                                                                if (empty($value)) continue;
+                                                        ?>
+                                                            <div class="field-value">
+                                                                <label><?php echo esc_html($field['label']); ?></label>
+                                                                <div class="value">
+                                                                    <?php if ($field['type'] === 'image'): ?>
+                                                                        <img src="<?php echo esc_url($value); ?>" alt="" style="max-width: 100px;">
+                                                                    <?php elseif ($field['type'] === 'editor' || $field['type'] === 'textarea'): ?>
+                                                                        <?php echo nl2br(esc_html($value)); ?>
+                                                                    <?php elseif ($field['type'] === 'url'): ?>
+                                                                        <a href="<?php echo esc_url($value); ?>" target="_blank"><?php echo esc_html($value); ?></a>
+                                                                    <?php else: ?>
+                                                                        <?php echo esc_html($value); ?>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </div>
+                                                        <?php 
+                                                            endforeach;
+                                                        endif;
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <pre><?php echo esc_html(json_encode($page_contents, JSON_PRETTY_PRINT)); ?></pre>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Preview Modal -->
+        <div id="preview-modal" class="spfm-modal" style="display:none;">
+            <div class="modal-content modal-fullscreen">
+                <div class="modal-header">
+                    <h3>Website Preview - Submission #<?php echo $submission->id; ?></h3>
+                    <div class="modal-toolbar">
+                        <button class="device-btn active" data-device="desktop"><span class="dashicons dashicons-desktop"></span></button>
+                        <button class="device-btn" data-device="tablet"><span class="dashicons dashicons-tablet"></span></button>
+                        <button class="device-btn" data-device="mobile"><span class="dashicons dashicons-smartphone"></span></button>
+                    </div>
+                    <button class="close-modal" onclick="closePreview()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="preview-iframe" src="<?php echo admin_url('admin-ajax.php?action=spfm_render_submission_preview&id=' . $submission->id . '&nonce=' . wp_create_nonce('spfm_nonce')); ?>"></iframe>
+                </div>
+            </div>
         </div>
     <?php endif; ?>
 </div>
 
 <style>
-.spfm-submissions-container {
-    margin-top: 20px;
-}
-.submissions-filters {
-    background: #fff;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-.submissions-filters select {
-    min-width: 200px;
-}
-.submissions-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+/* Stats Cards */
+.stats-cards {
+    display: flex;
     gap: 20px;
-    margin-bottom: 20px;
+    margin: 20px 0;
 }
 .stat-card {
     background: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    text-align: center;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    flex: 1;
 }
-.stat-number {
-    font-size: 36px;
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.stat-icon .dashicons {
+    color: #fff;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+.stat-value {
+    display: block;
+    font-size: 28px;
     font-weight: 700;
     color: #333;
 }
 .stat-label {
+    font-size: 13px;
     color: #666;
-    margin-top: 5px;
 }
-.stat-new .stat-number { color: #007bff; }
-.stat-completed .stat-number { color: #28a745; }
-.spfm-status {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-}
-.spfm-empty-state {
+
+/* Filters */
+.filters-bar {
     background: #fff;
-    text-align: center;
-    padding: 60px 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-.spfm-empty-state .dashicons {
-    font-size: 60px;
-    width: 60px;
-    height: 60px;
-    color: #ccc;
-}
-/* Submission Detail */
-.spfm-submission-detail {
-    background: #fff;
-    border: 1px solid #ddd;
+    padding: 15px 20px;
     border-radius: 10px;
-    margin-top: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.filter-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.filter-select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    min-width: 150px;
+}
+
+/* Submissions Table */
+.submissions-table-container {
+    background: #fff;
+    border-radius: 12px;
     overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.submissions-table th {
+    background: #f8f9fa;
+    padding: 15px;
+    font-weight: 600;
+}
+.submissions-table td {
+    padding: 15px;
+    vertical-align: middle;
+}
+.template-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.template-colors {
+    display: flex;
+    gap: 3px;
+}
+.template-colors span {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.status-select {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border-width: 2px;
+    font-size: 12px;
+}
+
+/* Submission View */
+.submission-view {
+    margin-top: 20px;
 }
 .submission-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    padding: 25px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 25px 30px;
+    border-radius: 12px;
+    color: #fff;
+    margin-bottom: 25px;
 }
 .submission-header h2 {
     margin: 0;
     color: #fff;
 }
 .submission-header p {
-    margin: 10px 0 0;
+    margin: 5px 0 0;
     opacity: 0.9;
 }
-.header-status select {
-    padding: 8px 15px;
-    border-radius: 5px;
-    border: 1px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.2);
-    color: #fff;
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
-.header-status label {
-    margin-right: 10px;
+.status-select-large {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.9);
+    font-weight: 500;
 }
-.submission-section {
-    padding: 25px 30px;
-    border-bottom: 1px solid #eee;
+.submission-content {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 25px;
 }
-.submission-section h3 {
+.detail-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.detail-card h3 {
     margin: 0 0 20px 0;
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #333;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
 }
-.submission-table {
-    width: 100%;
-    border-collapse: collapse;
+.detail-card h3 .dashicons {
+    color: #667eea;
 }
-.submission-table th {
-    text-align: left;
-    padding: 12px 15px;
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+.detail-item {
+    padding: 12px;
     background: #f8f9fa;
-    width: 200px;
-    font-weight: 600;
-    border: 1px solid #eee;
+    border-radius: 8px;
 }
-.submission-table td {
-    padding: 12px 15px;
-    border: 1px solid #eee;
+.detail-item.full-width {
+    grid-column: 1 / -1;
 }
-.color-preview {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    vertical-align: middle;
-    margin-right: 8px;
-    border: 1px solid #ddd;
+.detail-item label {
+    display: block;
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 5px;
+    text-transform: uppercase;
 }
-.uploaded-files {
+.detail-item span {
+    font-weight: 500;
+}
+.small-text {
+    font-size: 12px;
+    word-break: break-all;
+}
+
+/* Selected Template */
+.selected-template {
     display: flex;
     gap: 15px;
-    flex-wrap: wrap;
+    align-items: center;
 }
-.file-item {
-    background: #f8f9fa;
-    padding: 10px 15px;
-    border-radius: 5px;
+.template-preview-mini {
+    width: 80px;
+    height: 60px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+.selected-template .template-info h4 {
+    margin: 0 0 5px 0;
+}
+.selected-template .category {
+    font-size: 11px;
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* Color Swatches */
+.color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+.color-swatch {
+    text-align: center;
+}
+.color-swatch span {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.color-swatch small {
+    font-size: 10px;
+    color: #666;
+}
+
+/* Accordion */
+.accordion-item {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+.accordion-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-}
-.submission-actions {
-    padding: 25px 30px;
-    display: flex;
     gap: 10px;
+    width: 100%;
+    padding: 15px;
+    background: #f8f9fa;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
 }
-.submission-actions .dashicons {
-    vertical-align: middle;
-    margin-right: 5px;
+.accordion-header .dashicons:first-child {
+    color: #667eea;
 }
-@media print {
-    .submission-actions,
-    .header-status,
-    .wp-admin #wpadminbar,
-    .wp-admin #adminmenumain,
-    .page-title-action {
-        display: none !important;
-    }
-    .wp-admin #wpcontent {
-        margin-left: 0 !important;
+.accordion-icon {
+    margin-left: auto;
+    transition: transform 0.3s;
+}
+.accordion-item.open .accordion-icon {
+    transform: rotate(180deg);
+}
+.accordion-content {
+    display: none;
+    padding: 15px;
+}
+.accordion-item.open .accordion-content {
+    display: block;
+}
+.section-content {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+.section-content:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.section-content h5 {
+    margin: 0 0 15px 0;
+    color: #667eea;
+}
+.field-value {
+    margin-bottom: 12px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+.field-value label {
+    display: block;
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+.field-value .value {
+    font-size: 14px;
+}
+
+/* Modal */
+.spfm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-fullscreen {
+    width: 95%;
+    height: 95%;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background: #333;
+    color: #fff;
+}
+.modal-header h3 {
+    margin: 0;
+    color: #fff;
+    flex: 1;
+}
+.modal-toolbar {
+    display: flex;
+    gap: 5px;
+}
+.device-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.device-btn.active {
+    background: #667eea;
+}
+.close-modal {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    margin-left: 20px;
+}
+.modal-body {
+    flex: 1;
+    padding: 20px;
+    background: #e9ecef;
+    display: flex;
+    justify-content: center;
+    overflow: auto;
+}
+#preview-iframe {
+    width: 100%;
+    max-width: 1000px;
+    height: 100%;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.1);
+    background: #fff;
+    transition: all 0.3s;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: #fff;
+    border-radius: 12px;
+}
+.empty-state .dashicons {
+    font-size: 60px;
+    width: 60px;
+    height: 60px;
+    color: #ddd;
+}
+
+@media (max-width: 1200px) {
+    .submission-content {
+        grid-template-columns: 1fr;
     }
 }
 </style>
 
 <script>
 jQuery(document).ready(function($) {
-    // Update status
-    $('#submission-status').on('change', function() {
+    // Status change
+    $('.status-select, .status-select-large').on('change', function() {
         var id = $(this).data('id');
         var status = $(this).val();
         
@@ -494,20 +788,17 @@ jQuery(document).ready(function($) {
             status: status
         }, function(response) {
             if (!response.success) {
-                alert(response.data.message);
+                alert('Failed to update status');
             }
         });
     });
     
-    // Print
-    $('#print-submission').on('click', function() {
-        window.print();
-    });
-    
-    // Delete
-    $('#delete-submission').on('click', function() {
+    // Delete submission
+    $('.delete-submission').on('click', function() {
         if (!confirm('Are you sure you want to delete this submission?')) return;
+        
         var id = $(this).data('id');
+        var $row = $(this).closest('tr');
         
         $.post(spfm_ajax.ajax_url, {
             action: 'spfm_delete_submission',
@@ -515,11 +806,41 @@ jQuery(document).ready(function($) {
             id: id
         }, function(response) {
             if (response.success) {
-                window.location.href = '<?php echo admin_url('admin.php?page=spfm-submissions'); ?>';
+                $row.fadeOut(300, function() { $(this).remove(); });
             } else {
                 alert(response.data.message);
             }
         });
     });
+    
+    // Device switcher in modal
+    $('#preview-modal .device-btn').on('click', function() {
+        $('#preview-modal .device-btn').removeClass('active');
+        $(this).addClass('active');
+        
+        var device = $(this).data('device');
+        var iframe = $('#preview-iframe');
+        
+        if (device === 'tablet') {
+            iframe.css('max-width', '768px');
+        } else if (device === 'mobile') {
+            iframe.css('max-width', '375px');
+        } else {
+            iframe.css('max-width', '1000px');
+        }
+    });
 });
+
+function toggleAccordion(btn) {
+    var item = jQuery(btn).closest('.accordion-item');
+    item.toggleClass('open');
+}
+
+function openPreview() {
+    jQuery('#preview-modal').show();
+}
+
+function closePreview() {
+    jQuery('#preview-modal').hide();
+}
 </script>
