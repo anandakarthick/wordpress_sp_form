@@ -87,17 +87,25 @@ $edit_url = admin_url('admin.php?page=spfm-themes&action=edit&id=' . $theme->id)
             box-sizing: border-box;
         }
         
-        html, body {
+        html {
             width: 100%;
             min-height: 100%;
             background: <?php echo esc_attr($background); ?>;
+            scroll-behavior: smooth;
         }
         
         body {
+            width: 100%;
+            min-height: 100%;
             font-family: '<?php echo esc_attr($fontFamily); ?>', sans-serif;
             color: <?php echo esc_attr($textColor); ?>;
             line-height: 1.6;
             font-size: 16px;
+        }
+        
+        /* Scroll offset for fixed headers */
+        [id] {
+            scroll-margin-top: 140px;
         }
         
         :root {

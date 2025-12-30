@@ -60,27 +60,27 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 ?>
 
 <!-- Header -->
-<header class="header">
+<header class="header" id="home">
     <div class="logo">
         <span>🦷</span>
         <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav">
-        <a href="#">Home</a>
-        <a href="#">Services</a>
-        <a href="#">Smile Gallery</a>
-        <a href="#">Our Team</a>
-        <a href="#">New Patients</a>
-        <a href="#">Contact</a>
+        <a href="#home">Home</a>
+        <a href="#services">Services</a>
+        <a href="#gallery">Smile Gallery</a>
+        <a href="#team">Our Team</a>
+        <a href="#about">New Patients</a>
+        <a href="#contact">Contact</a>
     </nav>
     <div style="display: flex; align-items: center; gap: 15px;">
         <span style="color: var(--primary); font-weight: 600;">📞 <?php echo esc_html($phone); ?></span>
-        <a href="#" class="header-cta">Book Your Smile ✨</a>
+        <a href="#contact" class="header-cta">Book Your Smile ✨</a>
     </div>
 </header>
 
 <!-- Hero -->
-<section class="hero" style="text-align: center; padding: 100px 30px;">
+<section class="hero" id="hero" style="text-align: center; padding: 100px 30px;">
     <div style="font-size: 100px; margin-bottom: 20px; animation: bounce 2s infinite;">😊</div>
     <h1><?php echo esc_html($heroHeadline); ?></h1>
     <p><?php echo esc_html($heroSubheadline); ?></p>
@@ -88,8 +88,8 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
         ✨ Free Whitening with New Patient Exam!
     </div>
     <div class="hero-btns">
-        <a href="#" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
-        <a href="#" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
+        <a href="#contact" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
+        <a href="#services" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
     </div>
 </section>
 
@@ -101,18 +101,18 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </style>
 
 <!-- Services Pills -->
-<section style="background: #fff; padding: 40px 30px;">
+<section style="background: #fff; padding: 40px 30px;" id="services-pills">
     <div class="container" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
         <?php foreach (array_slice($quick_features, 0, 6) as $feature): ?>
-            <span style="background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-size: 14px;">
+            <a href="#services" style="background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-size: 14px; text-decoration: none;">
                 <?php echo esc_html($feature['icon'] ?? '✨'); ?> <?php echo esc_html($feature['name'] ?? 'Service'); ?>
-            </span>
+            </a>
         <?php endforeach; ?>
     </div>
 </section>
 
 <!-- Before/After Gallery -->
-<section style="background: var(--background);">
+<section style="background: var(--background);" id="gallery">
     <div class="section-title">
         <h2>😁 Smile Transformations</h2>
         <p>See the amazing results our patients have achieved</p>
@@ -130,7 +130,7 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </section>
 
 <!-- Services Detail -->
-<section style="background: #fff;">
+<section style="background: #fff;" id="services">
     <div class="section-title">
         <h2>Our Dental Services</h2>
         <p>Comprehensive dental care for your entire family</p>
@@ -149,7 +149,7 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </section>
 
 <!-- Stats -->
-<section class="stats-section">
+<section class="stats-section" id="stats">
     <div class="stats-grid">
         <div>
             <div class="stat-num"><?php echo esc_html($stat1Num); ?></div>
@@ -171,7 +171,7 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </section>
 
 <!-- Team -->
-<section style="background: var(--background);">
+<section style="background: var(--background);" id="team">
     <div class="section-title">
         <h2>Meet Our Dental Team</h2>
         <p>Experienced, gentle, and dedicated to your smile</p>
@@ -194,7 +194,7 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </section>
 
 <!-- Insurance Banner -->
-<section style="background: var(--primary); color: #fff; padding: 40px 30px; text-align: center;">
+<section style="background: var(--primary); color: #fff; padding: 40px 30px; text-align: center;" id="insurance">
     <h3 style="font-size: 24px; margin-bottom: 15px;">💳 We Accept Most Insurance Plans</h3>
     <p style="opacity: 0.9; margin-bottom: 20px;">Plus flexible financing options available for all treatments</p>
     <div style="display: flex; justify-content: center; gap: 30px; font-size: 14px; opacity: 0.8;">
@@ -207,16 +207,16 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </section>
 
 <!-- CTA Section -->
-<section class="cta-section">
+<section class="cta-section" id="cta">
     <h2><?php echo esc_html($ctaHeadline); ?></h2>
     <p><?php echo esc_html($ctaDescription); ?></p>
-    <a href="#" class="btn-primary">📅 <?php echo esc_html($ctaButton); ?></a>
+    <a href="#contact" class="btn-primary">📅 <?php echo esc_html($ctaButton); ?></a>
 </section>
 
 <!-- Footer -->
-<footer class="footer">
+<footer class="footer" id="contact">
     <div class="footer-grid">
-        <div>
+        <div id="about">
             <h4>🦷 <?php echo esc_html($businessName); ?></h4>
             <p><?php echo esc_html($aboutShort); ?></p>
         </div>
@@ -224,18 +224,18 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
             <h4>Our Services</h4>
             <ul>
                 <?php foreach (array_slice($services, 0, 5) as $service): ?>
-                    <li><a href="#"><?php echo esc_html($service['name'] ?? 'Service'); ?></a></li>
+                    <li><a href="#services"><?php echo esc_html($service['name'] ?? 'Service'); ?></a></li>
                 <?php endforeach; ?>
             </ul>
         </div>
         <div>
             <h4>Patient Info</h4>
             <ul>
-                <li><a href="#">New Patients</a></li>
-                <li><a href="#">Insurance</a></li>
-                <li><a href="#">Financing</a></li>
-                <li><a href="#">Patient Forms</a></li>
-                <li><a href="#">FAQs</a></li>
+                <li><a href="#about">New Patients</a></li>
+                <li><a href="#insurance">Insurance</a></li>
+                <li><a href="#contact">Financing</a></li>
+                <li><a href="#contact">Patient Forms</a></li>
+                <li><a href="#contact">FAQs</a></li>
             </ul>
         </div>
         <div>

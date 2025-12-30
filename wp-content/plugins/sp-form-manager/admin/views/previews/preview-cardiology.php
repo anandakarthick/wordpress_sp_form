@@ -32,6 +32,28 @@ $stat4Label = get_site_content($site_content, 'stat4_label', 'Cardiac ER');
 $ctaHeadline = get_site_content($site_content, 'cta_headline', 'Cardiac Emergency?');
 $ctaDescription = get_site_content($site_content, 'cta_description', 'Don\'t wait! Every second counts during a heart attack. Our cardiac ER is ready 24/7.');
 $ctaButton = get_site_content($site_content, 'cta_button', 'Call 911 Now');
+
+// Get repeater data with defaults
+$services = isset($site_content['services']) && is_array($site_content['services']) ? $site_content['services'] : array(
+    array('icon' => '🩺', 'name' => 'Diagnostics', 'desc' => 'ECG, Echo, Stress Tests'),
+    array('icon' => '💓', 'name' => 'Cath Lab', 'desc' => 'Angiography & Angioplasty'),
+    array('icon' => '🫀', 'name' => 'Heart Surgery', 'desc' => 'Bypass & Valve Repair'),
+    array('icon' => '⚡', 'name' => 'Pacemakers', 'desc' => 'Device Implantation'),
+);
+
+$team = isset($site_content['team']) && is_array($site_content['team']) ? $site_content['team'] : array(
+    array('name' => 'Dr. Heart Smith', 'role' => 'Chief Cardiologist', 'initial' => 'H'),
+    array('name' => 'Dr. Beat Johnson', 'role' => 'Interventional', 'initial' => 'B'),
+    array('name' => 'Dr. Pulse Lee', 'role' => 'Electrophysiologist', 'initial' => 'P'),
+    array('name' => 'Dr. Care Wilson', 'role' => 'Heart Surgeon', 'initial' => 'C'),
+);
+
+$quick_features = isset($site_content['quick_features']) && is_array($site_content['quick_features']) ? $site_content['quick_features'] : array(
+    array('icon' => '❤️', 'name' => 'Heart Attack', 'desc' => ''),
+    array('icon' => '💓', 'name' => 'Arrhythmia', 'desc' => ''),
+    array('icon' => '🫀', 'name' => 'Heart Failure', 'desc' => ''),
+    array('icon' => '🩺', 'name' => 'Coronary Disease', 'desc' => ''),
+);
 ?>
 
 <!-- Emergency Alert Banner -->
@@ -51,27 +73,30 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Call 911 Now');
     50% { transform: scale(1); }
     75% { transform: scale(1.05); }
 }
+@keyframes ecgDraw {
+    to { stroke-dashoffset: -200; }
+}
 </style>
 
 <!-- Header -->
-<header class="header">
+<header class="header" id="home">
     <div class="logo">
         <span>❤️</span>
         <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav">
-        <a href="#">Home</a>
-        <a href="#">Services</a>
-        <a href="#">Conditions</a>
-        <a href="#">Our Doctors</a>
-        <a href="#">Heart Health</a>
-        <a href="#">Contact</a>
+        <a href="#home">Home</a>
+        <a href="#services">Services</a>
+        <a href="#conditions">Conditions</a>
+        <a href="#doctors">Our Doctors</a>
+        <a href="#about">Heart Health</a>
+        <a href="#contact">Contact</a>
     </nav>
     <a href="tel:<?php echo esc_attr($emergency); ?>" style="background: #dc2626; color: #fff; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: 700; animation: pulse 1.5s infinite;">🚨 Emergency</a>
 </header>
 
 <!-- Hero -->
-<section class="hero" style="padding: 100px 30px;">
+<section class="hero" id="hero" style="padding: 100px 30px;">
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 30px;">
         <span style="font-size: 70px; animation: heartbeat 1s ease-in-out infinite;">❤️</span>
         <svg viewBox="0 0 100 30" style="width: 120px; height: 40px;">
@@ -82,37 +107,24 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Call 911 Now');
     <h1><?php echo esc_html($heroHeadline); ?></h1>
     <p><?php echo esc_html($heroSubheadline); ?></p>
     <div class="hero-btns">
-        <a href="#" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
-        <a href="#" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
+        <a href="#contact" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
+        <a href="#services" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
     </div>
 </section>
 
-<style>
-@keyframes ecgDraw {
-    to { stroke-dashoffset: -200; }
-}
-</style>
-
 <!-- Services -->
-<section style="background: #fff;">
+<section style="background: #fff;" id="services">
     <div class="section-title">
         <h2>Cardiac Services</h2>
         <p>Comprehensive heart care from diagnosis to treatment</p>
     </div>
     <div class="container">
-        <div class="cards-grid" style="grid-template-columns: repeat(4, 1fr);">
-            <?php 
-            $services = array(
-                array('icon' => '🩺', 'name' => 'Diagnostics', 'desc' => 'ECG, Echo, Stress Tests'),
-                array('icon' => '💓', 'name' => 'Cath Lab', 'desc' => 'Angiography & Angioplasty'),
-                array('icon' => '🫀', 'name' => 'Heart Surgery', 'desc' => 'Bypass & Valve Repair'),
-                array('icon' => '⚡', 'name' => 'Pacemakers', 'desc' => 'Device Implantation'),
-            );
-            foreach ($services as $svc): ?>
+        <div class="cards-grid" style="grid-template-columns: repeat(<?php echo min(count($services), 4); ?>, 1fr);">
+            <?php foreach ($services as $svc): ?>
                 <div class="card">
-                    <div class="card-icon"><?php echo $svc['icon']; ?></div>
-                    <h3><?php echo $svc['name']; ?></h3>
-                    <p><?php echo $svc['desc']; ?></p>
+                    <div class="card-icon"><?php echo esc_html($svc['icon'] ?? '❤️'); ?></div>
+                    <h3><?php echo esc_html($svc['name'] ?? 'Service'); ?></h3>
+                    <p><?php echo esc_html($svc['desc'] ?? ''); ?></p>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -120,24 +132,22 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Call 911 Now');
 </section>
 
 <!-- Conditions We Treat -->
-<section style="background: var(--background);">
+<section style="background: var(--background);" id="conditions">
     <div class="section-title">
         <h2>Conditions We Treat</h2>
         <p>Expert care for all heart-related conditions</p>
     </div>
     <div class="container" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-        <?php 
-        $conditions = array('Heart Attack', 'Arrhythmia', 'Heart Failure', 'Coronary Disease', 'High Blood Pressure', 'Valve Disease', 'Congenital Heart', 'Peripheral Artery');
-        foreach ($conditions as $c): ?>
-            <span style="background: #fff; border: 2px solid var(--primary); color: var(--primary); padding: 12px 25px; border-radius: 25px; font-weight: 600; font-size: 14px;">
-                <?php echo $c; ?>
-            </span>
+        <?php foreach ($quick_features as $feature): ?>
+            <a href="#services" style="background: #fff; border: 2px solid var(--primary); color: var(--primary); padding: 12px 25px; border-radius: 25px; font-weight: 600; font-size: 14px; text-decoration: none;">
+                <?php echo esc_html($feature['icon'] ?? '❤️'); ?> <?php echo esc_html($feature['name'] ?? 'Condition'); ?>
+            </a>
         <?php endforeach; ?>
     </div>
 </section>
 
 <!-- Stats -->
-<section class="stats-section">
+<section class="stats-section" id="stats">
     <div class="stats-grid">
         <div>
             <div class="stat-num"><?php echo esc_html($stat1Num); ?></div>
@@ -159,28 +169,21 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Call 911 Now');
 </section>
 
 <!-- Team -->
-<section style="background: #fff;">
+<section style="background: #fff;" id="doctors">
     <div class="section-title">
         <h2>Our Cardiologists</h2>
         <p>Board-certified heart specialists</p>
     </div>
     <div class="container">
-        <div class="team-grid" style="grid-template-columns: repeat(4, 1fr);">
-            <?php 
-            $doctors = array(
-                array('name' => 'Dr. Heart Smith', 'role' => 'Chief Cardiologist', 'initial' => 'H'),
-                array('name' => 'Dr. Beat Johnson', 'role' => 'Interventional', 'initial' => 'B'),
-                array('name' => 'Dr. Pulse Lee', 'role' => 'Electrophysiologist', 'initial' => 'P'),
-                array('name' => 'Dr. Care Wilson', 'role' => 'Heart Surgeon', 'initial' => 'C'),
-            );
-            foreach ($doctors as $doc): ?>
+        <div class="team-grid" style="grid-template-columns: repeat(<?php echo min(count($team), 4); ?>, 1fr);">
+            <?php foreach ($team as $doc): ?>
                 <div class="team-card">
                     <div class="team-photo">
-                        <div class="team-avatar"><?php echo $doc['initial']; ?></div>
+                        <div class="team-avatar"><?php echo esc_html($doc['initial'] ?? substr($doc['name'] ?? 'D', 0, 1)); ?></div>
                     </div>
                     <div class="team-info">
-                        <h3 style="font-size: 16px;"><?php echo $doc['name']; ?></h3>
-                        <div class="role"><?php echo $doc['role']; ?></div>
+                        <h3 style="font-size: 16px;"><?php echo esc_html($doc['name'] ?? 'Doctor'); ?></h3>
+                        <div class="role"><?php echo esc_html($doc['role'] ?? 'Cardiologist'); ?></div>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -189,37 +192,35 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Call 911 Now');
 </section>
 
 <!-- CTA -->
-<section class="cta-section" style="background: linear-gradient(135deg, #dc2626, var(--primary));">
+<section class="cta-section" id="cta" style="background: linear-gradient(135deg, #dc2626, var(--primary));">
     <h2>🚨 <?php echo esc_html($ctaHeadline); ?></h2>
     <p><?php echo esc_html($ctaDescription); ?></p>
     <a href="tel:<?php echo esc_attr($emergency); ?>" class="btn-primary" style="background: #fff; color: #dc2626;">📞 <?php echo esc_html($ctaButton); ?></a>
 </section>
 
 <!-- Footer -->
-<footer class="footer">
+<footer class="footer" id="contact">
     <div class="footer-grid">
-        <div>
+        <div id="about">
             <h4>❤️ <?php echo esc_html($businessName); ?></h4>
             <p><?php echo esc_html($aboutShort); ?></p>
         </div>
         <div>
             <h4>Services</h4>
             <ul>
-                <li><a href="#">Heart Screening</a></li>
-                <li><a href="#">Cardiac Cath Lab</a></li>
-                <li><a href="#">Heart Surgery</a></li>
-                <li><a href="#">Cardiac Rehab</a></li>
-                <li><a href="#">Pacemakers</a></li>
+                <?php foreach (array_slice($services, 0, 5) as $service): ?>
+                    <li><a href="#services"><?php echo esc_html($service['name'] ?? 'Service'); ?></a></li>
+                <?php endforeach; ?>
             </ul>
         </div>
         <div>
             <h4>Heart Health</h4>
             <ul>
-                <li><a href="#">Risk Assessment</a></li>
-                <li><a href="#">Prevention Tips</a></li>
-                <li><a href="#">Diet & Exercise</a></li>
-                <li><a href="#">Warning Signs</a></li>
-                <li><a href="#">Patient Stories</a></li>
+                <li><a href="#conditions">Risk Assessment</a></li>
+                <li><a href="#about">Prevention Tips</a></li>
+                <li><a href="#about">Diet & Exercise</a></li>
+                <li><a href="#conditions">Warning Signs</a></li>
+                <li><a href="#about">Patient Stories</a></li>
             </ul>
         </div>
         <div>

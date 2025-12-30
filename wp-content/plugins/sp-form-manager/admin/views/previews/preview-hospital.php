@@ -65,34 +65,34 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </div>
 
 <!-- Header -->
-<header class="header">
+<header class="header" id="home">
     <div class="logo">
         <span>🏥</span>
         <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav">
-        <a href="#">Home</a>
-        <a href="#">Departments</a>
-        <a href="#">Find a Doctor</a>
-        <a href="#">Services</a>
-        <a href="#">Patient Portal</a>
-        <a href="#">Contact</a>
+        <a href="#home">Home</a>
+        <a href="#departments">Departments</a>
+        <a href="#doctors">Find a Doctor</a>
+        <a href="#services">Services</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
     </nav>
-    <a href="#" class="header-cta">Book Appointment</a>
+    <a href="#contact" class="header-cta">Book Appointment</a>
 </header>
 
 <!-- Hero -->
-<section class="hero">
+<section class="hero" id="hero">
     <h1><?php echo esc_html($heroHeadline); ?></h1>
     <p><?php echo esc_html($heroSubheadline); ?></p>
     <div class="hero-btns">
-        <a href="#" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
-        <a href="#" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
+        <a href="#doctors" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
+        <a href="#services" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
     </div>
 </section>
 
 <!-- Quick Services Cards -->
-<div class="container" style="margin-top: -60px; position: relative; z-index: 10;">
+<div class="container" id="services" style="margin-top: -60px; position: relative; z-index: 10;">
     <div class="cards-grid" style="grid-template-columns: repeat(<?php echo min(count($quick_features), 4); ?>, 1fr);">
         <?php foreach ($quick_features as $feature): ?>
             <div class="card">
@@ -105,7 +105,7 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </div>
 
 <!-- Departments Section -->
-<section style="background: var(--background);">
+<section style="background: var(--background);" id="departments">
     <div class="section-title">
         <h2>Our Departments</h2>
         <p>Comprehensive care across <?php echo esc_html($stat3Num); ?> medical specialties</p>
@@ -123,7 +123,7 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </section>
 
 <!-- Stats Section -->
-<section class="stats-section">
+<section class="stats-section" id="stats">
     <div class="stats-grid">
         <div>
             <div class="stat-num"><?php echo esc_html($stat1Num); ?></div>
@@ -145,7 +145,7 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </section>
 
 <!-- Featured Doctors -->
-<section style="background: var(--background);">
+<section style="background: var(--background);" id="doctors">
     <div class="section-title">
         <h2>Our Expert Physicians</h2>
         <p>Meet our experienced and dedicated medical team</p>
@@ -168,34 +168,34 @@ $quick_features = isset($site_content['quick_features']) && is_array($site_conte
 </section>
 
 <!-- CTA Section -->
-<section class="cta-section">
+<section class="cta-section" id="emergency">
     <h2><?php echo esc_html($ctaHeadline); ?></h2>
     <p><?php echo esc_html($ctaDescription); ?></p>
-    <a href="#" class="btn-primary">🚨 <?php echo esc_html($ctaButton); ?>: <?php echo esc_html($emergency); ?></a>
+    <a href="tel:<?php echo esc_attr($emergency); ?>" class="btn-primary">🚨 <?php echo esc_html($ctaButton); ?>: <?php echo esc_html($emergency); ?></a>
 </section>
 
 <!-- Footer -->
-<footer class="footer">
+<footer class="footer" id="contact">
     <div class="footer-grid">
-        <div>
+        <div id="about">
             <h4>About Us</h4>
             <p><?php echo esc_html($aboutShort); ?></p>
         </div>
         <div>
             <h4>Quick Links</h4>
             <ul>
-                <li><a href="#">Find a Doctor</a></li>
-                <li><a href="#">Patient Portal</a></li>
-                <li><a href="#">Visitor Information</a></li>
-                <li><a href="#">Careers</a></li>
-                <li><a href="#">Contact Us</a></li>
+                <li><a href="#doctors">Find a Doctor</a></li>
+                <li><a href="#services">Patient Portal</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#departments">Departments</a></li>
+                <li><a href="#contact">Contact Us</a></li>
             </ul>
         </div>
         <div>
             <h4>Departments</h4>
             <ul>
                 <?php foreach (array_slice($services, 0, 5) as $service): ?>
-                    <li><a href="#"><?php echo esc_html($service['name'] ?? 'Department'); ?></a></li>
+                    <li><a href="#departments"><?php echo esc_html($service['name'] ?? 'Department'); ?></a></li>
                 <?php endforeach; ?>
             </ul>
         </div>
