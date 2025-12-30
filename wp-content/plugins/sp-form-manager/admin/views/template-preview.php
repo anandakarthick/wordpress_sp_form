@@ -111,6 +111,7 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
             --text: <?php echo esc_attr($textColor); ?>;
             --header-bg: <?php echo esc_attr($headerBg); ?>;
             --footer-bg: <?php echo esc_attr($footerBg); ?>;
+            --admin-bar-height: 70px;
         }
         
         * {
@@ -119,30 +120,36 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
             box-sizing: border-box;
         }
         
+        html {
+            scroll-padding-top: var(--admin-bar-height);
+        }
+        
         body {
             font-family: '<?php echo esc_attr($fontFamily); ?>', sans-serif;
             color: var(--text);
             background: var(--background);
             line-height: 1.6;
+            padding-top: var(--admin-bar-height);
         }
         
         h1, h2, h3, h4, h5, h6 {
             font-family: '<?php echo esc_attr($headingFont); ?>', sans-serif;
         }
         
-        /* Admin Preview Bar */
+        /* Admin Preview Bar - Fixed at top */
         .preview-admin-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
+            height: var(--admin-bar-height);
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             color: #fff;
-            padding: 12px 25px;
+            padding: 0 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 10000;
+            z-index: 99999;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         .preview-admin-bar .bar-left {
@@ -157,18 +164,21 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
             align-items: center;
             gap: 10px;
         }
+        .preview-admin-bar .template-name .icon {
+            font-size: 24px;
+        }
         .preview-admin-bar .template-category {
             font-size: 12px;
             background: rgba(255,255,255,0.15);
-            padding: 4px 12px;
-            border-radius: 15px;
+            padding: 5px 14px;
+            border-radius: 20px;
         }
         .preview-admin-bar .bar-right {
             display: flex;
             gap: 12px;
         }
         .preview-admin-bar .btn {
-            padding: 10px 20px;
+            padding: 10px 22px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
@@ -195,8 +205,9 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
             opacity: 0.9;
         }
         
+        /* Preview Content - Below admin bar */
         .preview-content {
-            margin-top: 60px;
+            min-height: calc(100vh - var(--admin-bar-height));
         }
         
         /* Top Bar */
@@ -221,7 +232,7 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
         }
         
         /* Header */
-        header {
+        .site-header {
             background: var(--header-bg);
             padding: 15px 40px;
             display: flex;
@@ -230,6 +241,9 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
             box-shadow: 0 2px 15px rgba(0,0,0,0.05);
             flex-wrap: wrap;
             gap: 20px;
+            position: sticky;
+            top: var(--admin-bar-height);
+            z-index: 1000;
         }
         .logo {
             font-size: 26px;
@@ -649,7 +663,7 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
         }
         
         /* Footer */
-        footer {
+        .site-footer {
             background: var(--footer-bg);
             color: #fff;
             padding: 70px 40px 30px;
@@ -707,16 +721,33 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
         
         /* Responsive */
         @media (max-width: 768px) {
+            :root {
+                --admin-bar-height: auto;
+            }
+            
+            body {
+                padding-top: 0;
+            }
+            
             .preview-admin-bar {
+                position: relative;
                 flex-direction: column;
                 gap: 15px;
-                text-align: center;
+                padding: 15px 20px;
+                height: auto;
             }
             .preview-admin-bar .bar-left {
                 flex-direction: column;
+                text-align: center;
                 gap: 10px;
             }
-            header {
+            .preview-admin-bar .bar-right {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .site-header {
+                position: relative;
+                top: 0;
                 padding: 15px 20px;
             }
             nav {
@@ -748,12 +779,12 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
     </style>
 </head>
 <body>
-    <!-- Admin Preview Bar -->
+    <!-- Admin Preview Bar - Fixed at very top -->
     <div class="preview-admin-bar">
         <div class="bar-left">
             <div class="template-name">
-                <span><?php echo $categoryIcon; ?></span>
-                <?php echo esc_html($theme->name); ?>
+                <span class="icon"><?php echo $categoryIcon; ?></span>
+                <span><?php echo esc_html($theme->name); ?></span>
             </div>
             <span class="template-category"><?php echo esc_html(ucwords(str_replace('_', ' ', $theme->category))); ?></span>
         </div>
@@ -767,6 +798,7 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
         </div>
     </div>
     
+    <!-- Preview Content - All website content below admin bar -->
     <div class="preview-content">
         <!-- Top Bar -->
         <div class="top-bar">
@@ -779,7 +811,7 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
         </div>
         
         <!-- Header -->
-        <header>
+        <header class="site-header">
             <div class="logo">
                 <span class="logo-icon"><?php echo $categoryIcon; ?></span>
                 <?php echo esc_html($logoText); ?>
@@ -951,7 +983,7 @@ $categoryIcon = isset($categoryIcons[$theme->category]) ? $categoryIcons[$theme-
         </section>
         
         <!-- Footer -->
-        <footer>
+        <footer class="site-footer">
             <div class="footer-grid">
                 <div class="footer-col">
                     <h4>About Us</h4>

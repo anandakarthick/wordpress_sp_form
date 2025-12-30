@@ -30,6 +30,18 @@ $edit_theme = null;
 if ($edit_mode) {
     $edit_theme = $themes_handler->get_theme_complete(intval($_GET['id']));
 }
+
+// Category icons
+$category_icons = array(
+    'hospital' => '🏥',
+    'dental' => '🦷',
+    'eye_care' => '👁️',
+    'pediatric' => '👶',
+    'cardiology' => '❤️',
+    'mental_health' => '🧠',
+    'orthopedic' => '🦴',
+    'diagnostic' => '🔬'
+);
 ?>
 
 <div class="spfm-wrap">
@@ -193,22 +205,6 @@ if ($edit_mode) {
                             <span class="dashicons dashicons-visibility"></span> Preview Template
                         </a>
                     </div>
-                    
-                    <div class="sidebar-card">
-                        <h4>Live Preview</h4>
-                        <div class="preview-mockup">
-                            <div class="mockup-screen" style="--primary: <?php echo esc_attr($edit_theme->primary_color); ?>; --secondary: <?php echo esc_attr($edit_theme->secondary_color); ?>;">
-                                <div class="mockup-header"></div>
-                                <div class="mockup-hero" style="background: linear-gradient(135deg, <?php echo esc_attr($edit_theme->primary_color); ?>, <?php echo esc_attr($edit_theme->secondary_color); ?>);"></div>
-                                <div class="mockup-content">
-                                    <div class="mockup-card"></div>
-                                    <div class="mockup-card"></div>
-                                    <div class="mockup-card"></div>
-                                </div>
-                                <div class="mockup-footer" style="background: <?php echo esc_attr($edit_theme->footer_bg_color); ?>;"></div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </form>
@@ -252,67 +248,170 @@ if ($edit_mode) {
             $features = json_decode($theme->features, true) ?: array();
             $theme_complete = $themes_handler->get_theme_complete($theme->id);
             $page_count = $theme_complete ? count($theme_complete->pages) : 0;
+            $icon = $category_icons[$theme->category] ?? '🏥';
+            
+            // Get default values for preview
+            $defaults = array();
+            if (!empty($theme_complete->pages)) {
+                foreach ($theme_complete->pages as $page) {
+                    if (!empty($page->sections)) {
+                        foreach ($page->sections as $section) {
+                            if (!empty($section->default_values)) {
+                                foreach ($section->default_values as $key => $value) {
+                                    $defaults[$key] = $value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            $headline = isset($defaults['headline']) ? $defaults['headline'] : 'Your Health, Our Priority';
+            $subheadline = isset($defaults['subheadline']) ? substr($defaults['subheadline'], 0, 60) . '...' : 'Quality healthcare services...';
         ?>
             <div class="template-card" data-category="<?php echo esc_attr($theme->category); ?>">
-                <div class="template-preview" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?> 0%, <?php echo esc_attr($theme->secondary_color); ?> 100%);">
-                    <?php if ($theme->preview_image): ?>
-                        <img src="<?php echo esc_url($theme->preview_image); ?>" alt="<?php echo esc_attr($theme->name); ?>">
-                    <?php else: ?>
-                        <div class="template-mockup">
-                            <div class="mockup-nav">
-                                <span class="mockup-logo"><?php echo esc_html(substr($theme->name, 0, 12)); ?></span>
-                                <div class="mockup-menu">
-                                    <span>Home</span>
-                                    <span>About</span>
-                                    <span>Services</span>
-                                </div>
-                            </div>
-                            <div class="mockup-hero" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?>, <?php echo esc_attr($theme->secondary_color); ?>);">
-                                <div class="hero-text">Your Health, Our Priority</div>
-                                <div class="hero-btn" style="background: <?php echo esc_attr($theme->accent_color); ?>;">Book Now</div>
-                            </div>
-                            <div class="mockup-cards">
-                                <div class="m-card"></div>
-                                <div class="m-card"></div>
-                                <div class="m-card"></div>
-                            </div>
-                            <div class="mockup-footer" style="background: <?php echo esc_attr($theme->footer_bg_color); ?>;"></div>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <div class="template-overlay">
-                        <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=edit&id=' . $theme->id); ?>" class="overlay-btn btn-edit">
-                            <span class="dashicons dashicons-edit"></span> Edit Template
-                        </a>
-                        <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=preview&id=' . $theme->id); ?>" class="overlay-btn btn-preview" target="_blank">
-                            <span class="dashicons dashicons-visibility"></span> Preview
-                        </a>
-                        <button class="overlay-btn btn-duplicate" onclick="duplicateTemplate(<?php echo $theme->id; ?>)">
-                            <span class="dashicons dashicons-admin-page"></span> Duplicate
-                        </button>
-                    </div>
-                    
+                <div class="template-preview">
                     <?php if ($theme->is_template): ?>
                         <span class="template-badge">Pre-built</span>
                     <?php endif; ?>
+                    
+                    <!-- Actual Template Preview -->
+                    <div class="live-template-preview" style="--primary: <?php echo esc_attr($theme->primary_color); ?>; --secondary: <?php echo esc_attr($theme->secondary_color); ?>; --accent: <?php echo esc_attr($theme->accent_color); ?>; --bg: <?php echo esc_attr($theme->background_color); ?>; --text: <?php echo esc_attr($theme->text_color); ?>; --header-bg: <?php echo esc_attr($theme->header_bg_color); ?>; --footer-bg: <?php echo esc_attr($theme->footer_bg_color); ?>;">
+                        <!-- Top Bar -->
+                        <div class="prev-topbar">
+                            <span>📞 +1 (555) 123-4567</span>
+                            <span>🚨 Emergency</span>
+                        </div>
+                        <!-- Header -->
+                        <div class="prev-header">
+                            <div class="prev-logo">
+                                <span class="prev-logo-icon"><?php echo $icon; ?></span>
+                                <span class="prev-logo-text"><?php echo esc_html(substr($theme->name, 0, 15)); ?></span>
+                            </div>
+                            <div class="prev-nav">
+                                <span>Home</span>
+                                <span>About</span>
+                                <span>Services</span>
+                                <span>Contact</span>
+                            </div>
+                            <div class="prev-cta-btn">Book Now</div>
+                        </div>
+                        <!-- Hero -->
+                        <div class="prev-hero">
+                            <div class="prev-hero-content">
+                                <h3><?php echo esc_html(substr($headline, 0, 25)); ?></h3>
+                                <p><?php echo esc_html(substr($subheadline, 0, 40)); ?>...</p>
+                                <div class="prev-hero-btns">
+                                    <span class="prev-btn-primary">Get Started</span>
+                                    <span class="prev-btn-secondary">Learn More</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Info Cards -->
+                        <div class="prev-cards">
+                            <div class="prev-card">
+                                <div class="prev-card-icon">🕐</div>
+                                <div class="prev-card-text">
+                                    <strong>24/7 Emergency</strong>
+                                    <span>Always available</span>
+                                </div>
+                            </div>
+                            <div class="prev-card">
+                                <div class="prev-card-icon">📅</div>
+                                <div class="prev-card-text">
+                                    <strong>Appointments</strong>
+                                    <span>Easy booking</span>
+                                </div>
+                            </div>
+                            <div class="prev-card">
+                                <div class="prev-card-icon">🛡️</div>
+                                <div class="prev-card-text">
+                                    <strong>Quality Care</strong>
+                                    <span>Certified doctors</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Services Section -->
+                        <div class="prev-services">
+                            <div class="prev-section-title">Our Services</div>
+                            <div class="prev-services-grid">
+                                <div class="prev-service">
+                                    <div class="prev-service-icon">❤️</div>
+                                    <span>Emergency</span>
+                                </div>
+                                <div class="prev-service">
+                                    <div class="prev-service-icon">🏥</div>
+                                    <span>Surgery</span>
+                                </div>
+                                <div class="prev-service">
+                                    <div class="prev-service-icon">💊</div>
+                                    <span>Medicine</span>
+                                </div>
+                                <div class="prev-service">
+                                    <div class="prev-service-icon">👶</div>
+                                    <span>Pediatrics</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Stats -->
+                        <div class="prev-stats">
+                            <div class="prev-stat">
+                                <strong>50+</strong>
+                                <span>Years</span>
+                            </div>
+                            <div class="prev-stat">
+                                <strong>200+</strong>
+                                <span>Doctors</span>
+                            </div>
+                            <div class="prev-stat">
+                                <strong>100K+</strong>
+                                <span>Patients</span>
+                            </div>
+                        </div>
+                        <!-- Footer -->
+                        <div class="prev-footer">
+                            <div class="prev-footer-cols">
+                                <div class="prev-footer-col">
+                                    <strong>About Us</strong>
+                                    <span>Healthcare excellence...</span>
+                                </div>
+                                <div class="prev-footer-col">
+                                    <strong>Quick Links</strong>
+                                    <span>Home • About • Services</span>
+                                </div>
+                                <div class="prev-footer-col">
+                                    <strong>Contact</strong>
+                                    <span>📍 123 Medical Dr</span>
+                                </div>
+                            </div>
+                            <div class="prev-copyright">© 2024 <?php echo esc_html(substr($theme->name, 0, 15)); ?></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hover Overlay with Buttons -->
+                    <div class="template-overlay">
+                        <div class="overlay-buttons">
+                            <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=edit&id=' . $theme->id); ?>" class="overlay-btn btn-edit">
+                                <span class="dashicons dashicons-edit"></span> Edit
+                            </a>
+                            <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=preview&id=' . $theme->id); ?>" class="overlay-btn btn-preview" target="_blank">
+                                <span class="dashicons dashicons-visibility"></span> Preview
+                            </a>
+                            <button class="overlay-btn btn-duplicate" onclick="duplicateTemplate(<?php echo $theme->id; ?>)">
+                                <span class="dashicons dashicons-admin-page"></span> Duplicate
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="template-info">
                     <div class="template-meta">
                         <span class="template-category" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?>, <?php echo esc_attr($theme->accent_color); ?>);">
-                            <?php echo esc_html($categories[$theme->category] ?? ucfirst($theme->category)); ?>
+                            <?php echo $icon; ?> <?php echo esc_html($categories[$theme->category] ?? ucfirst($theme->category)); ?>
                         </span>
                         <span class="template-pages"><?php echo $page_count; ?> Pages</span>
                     </div>
                     <h3><?php echo esc_html($theme->name); ?></h3>
-                    <p><?php echo esc_html(wp_trim_words($theme->description, 15)); ?></p>
-                    
-                    <div class="template-colors">
-                        <span class="color-dot" style="background: <?php echo esc_attr($theme->primary_color); ?>;" title="Primary"></span>
-                        <span class="color-dot" style="background: <?php echo esc_attr($theme->secondary_color); ?>;" title="Secondary"></span>
-                        <span class="color-dot" style="background: <?php echo esc_attr($theme->accent_color); ?>;" title="Accent"></span>
-                        <span class="color-dot" style="background: <?php echo esc_attr($theme->background_color); ?>; border: 1px solid #ddd;" title="Background"></span>
-                    </div>
+                    <p><?php echo esc_html(wp_trim_words($theme->description, 12)); ?></p>
                     
                     <?php if (!empty($features)): ?>
                     <div class="template-features">
@@ -320,7 +419,7 @@ if ($edit_mode) {
                             <span class="feature-tag"><?php echo esc_html($feature); ?></span>
                         <?php endforeach; ?>
                         <?php if (count($features) > 3): ?>
-                            <span class="feature-more">+<?php echo count($features) - 3; ?> more</span>
+                            <span class="feature-more">+<?php echo count($features) - 3; ?></span>
                         <?php endif; ?>
                     </div>
                     <?php endif; ?>
@@ -418,7 +517,7 @@ if ($edit_mode) {
 /* Templates Grid */
 .templates-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
     gap: 30px;
 }
 
@@ -436,99 +535,347 @@ if ($edit_mode) {
 .template-card.hidden { display: none; }
 
 .template-preview {
-    height: 240px;
+    height: 420px;
     position: relative;
     overflow: hidden;
+    background: #f8fafc;
 }
-.template-preview img {
+
+/* Live Template Preview - Mini Website */
+.live-template-preview {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    font-size: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg, #f0fdfa);
 }
 
-/* Mockup Styles */
-.template-mockup {
-    width: 90%;
-    height: 220px;
-    margin: 10px auto;
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-}
-.mockup-nav {
-    height: 30px;
+/* Top Bar */
+.prev-topbar {
+    background: var(--primary);
+    color: #fff;
+    padding: 3px 8px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 0 12px;
-    border-bottom: 1px solid #eee;
-    font-size: 9px;
+    font-size: 5px;
 }
-.mockup-logo { font-weight: 700; color: #0891b2; }
-.mockup-menu { display: flex; gap: 10px; color: #64748b; }
-.mockup-hero {
-    height: 80px;
+
+/* Header */
+.prev-header {
+    background: var(--header-bg, #fff);
+    padding: 6px 10px;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    color: #fff;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
 }
-.hero-text { font-size: 11px; font-weight: 700; margin-bottom: 8px; }
-.hero-btn { font-size: 8px; padding: 4px 12px; border-radius: 12px; }
-.mockup-cards {
+.prev-logo {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.prev-logo-icon {
+    font-size: 10px;
+}
+.prev-logo-text {
+    font-weight: 700;
+    font-size: 7px;
+    color: var(--primary);
+}
+.prev-nav {
     display: flex;
     gap: 8px;
-    padding: 12px;
+    font-size: 5px;
+    color: var(--text, #333);
 }
-.m-card { flex: 1; height: 50px; background: #f1f5f9; border-radius: 6px; }
-.mockup-footer { height: 25px; margin-top: auto; }
+.prev-cta-btn {
+    background: var(--primary);
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 5px;
+    font-weight: 600;
+}
 
-.template-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
+/* Hero */
+.prev-hero {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 20px 15px;
+    color: #fff;
+    text-align: center;
+}
+.prev-hero h3 {
+    font-size: 10px;
+    margin: 0 0 4px 0;
+    font-weight: 700;
+}
+.prev-hero p {
+    font-size: 6px;
+    opacity: 0.9;
+    margin: 0 0 8px 0;
+}
+.prev-hero-btns {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+.prev-btn-primary {
+    background: #fff;
+    color: var(--primary);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 5px;
+    font-weight: 600;
+}
+.prev-btn-secondary {
+    background: transparent;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 5px;
+    border: 1px solid rgba(255,255,255,0.5);
+}
+
+/* Info Cards */
+.prev-cards {
+    display: flex;
+    gap: 6px;
+    padding: 0 10px;
+    margin-top: -10px;
+    position: relative;
+    z-index: 5;
+}
+.prev-card {
+    flex: 1;
+    background: #fff;
+    border-radius: 6px;
+    padding: 8px 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.prev-card-icon {
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, var(--primary), var(--accent, var(--primary)));
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    flex-shrink: 0;
+}
+.prev-card-text {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    opacity: 0;
-    transition: opacity 0.3s;
 }
-.template-card:hover .template-overlay { opacity: 1; }
+.prev-card-text strong {
+    font-size: 5px;
+    color: var(--text, #333);
+}
+.prev-card-text span {
+    font-size: 4px;
+    color: #666;
+}
+
+/* Services Section */
+.prev-services {
+    padding: 12px 10px;
+    background: var(--bg, #f0fdfa);
+}
+.prev-section-title {
+    text-align: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+.prev-services-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+.prev-service {
+    background: #fff;
+    border-radius: 6px;
+    padding: 8px 4px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.prev-service-icon {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 4px;
+    font-size: 9px;
+}
+.prev-service span {
+    font-size: 5px;
+    color: var(--text, #333);
+}
+
+/* Stats */
+.prev-stats {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-around;
+    color: #fff;
+    text-align: center;
+}
+.prev-stat strong {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+}
+.prev-stat span {
+    font-size: 5px;
+    opacity: 0.9;
+}
+
+/* Footer */
+.prev-footer {
+    background: var(--footer-bg, #0f172a);
+    padding: 10px;
+    color: #fff;
+    margin-top: auto;
+}
+.prev-footer-cols {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+.prev-footer-col {
+    flex: 1;
+}
+.prev-footer-col strong {
+    display: block;
+    font-size: 5px;
+    margin-bottom: 2px;
+    position: relative;
+    padding-bottom: 2px;
+}
+.prev-footer-col strong::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 12px;
+    height: 1px;
+    background: var(--primary);
+}
+.prev-footer-col span {
+    font-size: 4px;
+    opacity: 0.7;
+    display: block;
+    line-height: 1.4;
+}
+.prev-copyright {
+    text-align: center;
+    font-size: 4px;
+    opacity: 0.5;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 5px;
+}
+
+/* Template Badge */
+.template-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(255,255,255,0.95);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #0891b2;
+    z-index: 20;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Overlay - FIXED */
+.template-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 15;
+}
+.template-card:hover .template-overlay { 
+    opacity: 1; 
+    visibility: visible;
+}
+
+.overlay-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+}
 
 .overlay-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 12px 28px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
-    font-weight: 500;
-    min-width: 150px;
-    justify-content: center;
-    text-decoration: none;
-}
-.btn-edit { background: #fff; color: #333; }
-.btn-preview { background: #0891b2; color: #fff; }
-.btn-duplicate { background: transparent; color: #fff; border: 2px solid #fff !important; }
-
-.template-badge {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    background: rgba(255,255,255,0.95);
-    padding: 4px 12px;
-    border-radius: 15px;
-    font-size: 11px;
     font-weight: 600;
-    color: #0891b2;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    min-width: 160px;
+}
+.overlay-btn .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+.btn-edit { 
+    background: #fff; 
+    color: #333; 
+}
+.btn-edit:hover {
+    background: #f8fafc;
+    transform: scale(1.05);
+}
+.btn-preview { 
+    background: #0891b2; 
+    color: #fff; 
+}
+.btn-preview:hover {
+    background: #0e7490;
+    transform: scale(1.05);
+}
+.btn-duplicate { 
+    background: transparent; 
+    color: #fff; 
+    border: 2px solid #fff !important; 
+}
+.btn-duplicate:hover {
+    background: rgba(255,255,255,0.1);
+    transform: scale(1.05);
 }
 
-.template-info { padding: 25px; }
+/* Template Info */
+.template-info { padding: 20px; }
 .template-meta {
     display: flex;
     justify-content: space-between;
@@ -538,25 +885,16 @@ if ($edit_mode) {
 .template-category {
     font-size: 11px;
     color: #fff;
-    padding: 4px 12px;
-    border-radius: 15px;
+    padding: 5px 14px;
+    border-radius: 20px;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 .template-pages { font-size: 13px; color: #64748b; }
-.template-info h3 { margin: 0 0 8px 0; font-size: 18px; }
+.template-info h3 { margin: 0 0 8px 0; font-size: 18px; color: #1e293b; }
 .template-info p { margin: 0 0 15px 0; color: #64748b; font-size: 14px; line-height: 1.5; }
-
-.template-colors {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-}
-.color-dot {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
 
 .template-features {
     display: flex;
@@ -709,7 +1047,6 @@ if ($edit_mode) {
 .add-feature-row input { flex: 1; }
 
 /* Sidebar */
-.editor-sidebar { }
 .sidebar-card {
     background: #fff;
     border-radius: 12px;
@@ -760,40 +1097,6 @@ if ($edit_mode) {
 }
 input:checked + .slider { background-color: #10b981; }
 input:checked + .slider:before { transform: translateX(24px); }
-
-/* Preview Mockup */
-.preview-mockup { }
-.mockup-screen {
-    width: 100%;
-    height: 200px;
-    background: #f8fafc;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #e2e8f0;
-}
-.mockup-screen .mockup-header {
-    height: 25px;
-    background: #fff;
-    border-bottom: 1px solid #eee;
-}
-.mockup-screen .mockup-hero {
-    height: 60px;
-}
-.mockup-screen .mockup-content {
-    display: flex;
-    gap: 8px;
-    padding: 10px;
-}
-.mockup-screen .mockup-card {
-    flex: 1;
-    height: 40px;
-    background: #e2e8f0;
-    border-radius: 4px;
-}
-.mockup-screen .mockup-footer {
-    height: 25px;
-    margin-top: auto;
-}
 
 /* Buttons */
 .btn {
@@ -908,13 +1211,11 @@ jQuery(document).ready(function($) {
     // Color Picker Sync
     $('input[type="color"]').on('input', function() {
         $(this).siblings('.color-hex').val($(this).val());
-        updatePreviewMockup();
     });
     $('.color-hex').on('input', function() {
         const val = $(this).val();
         if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
             $(this).siblings('input[type="color"]').val(val);
-            updatePreviewMockup();
         }
     });
     
@@ -980,22 +1281,6 @@ function addFeature() {
 
 function removeFeature(btn) {
     btn.closest('.feature-tag').remove();
-}
-
-function updatePreviewMockup() {
-    const primary = document.querySelector('input[name="primary_color"]').value;
-    const secondary = document.querySelector('input[name="secondary_color"]').value;
-    const footer = document.querySelector('input[name="footer_bg_color"]')?.value || '#0f172a';
-    
-    const hero = document.querySelector('.mockup-screen .mockup-hero');
-    if (hero) {
-        hero.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
-    }
-    
-    const footerEl = document.querySelector('.mockup-screen .mockup-footer');
-    if (footerEl) {
-        footerEl.style.background = footer;
-    }
 }
 
 function duplicateTemplate(id) {
