@@ -87,7 +87,7 @@ $category_data = array(
         <form id="theme-edit-form">
             <input type="hidden" name="id" value="<?php echo $edit_theme->id; ?>">
             <input type="hidden" name="action" value="spfm_save_theme">
-            <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('spfm_ajax'); ?>">
+            <input type="hidden" name="nonce" value="<?php echo wp_create_nonce('spfm_nonce'); ?>">
             
             <!-- TAB: Settings -->
             <div class="tab-content active" id="tab-settings">
@@ -545,7 +545,7 @@ $category_data = array(
                                                             <?php elseif ($field['type'] === 'url'): ?>
                                                                 <div class="url-input-group">
                                                                     <span class="url-icon">🔗</span>
-                                                                    <input type="url" name="content[page_<?php echo $pageIndex; ?>][<?php echo $sectionIndex; ?>][<?php echo $field['name']; ?>]" value="<?php echo esc_attr($fieldValue); ?>" placeholder="https://...">
+                                                                    <input type="text" name="content[page_<?php echo $pageIndex; ?>][<?php echo $sectionIndex; ?>][<?php echo $field['name']; ?>]" value="<?php echo esc_attr($fieldValue); ?>" placeholder="/page or #section or https://...">
                                                                 </div>
                                                             <?php elseif ($field['type'] === 'image'): ?>
                                                                 <div class="image-upload">
@@ -1272,6 +1272,11 @@ input:checked + .slider:before { transform: translateX(20px); }
 </style>
 
 <script>
+var spfm_ajax = {
+    ajax_url: '<?php echo admin_url('admin-ajax.php'); ?>',
+    nonce: '<?php echo wp_create_nonce('spfm_nonce'); ?>'
+};
+
 jQuery(document).ready(function($) {
     // Tab switching
     $('.tab-btn').on('click', function() {
