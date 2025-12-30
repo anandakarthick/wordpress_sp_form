@@ -59,11 +59,11 @@ class SPFM_Admin {
             array($this, 'render_themes')
         );
         
-        // Order Forms
+        // Forms
         add_submenu_page(
             'spfm-dashboard',
-            'Order Forms',
-            'Order Forms',
+            'Forms',
+            'Forms',
             'manage_options',
             'spfm-forms',
             array($this, 'render_forms')

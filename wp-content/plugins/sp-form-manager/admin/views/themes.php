@@ -9,12 +9,25 @@ if (!defined('ABSPATH')) {
 }
 
 $themes_handler = SPFM_Themes::get_instance();
-$themes = $themes_handler->get_all();
 $categories = $themes_handler->get_categories();
 $fonts = $themes_handler->get_fonts();
 
+// Check if we're in preview mode
+$preview_mode = isset($_GET['action']) && $_GET['action'] === 'preview' && isset($_GET['id']);
+$edit_mode = isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id']);
+
+if ($preview_mode) {
+    $preview_theme = $themes_handler->get_theme_complete(intval($_GET['id']));
+    if ($preview_theme) {
+        include SPFM_PLUGIN_PATH . 'admin/views/template-preview.php';
+        return;
+    }
+}
+
+$themes = $themes_handler->get_all();
+
 $edit_theme = null;
-if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
+if ($edit_mode) {
     $edit_theme = $themes_handler->get_theme_complete(intval($_GET['id']));
 }
 ?>
@@ -57,29 +70,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
                         <div class="form-group">
                             <label>Description</label>
                             <textarea name="description" rows="3"><?php echo esc_textarea($edit_theme->description); ?></textarea>
-                        </div>
-                    </div>
-                    
-                    <!-- Preview Image -->
-                    <div class="editor-section">
-                        <h3><span class="dashicons dashicons-format-image"></span> Preview Image</h3>
-                        <div class="image-upload-area">
-                            <div class="image-preview" id="preview-container">
-                                <?php if ($edit_theme->preview_image): ?>
-                                    <img src="<?php echo esc_url($edit_theme->preview_image); ?>" alt="Preview">
-                                    <button type="button" class="remove-image" onclick="removePreviewImage()">×</button>
-                                <?php else: ?>
-                                    <div class="no-image">
-                                        <span class="dashicons dashicons-format-image"></span>
-                                        <p>No preview image</p>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                            <input type="hidden" name="preview_image" id="preview_image" value="<?php echo esc_url($edit_theme->preview_image); ?>">
-                            <button type="button" class="btn btn-secondary" id="upload-preview-btn">
-                                <span class="dashicons dashicons-upload"></span> Upload Image
-                            </button>
-                            <p class="hint">Recommended size: 800x600px</p>
                         </div>
                     </div>
                     
@@ -159,50 +149,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
                         </div>
                     </div>
                     
-                    <!-- Template Pages -->
-                    <div class="editor-section">
-                        <h3><span class="dashicons dashicons-admin-page"></span> Template Pages</h3>
-                        <div class="pages-accordion">
-                            <?php if (!empty($edit_theme->pages)): ?>
-                                <?php foreach ($edit_theme->pages as $page): ?>
-                                    <div class="page-item">
-                                        <div class="page-header" onclick="togglePageAccordion(this)">
-                                            <span class="dashicons <?php echo esc_attr($page->page_icon); ?>"></span>
-                                            <strong><?php echo esc_html($page->page_name); ?></strong>
-                                            <?php if ($page->is_required): ?>
-                                                <span class="required-badge">Required</span>
-                                            <?php endif; ?>
-                                            <span class="toggle-icon dashicons dashicons-arrow-down-alt2"></span>
-                                        </div>
-                                        <div class="page-content">
-                                            <p class="page-description"><?php echo esc_html($page->page_description); ?></p>
-                                            <?php if (!empty($page->sections)): ?>
-                                                <div class="sections-list">
-                                                    <h5>Sections:</h5>
-                                                    <?php foreach ($page->sections as $section): ?>
-                                                        <div class="section-item">
-                                                            <span class="section-name"><?php echo esc_html($section->section_name); ?></span>
-                                                            <span class="section-type"><?php echo esc_html($section->section_type); ?></span>
-                                                            <?php if (!empty($section->fields)): ?>
-                                                                <div class="section-fields">
-                                                                    <?php foreach ($section->fields as $field): ?>
-                                                                        <span class="field-tag"><?php echo esc_html($field['label']); ?></span>
-                                                                    <?php endforeach; ?>
-                                                                </div>
-                                                            <?php endif; ?>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <p class="no-pages">No pages configured for this template.</p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    
                     <!-- Features -->
                     <div class="editor-section">
                         <h3><span class="dashicons dashicons-star-filled"></span> Features</h3>
@@ -243,6 +189,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
                         <button type="submit" class="btn btn-primary btn-block">
                             <span class="dashicons dashicons-saved"></span> Save Changes
                         </button>
+                        <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=preview&id=' . $edit_theme->id); ?>" class="btn btn-secondary btn-block" target="_blank" style="margin-top: 10px; text-align: center;">
+                            <span class="dashicons dashicons-visibility"></span> Preview Template
+                        </a>
                     </div>
                     
                     <div class="sidebar-card">
@@ -335,9 +284,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
                         <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=edit&id=' . $theme->id); ?>" class="overlay-btn btn-edit">
                             <span class="dashicons dashicons-edit"></span> Edit Template
                         </a>
-                        <button class="overlay-btn btn-preview" onclick="previewTemplate(<?php echo $theme->id; ?>)">
+                        <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=preview&id=' . $theme->id); ?>" class="overlay-btn btn-preview" target="_blank">
                             <span class="dashicons dashicons-visibility"></span> Preview
-                        </button>
+                        </a>
                         <button class="overlay-btn btn-duplicate" onclick="duplicateTemplate(<?php echo $theme->id; ?>)">
                             <span class="dashicons dashicons-admin-page"></span> Duplicate
                         </button>
@@ -425,19 +374,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
                 <button type="submit" class="btn btn-primary">Create Template</button>
             </div>
         </form>
-    </div>
-</div>
-
-<!-- Preview Modal -->
-<div class="spfm-modal" id="preview-modal">
-    <div class="modal-content modal-xl">
-        <div class="modal-header">
-            <h2><span class="dashicons dashicons-visibility"></span> Template Preview</h2>
-            <button class="modal-close" onclick="closeModal('preview-modal')">&times;</button>
-        </div>
-        <div class="modal-body" id="preview-content">
-            <div class="loading">Loading preview...</div>
-        </div>
     </div>
 </div>
 
@@ -739,95 +675,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
     padding: 8px 12px;
 }
 
-/* Image Upload */
-.image-upload-area { text-align: center; }
-.image-preview {
-    width: 200px;
-    height: 150px;
-    margin: 0 auto 15px;
-    border: 2px dashed #e2e8f0;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-}
-.image-preview img { width: 100%; height: 100%; object-fit: cover; }
-.image-preview .remove-image {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 24px;
-    height: 24px;
-    background: #ef4444;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-}
-.no-image { text-align: center; color: #94a3b8; }
-.no-image .dashicons { font-size: 40px; width: 40px; height: 40px; }
-
-/* Pages Accordion */
-.pages-accordion { }
-.page-item {
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    overflow: hidden;
-}
-.page-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 15px;
-    background: #f8fafc;
-    cursor: pointer;
-}
-.page-header .dashicons { color: #0891b2; }
-.page-header .required-badge {
-    font-size: 10px;
-    background: #fee2e2;
-    color: #ef4444;
-    padding: 2px 8px;
-    border-radius: 10px;
-}
-.page-header .toggle-icon { margin-left: auto; }
-.page-content {
-    padding: 15px;
-    display: none;
-    border-top: 1px solid #e2e8f0;
-}
-.page-item.open .page-content { display: block; }
-.page-description { color: #64748b; margin-bottom: 15px; }
-.sections-list h5 { font-size: 12px; color: #94a3b8; margin: 0 0 10px 0; }
-.section-item {
-    background: #f8fafc;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 8px;
-}
-.section-name { font-weight: 600; margin-right: 10px; }
-.section-type {
-    font-size: 11px;
-    background: #e2e8f0;
-    padding: 2px 8px;
-    border-radius: 10px;
-}
-.section-fields {
-    margin-top: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-.section-fields .field-tag {
-    font-size: 10px;
-    background: #fef3c7;
-    padding: 2px 8px;
-    border-radius: 8px;
-}
-
 /* Features Editor */
 .features-editor {
     display: flex;
@@ -959,6 +806,7 @@ input:checked + .slider:before { transform: translateX(24px); }
     cursor: pointer;
     border: none;
     transition: all 0.3s;
+    text-decoration: none;
 }
 .btn-primary { background: #0891b2; color: #fff; }
 .btn-primary:hover { background: #0e7490; }
@@ -989,7 +837,6 @@ input:checked + .slider:before { transform: translateX(24px); }
     flex-direction: column;
 }
 .modal-lg { max-width: 600px; }
-.modal-xl { max-width: 1200px; }
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -1024,7 +871,6 @@ input:checked + .slider:before { transform: translateX(24px); }
 }
 
 .required { color: #ef4444; }
-.loading { text-align: center; padding: 40px; color: #64748b; }
 
 @media (max-width: 1024px) {
     .editor-layout { grid-template-columns: 1fr; }
@@ -1072,28 +918,6 @@ jQuery(document).ready(function($) {
         }
     });
     
-    // Upload Preview Image
-    $('#upload-preview-btn').on('click', function(e) {
-        e.preventDefault();
-        
-        const frame = wp.media({
-            title: 'Select Preview Image',
-            button: { text: 'Use this image' },
-            multiple: false
-        });
-        
-        frame.on('select', function() {
-            const attachment = frame.state().get('selection').first().toJSON();
-            $('#preview_image').val(attachment.url);
-            $('#preview-container').html(`
-                <img src="${attachment.url}" alt="Preview">
-                <button type="button" class="remove-image" onclick="removePreviewImage()">×</button>
-            `);
-        });
-        
-        frame.open();
-    });
-    
     // Theme Edit Form Submit
     $('#theme-edit-form').on('submit', function(e) {
         e.preventDefault();
@@ -1135,21 +959,6 @@ function openCreateModal() {
 
 function closeModal(id) {
     document.getElementById(id).classList.remove('active');
-}
-
-function removePreviewImage() {
-    document.getElementById('preview_image').value = '';
-    document.getElementById('preview-container').innerHTML = `
-        <div class="no-image">
-            <span class="dashicons dashicons-format-image"></span>
-            <p>No preview image</p>
-        </div>
-    `;
-}
-
-function togglePageAccordion(header) {
-    const pageItem = header.closest('.page-item');
-    pageItem.classList.toggle('open');
 }
 
 function addFeature() {
@@ -1204,34 +1013,4 @@ function duplicateTemplate(id) {
         });
     }
 }
-
-function previewTemplate(id) {
-    document.getElementById('preview-modal').classList.add('active');
-    document.getElementById('preview-content').innerHTML = '<div class="loading">Loading preview...</div>';
-    
-    // Load preview content via AJAX
-    jQuery.post(spfm_ajax.ajax_url, {
-        action: 'spfm_get_theme',
-        nonce: spfm_ajax.nonce,
-        id: id
-    }, function(response) {
-        if (response.success) {
-            const theme = response.data.theme;
-            document.getElementById('preview-content').innerHTML = `
-                <div style="text-align: center;">
-                    <div style="background: linear-gradient(135deg, ${theme.primary_color}, ${theme.secondary_color}); border-radius: 12px; padding: 40px; color: #fff; margin-bottom: 20px;">
-                        <h2 style="margin: 0 0 10px;">${theme.name}</h2>
-                        <p style="opacity: 0.9; margin: 0;">${theme.description}</p>
-                    </div>
-                    <p>This is a preview placeholder. The actual website preview would render here.</p>
-                </div>
-            `;
-        }
-    });
-}
 </script>
-
-<?php
-// Enqueue media for upload
-wp_enqueue_media();
-?>

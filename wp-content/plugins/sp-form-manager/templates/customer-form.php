@@ -1,6 +1,7 @@
 <?php
 /**
  * Customer Form Template - Hospital Website Template Selector
+ * Full Content Customization Support
  */
 
 if (!defined('ABSPATH')) {
@@ -20,7 +21,7 @@ if (empty($theme_ids)) {
 
 $available_themes = $themes_handler->get_by_ids($theme_ids);
 
-// Get complete theme data
+// Get complete theme data with pages and sections
 $themes_complete = array();
 foreach ($available_themes as $theme) {
     $themes_complete[$theme->id] = $themes_handler->get_theme_complete($theme->id);
@@ -37,14 +38,12 @@ $allow_color_customization = $form->allow_color_customization;
     <title><?php echo esc_html($form->name); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Nunito:wght@400;600;700&family=Open+Sans:wght@400;600&family=Montserrat:wght@400;600;700&family=Quicksand:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Lato:wght@400;700&family=Playfair+Display:wght@400;600;700&family=Oswald:wght@400;500;600&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #0891b2;
             --secondary: #0e7490;
             --accent: #06b6d4;
-            --bg: #f0fdfa;
-            --text: #1e293b;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -72,7 +71,6 @@ $allow_color_customization = $form->allow_color_customization;
             opacity: 0.9;
             max-width: 600px;
             margin: 0 auto;
-            font-size: 16px;
         }
         
         /* Progress Steps */
@@ -112,7 +110,6 @@ $allow_color_customization = $form->allow_color_customization;
             justify-content: center;
             background: #e2e8f0;
             font-weight: 700;
-            font-size: 16px;
         }
         .step.active .step-number {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -151,12 +148,9 @@ $allow_color_customization = $form->allow_color_customization;
             color: #1e293b;
             margin-bottom: 10px;
         }
-        .section-title p {
-            color: #64748b;
-            font-size: 16px;
-        }
+        .section-title p { color: #64748b; }
         
-        /* Theme Selection */
+        /* Theme Selection Grid */
         .themes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -170,7 +164,6 @@ $allow_color_customization = $form->allow_color_customization;
             cursor: pointer;
             transition: all 0.4s ease;
             border: 3px solid transparent;
-            position: relative;
         }
         .theme-card:hover {
             transform: translateY(-8px);
@@ -203,16 +196,8 @@ $allow_color_customization = $form->allow_color_customization;
             border-bottom: 1px solid #eee;
             font-size: 10px;
         }
-        .mockup-logo {
-            font-weight: 700;
-            color: inherit;
-        }
-        .mockup-nav {
-            display: flex;
-            gap: 12px;
-            font-size: 9px;
-            color: #64748b;
-        }
+        .mockup-logo { font-weight: 700; }
+        .mockup-nav { display: flex; gap: 12px; font-size: 9px; color: #64748b; }
         .mockup-hero {
             height: 80px;
             display: flex;
@@ -223,30 +208,11 @@ $allow_color_customization = $form->allow_color_customization;
             text-align: center;
             padding: 10px;
         }
-        .mockup-hero h3 {
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        .mockup-hero p {
-            font-size: 8px;
-            opacity: 0.9;
-        }
-        .mockup-content {
-            padding: 12px;
-            display: flex;
-            gap: 8px;
-        }
-        .mockup-card {
-            flex: 1;
-            height: 45px;
-            background: #f1f5f9;
-            border-radius: 6px;
-        }
-        .mockup-footer {
-            height: 25px;
-            margin-top: auto;
-        }
+        .mockup-hero h3 { font-size: 12px; font-weight: 700; margin-bottom: 5px; }
+        .mockup-hero p { font-size: 8px; opacity: 0.9; }
+        .mockup-content { padding: 12px; display: flex; gap: 8px; }
+        .mockup-card { flex: 1; height: 45px; background: #f1f5f9; border-radius: 6px; }
+        .mockup-footer { height: 25px; }
         .select-badge {
             position: absolute;
             top: 15px;
@@ -266,38 +232,20 @@ $allow_color_customization = $form->allow_color_customization;
             background: var(--primary);
             color: #fff;
         }
-        .theme-info {
-            padding: 25px;
-        }
+        .theme-info { padding: 25px; }
         .theme-category {
             display: inline-block;
             font-size: 11px;
             font-weight: 600;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: #fff;
             padding: 4px 12px;
             border-radius: 20px;
             margin-bottom: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
-        .theme-info h3 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #1e293b;
-        }
-        .theme-info p {
-            color: #64748b;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-        .theme-features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
+        .theme-info h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #1e293b; }
+        .theme-info p { color: #64748b; font-size: 14px; line-height: 1.6; margin-bottom: 15px; }
+        .theme-features { display: flex; flex-wrap: wrap; gap: 6px; }
         .theme-feature {
             font-size: 11px;
             background: #f1f5f9;
@@ -306,7 +254,7 @@ $allow_color_customization = $form->allow_color_customization;
             color: #475569;
         }
         
-        /* Content Editor */
+        /* Content Editor - Step 2 */
         .content-editor {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -349,14 +297,8 @@ $allow_color_customization = $form->allow_color_customization;
             border-color: var(--primary);
             box-shadow: 0 4px 15px rgba(8,145,178,0.15);
         }
-        .page-nav-item.completed {
-            background: #ecfdf5;
-            border-color: #10b981;
-        }
         .page-nav-item i { font-size: 18px; color: var(--primary); }
         .page-nav-item span { flex: 1; font-weight: 500; }
-        .page-nav-item .check { color: #10b981; display: none; }
-        .page-nav-item.completed .check { display: block; }
         
         /* Page Content Editor */
         .page-content-editor {
@@ -367,12 +309,12 @@ $allow_color_customization = $form->allow_color_customization;
             display: none;
         }
         .page-content-editor.active { display: block; }
-        .page-header {
-            margin-bottom: 35px;
-            padding-bottom: 25px;
+        .page-header-bar {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
             border-bottom: 2px solid #f1f5f9;
         }
-        .page-header h2 {
+        .page-header-bar h2 {
             font-size: 24px;
             font-weight: 700;
             color: #1e293b;
@@ -381,29 +323,57 @@ $allow_color_customization = $form->allow_color_customization;
             align-items: center;
             gap: 12px;
         }
-        .page-header h2 i { color: var(--primary); }
-        .page-header p { color: #64748b; }
+        .page-header-bar h2 i { color: var(--primary); }
+        .page-header-bar p { color: #64748b; margin: 0; }
         
-        /* Section Card */
+        /* Section Cards */
         .section-card {
             background: #f8fafc;
             border-radius: 16px;
-            padding: 30px;
+            padding: 25px;
             margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
         }
-        .section-card h4 {
-            font-size: 18px;
+        .section-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        .section-card-header h4 {
+            font-size: 16px;
             font-weight: 700;
             color: var(--primary);
-            margin-bottom: 25px;
             display: flex;
             align-items: center;
             gap: 10px;
+            margin: 0;
         }
+        .section-toggle {
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+        .section-card.collapsed .section-toggle { transform: rotate(-90deg); }
+        .section-card.collapsed .section-card-body { display: none; }
         
         /* Form Fields */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-row.three-col {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
         .form-group {
-            margin-bottom: 22px;
+            margin-bottom: 20px;
         }
         .form-group label {
             display: block;
@@ -413,6 +383,11 @@ $allow_color_customization = $form->allow_color_customization;
             color: #334155;
         }
         .form-group label .required { color: #ef4444; }
+        .form-group label .hint {
+            font-weight: 400;
+            color: #94a3b8;
+            font-size: 12px;
+        }
         .form-control {
             width: 100%;
             padding: 14px 18px;
@@ -428,93 +403,113 @@ $allow_color_customization = $form->allow_color_customization;
             box-shadow: 0 0 0 4px rgba(8,145,178,0.1);
         }
         .form-control::placeholder { color: #94a3b8; }
-        .form-hint {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 6px;
-        }
+        textarea.form-control { resize: vertical; min-height: 100px; }
         
         /* Image Upload */
-        .image-upload {
+        .image-upload-box {
             border: 2px dashed #cbd5e1;
             border-radius: 12px;
-            padding: 40px 20px;
+            padding: 30px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
             background: #fff;
+            position: relative;
         }
-        .image-upload:hover {
+        .image-upload-box:hover {
             border-color: var(--primary);
             background: #f0fdfa;
         }
-        .image-upload i {
-            font-size: 48px;
-            color: #cbd5e1;
-            margin-bottom: 15px;
+        .image-upload-box.has-image {
+            padding: 10px;
+            border-style: solid;
+            border-color: var(--primary);
         }
-        .image-upload p { color: #64748b; }
-        .image-upload input { display: none; }
-        .image-preview {
-            max-width: 200px;
-            max-height: 150px;
-            margin-top: 15px;
+        .image-upload-box i {
+            font-size: 40px;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+        }
+        .image-upload-box p { color: #64748b; margin: 0; font-size: 14px; }
+        .image-upload-box input[type="file"] { display: none; }
+        .image-upload-box .preview-img {
+            max-width: 100%;
+            max-height: 200px;
             border-radius: 8px;
         }
-        
-        /* Repeater */
-        .repeater-container {
-            border: 2px dashed #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
-            background: #fff;
-        }
-        .repeater-item {
-            background: #f8fafc;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            position: relative;
-        }
-        .repeater-item .remove-item {
+        .image-upload-box .remove-image {
             position: absolute;
             top: 10px;
             right: 10px;
-            width: 28px;
-            height: 28px;
-            background: #fee2e2;
-            color: #ef4444;
+            width: 30px;
+            height: 30px;
+            background: #ef4444;
+            color: #fff;
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 16px;
+            display: none;
+        }
+        .image-upload-box.has-image .remove-image { display: flex; align-items: center; justify-content: center; }
+        .image-upload-box.has-image i,
+        .image-upload-box.has-image p { display: none; }
+        
+        /* Repeater Fields */
+        .repeater-container {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        .repeater-item {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            position: relative;
+        }
+        .repeater-item:last-child { border-bottom: none; }
+        .repeater-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .repeater-item-title {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .remove-repeater-item {
+            width: 32px;
+            height: 32px;
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .add-repeater-item {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 14px;
-            background: #f1f5f9;
+            padding: 15px;
+            background: #f8fafc;
             border: none;
-            border-radius: 10px;
             cursor: pointer;
             width: 100%;
             font-weight: 600;
-            color: #475569;
+            color: var(--primary);
             transition: all 0.3s;
         }
-        .add-repeater-item:hover {
-            background: #e2e8f0;
-            color: var(--primary);
-        }
+        .add-repeater-item:hover { background: #f1f5f9; }
         
         /* Color Customization */
         .color-customization {
             background: #fff;
             border-radius: 20px;
             padding: 35px;
-            margin-bottom: 30px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.08);
         }
         .color-customization h3 {
@@ -527,7 +522,7 @@ $allow_color_customization = $form->allow_color_customization;
         }
         .color-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 25px;
         }
         .color-picker-group { text-align: center; }
@@ -538,7 +533,11 @@ $allow_color_customization = $form->allow_color_customization;
             font-weight: 600;
             color: #334155;
         }
-        .color-picker-group input[type="color"] {
+        .color-picker-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .color-picker-wrapper input[type="color"] {
             width: 70px;
             height: 50px;
             border: none;
@@ -546,16 +545,17 @@ $allow_color_customization = $form->allow_color_customization;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .color-picker-group .hint {
-            font-size: 11px;
-            color: #94a3b8;
+        .color-hex {
+            display: block;
+            font-size: 12px;
+            color: #64748b;
             margin-top: 8px;
         }
         
-        /* Preview Container */
+        /* Preview */
         .preview-container {
             display: grid;
-            grid-template-columns: 280px 1fr;
+            grid-template-columns: 300px 1fr;
             gap: 30px;
         }
         .preview-sidebar {
@@ -568,6 +568,7 @@ $allow_color_customization = $form->allow_color_customization;
             border-radius: 16px;
             padding: 25px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
         }
         .preview-controls h4 {
             font-size: 14px;
@@ -590,10 +591,9 @@ $allow_color_customization = $form->allow_color_customization;
             font-weight: 500;
             transition: all 0.3s;
         }
-        .preview-page-btn.active {
-            background: var(--primary);
-            color: #fff;
-        }
+        .preview-page-btn.active { background: var(--primary); color: #fff; }
+        .customer-info-form .form-group { margin-bottom: 15px; }
+        
         .preview-main {
             background: #e2e8f0;
             border-radius: 16px;
@@ -657,10 +657,7 @@ $allow_color_customization = $form->allow_color_customization;
             transition: all 0.3s;
             border: none;
         }
-        .btn-prev {
-            background: #f1f5f9;
-            color: #475569;
-        }
+        .btn-prev { background: #f1f5f9; color: #475569; }
         .btn-prev:hover { background: #e2e8f0; }
         .btn-next {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -674,7 +671,6 @@ $allow_color_customization = $form->allow_color_customization;
             padding: 18px 45px;
             font-size: 18px;
         }
-        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(16,185,129,0.3); }
         
         /* Success */
         .success-container {
@@ -697,27 +693,21 @@ $allow_color_customization = $form->allow_color_customization;
             margin: 0 auto 30px;
         }
         .success-icon i { font-size: 60px; color: #fff; }
-        .success-container h2 {
-            color: #10b981;
-            font-size: 32px;
-            margin-bottom: 15px;
-        }
-        .success-container p {
-            color: #64748b;
-            font-size: 18px;
-            line-height: 1.7;
-        }
+        .success-container h2 { color: #10b981; font-size: 32px; margin-bottom: 15px; }
+        .success-container p { color: #64748b; font-size: 18px; line-height: 1.7; }
         
         /* Responsive */
         @media (max-width: 992px) {
             .content-editor, .preview-container { grid-template-columns: 1fr; }
             .pages-sidebar, .preview-sidebar { position: static; }
-            .steps-container { gap: 20px; }
+            .form-row { grid-template-columns: 1fr; }
+            .form-row.three-col { grid-template-columns: 1fr; }
         }
         @media (max-width: 600px) {
             .themes-grid { grid-template-columns: 1fr; }
             .site-header h1 { font-size: 24px; }
             .step span { display: none; }
+            .color-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -725,7 +715,7 @@ $allow_color_customization = $form->allow_color_customization;
     <!-- Header -->
     <header class="site-header">
         <h1><?php echo esc_html($form->header_text ?: $form->name); ?></h1>
-        <p>Select your preferred hospital website template, customize it, and fill in your content.</p>
+        <p>Select your hospital website template, customize all content with your information, and submit your order.</p>
     </header>
     
     <!-- Progress Steps -->
@@ -769,21 +759,14 @@ $allow_color_customization = $form->allow_color_customization;
                 <?php foreach ($themes_complete as $theme): ?>
                     <div class="theme-card" data-theme-id="<?php echo $theme->id; ?>">
                         <div class="theme-preview" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?> 0%, <?php echo esc_attr($theme->secondary_color); ?> 100%);">
-                            <div class="select-badge">
-                                <i class="bi bi-check-lg"></i>
-                            </div>
+                            <div class="select-badge"><i class="bi bi-check-lg"></i></div>
                             <div class="theme-mockup">
-                                <div class="mockup-header" style="border-bottom-color: <?php echo esc_attr($theme->primary_color); ?>20;">
+                                <div class="mockup-header">
                                     <span class="mockup-logo" style="color: <?php echo esc_attr($theme->primary_color); ?>;">
                                         <?php echo esc_html(substr($theme->name, 0, 15)); ?>
                                     </span>
                                     <div class="mockup-nav">
-                                        <?php 
-                                        $nav_items = array('Home', 'About', 'Services', 'Contact');
-                                        foreach ($nav_items as $item): 
-                                        ?>
-                                            <span><?php echo $item; ?></span>
-                                        <?php endforeach; ?>
+                                        <span>Home</span><span>About</span><span>Services</span><span>Contact</span>
                                     </div>
                                 </div>
                                 <div class="mockup-hero" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?>, <?php echo esc_attr($theme->secondary_color); ?>);">
@@ -829,7 +812,7 @@ $allow_color_customization = $form->allow_color_customization;
         <div class="step-section" id="step-2">
             <div class="section-title">
                 <h2>Fill Your Website Content</h2>
-                <p>Enter the information for each page of your website</p>
+                <p>Enter your hospital/clinic information for each page. All fields can be customized with your own content.</p>
             </div>
             
             <div class="content-editor">
@@ -858,42 +841,53 @@ $allow_color_customization = $form->allow_color_customization;
         <div class="step-section" id="step-3">
             <div class="section-title">
                 <h2>Customize Your Colors</h2>
-                <p>Personalize the color scheme to match your brand</p>
+                <p>Personalize the color scheme to match your brand identity</p>
             </div>
             
             <div class="color-customization">
                 <h3><i class="bi bi-palette"></i> Color Palette</h3>
-                
                 <div class="color-grid">
                     <div class="color-picker-group">
                         <label>Primary Color</label>
-                        <input type="color" id="custom-primary" value="#0891b2">
-                        <p class="hint">Main buttons & links</p>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="custom-primary" value="#0891b2">
+                            <span class="color-hex" id="hex-primary">#0891b2</span>
+                        </div>
                     </div>
                     <div class="color-picker-group">
                         <label>Secondary Color</label>
-                        <input type="color" id="custom-secondary" value="#0e7490">
-                        <p class="hint">Gradients & accents</p>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="custom-secondary" value="#0e7490">
+                            <span class="color-hex" id="hex-secondary">#0e7490</span>
+                        </div>
                     </div>
                     <div class="color-picker-group">
                         <label>Accent Color</label>
-                        <input type="color" id="custom-accent" value="#06b6d4">
-                        <p class="hint">Highlights & CTAs</p>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="custom-accent" value="#06b6d4">
+                            <span class="color-hex" id="hex-accent">#06b6d4</span>
+                        </div>
                     </div>
                     <div class="color-picker-group">
                         <label>Background</label>
-                        <input type="color" id="custom-background" value="#f0fdfa">
-                        <p class="hint">Page background</p>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="custom-background" value="#f0fdfa">
+                            <span class="color-hex" id="hex-background">#f0fdfa</span>
+                        </div>
                     </div>
                     <div class="color-picker-group">
                         <label>Text Color</label>
-                        <input type="color" id="custom-text" value="#1e293b">
-                        <p class="hint">Body text</p>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="custom-text" value="#1e293b">
+                            <span class="color-hex" id="hex-text">#1e293b</span>
+                        </div>
                     </div>
                     <div class="color-picker-group">
                         <label>Header Background</label>
-                        <input type="color" id="custom-header-bg" value="#ffffff">
-                        <p class="hint">Navigation area</p>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="custom-header-bg" value="#ffffff">
+                            <span class="color-hex" id="hex-header-bg">#ffffff</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -915,29 +909,29 @@ $allow_color_customization = $form->allow_color_customization;
         <div class="step-section" id="step-3">
         <?php endif; ?>
             <div class="section-title">
-                <h2>Preview & Submit</h2>
-                <p>Review your website and submit your order</p>
+                <h2>Preview & Submit Your Order</h2>
+                <p>Review your customized website and submit your order</p>
             </div>
             
             <div class="preview-container">
                 <div class="preview-sidebar">
                     <div class="preview-controls">
                         <h4>Preview Pages</h4>
-                        <div class="preview-pages" id="preview-pages-nav"></div>
-                        
-                        <hr style="margin: 20px 0; border-color: #e2e8f0;">
-                        
-                        <h4>Your Information</h4>
+                        <div id="preview-pages-nav"></div>
+                    </div>
+                    
+                    <div class="preview-controls customer-info-form">
+                        <h4>Your Contact Information</h4>
                         <div class="form-group">
                             <label>Your Name <span class="required">*</span></label>
                             <input type="text" class="form-control" id="customer-name" required placeholder="John Doe">
                         </div>
                         <div class="form-group">
-                            <label>Email <span class="required">*</span></label>
+                            <label>Email Address <span class="required">*</span></label>
                             <input type="email" class="form-control" id="customer-email" required placeholder="john@example.com">
                         </div>
                         <div class="form-group">
-                            <label>Phone</label>
+                            <label>Phone Number</label>
                             <input type="tel" class="form-control" id="customer-phone" placeholder="+1 234 567 8900">
                         </div>
                     </div>
@@ -972,9 +966,7 @@ $allow_color_customization = $form->allow_color_customization;
         <!-- Success -->
         <div class="step-section" id="step-success">
             <div class="success-container">
-                <div class="success-icon">
-                    <i class="bi bi-check-lg"></i>
-                </div>
+                <div class="success-icon"><i class="bi bi-check-lg"></i></div>
                 <h2>Thank You!</h2>
                 <p><?php echo esc_html($form->success_message ?: 'Your hospital website order has been submitted successfully. Our team will review your submission and contact you shortly.'); ?></p>
             </div>
@@ -988,7 +980,6 @@ $allow_color_customization = $form->allow_color_customization;
         const token = '<?php echo esc_js($token); ?>';
         const nonce = '<?php echo wp_create_nonce('spfm_nonce'); ?>';
         const allowColorCustomization = <?php echo $allow_color_customization ? 'true' : 'false'; ?>;
-        const totalSteps = <?php echo $allow_color_customization ? 4 : 3; ?>;
         
         const themesData = <?php echo json_encode($themes_complete); ?>;
         
@@ -996,7 +987,7 @@ $allow_color_customization = $form->allow_color_customization;
         let currentStep = 1;
         let pageContents = {};
         let colorCustomizations = {};
-        let currentPageIndex = 0;
+        let uploadedImages = {};
         
         $(document).ready(function() {
             // Theme selection
@@ -1006,14 +997,15 @@ $allow_color_customization = $form->allow_color_customization;
                 selectedThemeId = $(this).data('theme-id');
                 $('#step1-next').prop('disabled', false);
                 
+                // Set default colors from theme
                 const theme = themesData[selectedThemeId];
                 if (theme) {
-                    $('#custom-primary').val(theme.primary_color);
-                    $('#custom-secondary').val(theme.secondary_color);
-                    $('#custom-accent').val(theme.accent_color || theme.primary_color);
-                    $('#custom-background').val(theme.background_color);
-                    $('#custom-text').val(theme.text_color);
-                    $('#custom-header-bg').val(theme.header_bg_color || '#ffffff');
+                    setColorValue('primary', theme.primary_color);
+                    setColorValue('secondary', theme.secondary_color);
+                    setColorValue('accent', theme.accent_color || theme.primary_color);
+                    setColorValue('background', theme.background_color);
+                    setColorValue('text', theme.text_color);
+                    setColorValue('header-bg', theme.header_bg_color || '#ffffff');
                     
                     colorCustomizations = {
                         primary_color: theme.primary_color,
@@ -1030,14 +1022,16 @@ $allow_color_customization = $form->allow_color_customization;
                 }
             });
             
-            // Color changes
+            // Color picker changes
             $('input[type="color"]').on('input', function() {
                 const id = $(this).attr('id');
                 const value = $(this).val();
                 const key = id.replace('custom-', '').replace(/-/g, '_');
-                colorCustomizations[key] = value;
                 
-                if (key === 'primary_color' || key === 'primary') {
+                colorCustomizations[key + '_color'] = value;
+                $(`#hex-${id.replace('custom-', '')}`).text(value);
+                
+                if (key === 'primary') {
                     document.documentElement.style.setProperty('--primary', value);
                 }
             });
@@ -1051,23 +1045,30 @@ $allow_color_customization = $form->allow_color_customization;
             });
         });
         
+        function setColorValue(name, value) {
+            $(`#custom-${name}`).val(value);
+            $(`#hex-${name}`).text(value);
+        }
+        
         function goToStep(step) {
             if (step === 2 && !selectedThemeId) {
                 alert('Please select a template first.');
                 return;
             }
             
+            // Update progress
             $('.step').removeClass('active completed');
             for (let i = 1; i < step; i++) {
                 $(`.step[data-step="${i}"]`).addClass('completed');
             }
             $(`.step[data-step="${step}"]`).addClass('active');
             
+            // Show step content
             $('.step-section').removeClass('active');
             $(`#step-${step}`).addClass('active');
-            
             currentStep = step;
             
+            // Load content for specific steps
             if (step === 2) loadContentEditor();
             if ((allowColorCustomization && step === 4) || (!allowColorCustomization && step === 3)) loadPreview();
             
@@ -1076,8 +1077,9 @@ $allow_color_customization = $form->allow_color_customization;
         
         function loadContentEditor() {
             const theme = themesData[selectedThemeId];
-            if (!theme) return;
+            if (!theme || !theme.pages) return;
             
+            // Build pages navigation
             let pagesNav = '';
             theme.pages.forEach((page, index) => {
                 const icon = getPageIcon(page.page_icon);
@@ -1085,110 +1087,249 @@ $allow_color_customization = $form->allow_color_customization;
                     <div class="page-nav-item ${index === 0 ? 'active' : ''}" data-page-index="${index}" onclick="showPageEditor(${index})">
                         <i class="bi bi-${icon}"></i>
                         <span>${page.page_name}</span>
-                        <i class="bi bi-check-circle-fill check"></i>
                     </div>
                 `;
             });
             $('#pages-nav').html(pagesNav);
             
+            // Build content forms for each page
             let contentForms = '';
-            theme.pages.forEach((page, index) => {
+            theme.pages.forEach((page, pageIndex) => {
                 const icon = getPageIcon(page.page_icon);
                 contentForms += `
-                    <div class="page-content-editor ${index === 0 ? 'active' : ''}" id="page-editor-${index}">
-                        <div class="page-header">
+                    <div class="page-content-editor ${pageIndex === 0 ? 'active' : ''}" id="page-editor-${pageIndex}">
+                        <div class="page-header-bar">
                             <h2><i class="bi bi-${icon}"></i> ${page.page_name}</h2>
-                            <p>${page.page_description || 'Fill in the content for this page.'}</p>
+                            <p>${page.page_description || 'Customize the content for this page with your own information.'}</p>
                         </div>
-                        ${buildSectionForms(page, index)}
+                        ${buildPageSections(page, pageIndex)}
                     </div>
                 `;
             });
             $('#content-forms').html(contentForms);
+            
+            // Initialize image upload handlers
+            initImageUploads();
         }
         
-        function buildSectionForms(page, pageIndex) {
+        function buildPageSections(page, pageIndex) {
             if (!page.sections || page.sections.length === 0) {
-                return '<p style="color: #64748b;">No content sections for this page.</p>';
+                return '<div class="section-card"><p style="color: #64748b; text-align: center; padding: 30px;">No customizable sections for this page.</p></div>';
             }
             
             let html = '';
             page.sections.forEach((section, secIndex) => {
+                const sectionIcon = getSectionIcon(section.section_type);
                 html += `
-                    <div class="section-card">
-                        <h4><i class="bi bi-layers"></i> ${section.section_name}</h4>
-                        ${buildFieldsHtml(section.fields, section.default_values || {}, pageIndex, secIndex)}
+                    <div class="section-card" id="section-${pageIndex}-${secIndex}">
+                        <div class="section-card-header" onclick="toggleSection(this)">
+                            <h4><i class="bi bi-${sectionIcon}"></i> ${section.section_name}</h4>
+                            <div class="section-toggle"><i class="bi bi-chevron-down"></i></div>
+                        </div>
+                        <div class="section-card-body">
+                            ${buildSectionFields(section, pageIndex, secIndex)}
+                        </div>
                     </div>
                 `;
             });
             return html;
         }
         
-        function buildFieldsHtml(fields, defaults, pageIndex, secIndex, prefix = '') {
-            if (!fields || fields.length === 0) return '';
+        function buildSectionFields(section, pageIndex, secIndex) {
+            if (!section.fields || section.fields.length === 0) return '';
             
+            const defaults = section.default_values || {};
             let html = '';
-            fields.forEach((field, fieldIndex) => {
-                if (field.type === 'repeater') return;
-                
-                const fieldName = `${prefix}page_${pageIndex}_sec_${secIndex}_${field.name}`;
-                const required = field.required ? '<span class="required">*</span>' : '';
-                const defaultVal = defaults[field.name] || field.placeholder || '';
-                
-                html += `<div class="form-group">`;
-                html += `<label>${field.label} ${required}</label>`;
-                
-                switch (field.type) {
-                    case 'text':
-                    case 'email':
-                    case 'url':
-                    case 'number':
-                        html += `<input type="${field.type}" class="form-control content-field" name="${fieldName}" 
-                                 value="${escapeHtml(defaultVal)}" placeholder="${field.placeholder || ''}" ${field.required ? 'required' : ''}>`;
-                        break;
-                    case 'textarea':
-                        html += `<textarea class="form-control content-field" name="${fieldName}" rows="4" 
-                                 placeholder="${field.placeholder || ''}" ${field.required ? 'required' : ''}>${escapeHtml(defaultVal)}</textarea>`;
-                        break;
-                    case 'editor':
-                        html += `<textarea class="form-control content-field" name="${fieldName}" rows="6" 
-                                 placeholder="${field.placeholder || ''}" ${field.required ? 'required' : ''}>${escapeHtml(defaultVal)}</textarea>`;
-                        break;
-                    case 'image':
-                        html += `
-                            <div class="image-upload" onclick="triggerFileInput('${fieldName}')">
-                                <i class="bi bi-cloud-upload"></i>
-                                <p>Click to upload image</p>
-                                <input type="file" id="${fieldName}" class="content-field image-field" accept="image/*" 
-                                       onchange="previewImage(this, '${fieldName}')">
-                                <img id="preview-${fieldName}" class="image-preview" style="display:none;">
-                            </div>
-                        `;
-                        break;
-                    case 'icon':
-                        html += `<input type="text" class="form-control content-field" name="${fieldName}" 
-                                 value="${escapeHtml(defaultVal)}" placeholder="e.g., heart, clock, shield">`;
-                        break;
-                    default:
-                        html += `<input type="text" class="form-control content-field" name="${fieldName}" 
-                                 value="${escapeHtml(defaultVal)}" placeholder="${field.placeholder || ''}">`;
+            
+            // Group fields for better layout
+            let currentRow = [];
+            
+            section.fields.forEach((field, fieldIndex) => {
+                if (field.type === 'repeater') {
+                    // Handle repeater fields separately
+                    if (currentRow.length > 0) {
+                        html += renderFieldRow(currentRow);
+                        currentRow = [];
+                    }
+                    html += buildRepeaterField(field, pageIndex, secIndex, defaults);
+                    return;
                 }
                 
-                if (field.hint) {
-                    html += `<p class="form-hint">${field.hint}</p>`;
-                }
+                const fieldHtml = buildField(field, pageIndex, secIndex, defaults[field.name] || '');
                 
-                html += `</div>`;
+                // Full width for textarea, editor, image
+                if (['textarea', 'editor', 'image'].includes(field.type)) {
+                    if (currentRow.length > 0) {
+                        html += renderFieldRow(currentRow);
+                        currentRow = [];
+                    }
+                    html += `<div class="form-group">${fieldHtml}</div>`;
+                } else {
+                    currentRow.push(fieldHtml);
+                    if (currentRow.length === 2) {
+                        html += renderFieldRow(currentRow);
+                        currentRow = [];
+                    }
+                }
             });
+            
+            // Render remaining fields
+            if (currentRow.length > 0) {
+                html += renderFieldRow(currentRow);
+            }
             
             return html;
         }
         
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function renderFieldRow(fields) {
+            if (fields.length === 1) {
+                return `<div class="form-group">${fields[0]}</div>`;
+            }
+            return `<div class="form-row">${fields.map(f => `<div class="form-group">${f}</div>`).join('')}</div>`;
+        }
+        
+        function buildField(field, pageIndex, secIndex, defaultValue) {
+            const fieldName = `field_${pageIndex}_${secIndex}_${field.name}`;
+            const required = field.required ? '<span class="required">*</span>' : '';
+            const escapedDefault = escapeHtml(defaultValue);
+            
+            let html = `<label>${field.label} ${required}</label>`;
+            
+            switch (field.type) {
+                case 'text':
+                case 'email':
+                case 'url':
+                case 'tel':
+                    html += `<input type="${field.type}" class="form-control content-field" name="${fieldName}" 
+                             value="${escapedDefault}" placeholder="${field.placeholder || 'Enter ' + field.label.toLowerCase()}" 
+                             ${field.required ? 'required' : ''}>`;
+                    break;
+                    
+                case 'textarea':
+                    html += `<textarea class="form-control content-field" name="${fieldName}" rows="4" 
+                             placeholder="${field.placeholder || 'Enter ' + field.label.toLowerCase()}" 
+                             ${field.required ? 'required' : ''}>${escapedDefault}</textarea>`;
+                    break;
+                    
+                case 'editor':
+                    html += `<textarea class="form-control content-field" name="${fieldName}" rows="6" 
+                             placeholder="${field.placeholder || 'Enter detailed content here...'}" 
+                             ${field.required ? 'required' : ''}>${escapedDefault}</textarea>`;
+                    break;
+                    
+                case 'image':
+                    html += `
+                        <div class="image-upload-box" onclick="triggerImageUpload('${fieldName}')" id="upload-box-${fieldName}">
+                            <i class="bi bi-cloud-upload"></i>
+                            <p>Click to upload ${field.label.toLowerCase()}</p>
+                            <input type="file" id="file-${fieldName}" class="image-field" accept="image/*" 
+                                   onchange="handleImageUpload(this, '${fieldName}')">
+                            <img class="preview-img" id="preview-${fieldName}" src="" alt="">
+                            <button type="button" class="remove-image" onclick="removeImage(event, '${fieldName}')">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'icon':
+                    html += `<input type="text" class="form-control content-field" name="${fieldName}" 
+                             value="${escapedDefault}" placeholder="e.g., heart, clock, shield, phone">
+                             <small class="text-muted">Enter icon name (heart, clock, shield, calendar, etc.)</small>`;
+                    break;
+                    
+                default:
+                    html += `<input type="text" class="form-control content-field" name="${fieldName}" 
+                             value="${escapedDefault}" placeholder="${field.placeholder || ''}" 
+                             ${field.required ? 'required' : ''}>`;
+            }
+            
+            return html;
+        }
+        
+        function buildRepeaterField(field, pageIndex, secIndex, defaults) {
+            const fieldName = `field_${pageIndex}_${secIndex}_${field.name}`;
+            const defaultItems = defaults[field.name] || [];
+            
+            let html = `
+                <div class="form-group">
+                    <label>${field.label}</label>
+                    <div class="repeater-container" id="repeater-${fieldName}">
+            `;
+            
+            // Add default items or one empty item
+            const items = defaultItems.length > 0 ? defaultItems : [{}];
+            items.forEach((item, itemIndex) => {
+                html += buildRepeaterItem(field, fieldName, itemIndex, item);
+            });
+            
+            html += `
+                        <button type="button" class="add-repeater-item" onclick="addRepeaterItem('${fieldName}', ${JSON.stringify(field.fields).replace(/"/g, '&quot;')})">
+                            <i class="bi bi-plus-circle"></i> Add ${field.label.replace(/s$/, '')}
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+        
+        function buildRepeaterItem(field, fieldName, itemIndex, itemData = {}) {
+            let html = `
+                <div class="repeater-item" data-index="${itemIndex}">
+                    <div class="repeater-item-header">
+                        <span class="repeater-item-title">${field.label.replace(/s$/, '')} #${itemIndex + 1}</span>
+                        <button type="button" class="remove-repeater-item" onclick="removeRepeaterItem(this)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <div class="form-row">
+            `;
+            
+            if (field.fields) {
+                field.fields.forEach((subField, subIndex) => {
+                    const subFieldName = `${fieldName}_${itemIndex}_${subField.name}`;
+                    const subValue = itemData[subField.name] || '';
+                    html += `
+                        <div class="form-group">
+                            <label>${subField.label}</label>
+                            <input type="${subField.type === 'textarea' ? 'text' : subField.type || 'text'}" 
+                                   class="form-control content-field" 
+                                   name="${subFieldName}" 
+                                   value="${escapeHtml(subValue)}" 
+                                   placeholder="Enter ${subField.label.toLowerCase()}">
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `</div></div>`;
+            return html;
+        }
+        
+        function addRepeaterItem(fieldName, fields) {
+            const container = $(`#repeater-${fieldName}`);
+            const currentItems = container.find('.repeater-item').length;
+            
+            const field = { label: 'Item', fields: fields };
+            const newItem = buildRepeaterItem(field, fieldName, currentItems, {});
+            
+            container.find('.add-repeater-item').before(newItem);
+        }
+        
+        function removeRepeaterItem(btn) {
+            $(btn).closest('.repeater-item').remove();
+        }
+        
+        function toggleSection(header) {
+            $(header).closest('.section-card').toggleClass('collapsed');
+        }
+        
+        function showPageEditor(index) {
+            $('.page-nav-item').removeClass('active');
+            $(`.page-nav-item[data-page-index="${index}"]`).addClass('active');
+            $('.page-content-editor').removeClass('active');
+            $(`#page-editor-${index}`).addClass('active');
         }
         
         function getPageIcon(iconClass) {
@@ -1209,38 +1350,83 @@ $allow_color_customization = $form->allow_color_customization;
             return mapping[iconClass] || 'file-text';
         }
         
-        function showPageEditor(index) {
-            $('.page-nav-item').removeClass('active');
-            $(`.page-nav-item[data-page-index="${index}"]`).addClass('active');
-            $('.page-content-editor').removeClass('active');
-            $(`#page-editor-${index}`).addClass('active');
-            currentPageIndex = index;
+        function getSectionIcon(sectionType) {
+            const mapping = {
+                'header': 'window-dock',
+                'hero': 'star',
+                'info_cards': 'grid-3x3-gap',
+                'services': 'heart-pulse',
+                'services_list': 'list-check',
+                'features': 'check2-circle',
+                'stats': 'graph-up',
+                'cta': 'megaphone',
+                'footer': 'window-sidebar',
+                'page_header': 'type-h1',
+                'content': 'text-paragraph',
+                'mission': 'bullseye',
+                'history': 'clock-history',
+                'awards': 'award',
+                'team': 'people',
+                'contact_info': 'geo-alt',
+                'map': 'map',
+                'blog': 'newspaper',
+                'gallery': 'images',
+                'tests': 'clipboard2-pulse'
+            };
+            return mapping[sectionType] || 'layers';
         }
         
-        function triggerFileInput(id) {
-            document.getElementById(id).click();
+        function triggerImageUpload(fieldName) {
+            document.getElementById(`file-${fieldName}`).click();
         }
         
-        function previewImage(input, fieldName) {
+        function handleImageUpload(input, fieldName) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    $(`#preview-${fieldName}`).attr('src', e.target.result).show();
+                    $(`#preview-${fieldName}`).attr('src', e.target.result);
+                    $(`#upload-box-${fieldName}`).addClass('has-image');
+                    uploadedImages[fieldName] = e.target.result;
                 };
                 reader.readAsDataURL(input.files[0]);
             }
         }
         
+        function removeImage(event, fieldName) {
+            event.stopPropagation();
+            $(`#preview-${fieldName}`).attr('src', '');
+            $(`#upload-box-${fieldName}`).removeClass('has-image');
+            $(`#file-${fieldName}`).val('');
+            delete uploadedImages[fieldName];
+        }
+        
+        function initImageUploads() {
+            // Already handled by inline handlers
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
         function collectContentData() {
             pageContents = {};
+            
+            // Collect all form field values
             $('.content-field').each(function() {
                 const name = $(this).attr('name');
                 if (name) {
-                    if (!$(this).is(':file')) {
-                        pageContents[name] = $(this).val();
-                    }
+                    pageContents[name] = $(this).val();
                 }
             });
+            
+            // Add uploaded images
+            Object.keys(uploadedImages).forEach(key => {
+                pageContents[`image_${key}`] = uploadedImages[key];
+            });
+            
             return pageContents;
         }
         
@@ -1250,6 +1436,7 @@ $allow_color_customization = $form->allow_color_customization;
             const theme = themesData[selectedThemeId];
             if (!theme) return;
             
+            // Build preview pages navigation
             let pagesNav = '';
             theme.pages.forEach((page, index) => {
                 pagesNav += `
@@ -1260,6 +1447,7 @@ $allow_color_customization = $form->allow_color_customization;
             });
             $('#preview-pages-nav').html(pagesNav);
             
+            // Render first page preview
             renderPagePreview(0);
         }
         
@@ -1269,10 +1457,16 @@ $allow_color_customization = $form->allow_color_customization;
             renderPagePreview(index);
         }
         
+        function getFieldValue(pageIndex, secIndex, fieldName, fallback = '') {
+            const key = `field_${pageIndex}_${secIndex}_${fieldName}`;
+            return pageContents[key] || fallback;
+        }
+        
         function renderPagePreview(pageIndex) {
             const theme = themesData[selectedThemeId];
             const page = theme.pages[pageIndex];
             
+            // Get colors
             const primary = colorCustomizations.primary_color || theme.primary_color;
             const secondary = colorCustomizations.secondary_color || theme.secondary_color;
             const accent = colorCustomizations.accent_color || theme.accent_color || primary;
@@ -1281,83 +1475,52 @@ $allow_color_customization = $form->allow_color_customization;
             const headerBg = colorCustomizations.header_bg_color || theme.header_bg_color || '#ffffff';
             const footerBg = theme.footer_bg_color || '#0f172a';
             
-            const headerContent = getContentForSection(0, 0);
-            const logoText = headerContent.logo_text || theme.name;
-            const phone = headerContent.phone || '+1 (555) 123-4567';
-            const email = headerContent.email || 'info@hospital.com';
+            // Get header values from first page, first section (usually header)
+            const logoText = getFieldValue(0, 0, 'logo_text', theme.name);
+            const phone = getFieldValue(0, 0, 'phone', '+1 (555) 123-4567');
+            const email = getFieldValue(0, 0, 'email', 'info@hospital.com');
+            const emergency = getFieldValue(0, 0, 'emergency_number', '+1 (555) 999-0000');
             
             let previewHtml = `
-                <div style="font-family: ${theme.font_family}, sans-serif; background: ${background}; min-height: 100%;">
+                <div style="font-family: ${theme.font_family || 'Inter'}, sans-serif; background: ${background}; min-height: 100%;">
                     <!-- Top Bar -->
-                    <div style="background: ${primary}; color: #fff; padding: 8px 20px; font-size: 12px; display: flex; justify-content: space-between; flex-wrap: wrap;">
+                    <div style="background: ${primary}; color: #fff; padding: 8px 20px; font-size: 12px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                         <span>📞 ${phone} | ✉️ ${email}</span>
-                        <span>🚨 24/7 Emergency Services</span>
+                        <span>🚨 Emergency: ${emergency}</span>
                     </div>
                     
                     <!-- Header -->
-                    <header style="background: ${headerBg}; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <header style="background: ${headerBg}; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-wrap: wrap; gap: 15px;">
                         <div style="font-size: 20px; font-weight: 700; color: ${primary};">${logoText}</div>
-                        <nav style="display: flex; gap: 25px; font-size: 14px;">
+                        <nav style="display: flex; gap: 20px; font-size: 14px; flex-wrap: wrap;">
                             ${theme.pages.map(p => `<a href="#" style="color: ${textColor}; text-decoration: none;">${p.page_name}</a>`).join('')}
                         </nav>
                         <a href="#" style="background: ${primary}; color: #fff; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-size: 13px; font-weight: 600;">Book Appointment</a>
                     </header>
                     
                     <!-- Page Content -->
-                    ${renderPageSections(page, pageIndex, primary, secondary, accent, textColor, background)}
+                    ${renderPreviewSections(page, pageIndex, primary, secondary, accent, textColor, background, footerBg)}
                     
                     <!-- Footer -->
-                    <footer style="background: ${footerBg}; color: #fff; padding: 50px 20px 20px;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto 30px;">
-                            <div>
-                                <h4 style="margin-bottom: 15px; font-size: 18px;">About Us</h4>
-                                <p style="opacity: 0.8; font-size: 14px; line-height: 1.7;">Providing quality healthcare services with compassion and excellence.</p>
-                            </div>
-                            <div>
-                                <h4 style="margin-bottom: 15px; font-size: 18px;">Quick Links</h4>
-                                <p style="opacity: 0.8; font-size: 14px; line-height: 2;">Home<br>Services<br>Doctors<br>Contact</p>
-                            </div>
-                            <div>
-                                <h4 style="margin-bottom: 15px; font-size: 18px;">Contact</h4>
-                                <p style="opacity: 0.8; font-size: 14px; line-height: 1.7;">📍 123 Medical Center Dr<br>📞 ${phone}<br>✉️ ${email}</p>
-                            </div>
-                        </div>
-                        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; opacity: 0.7; font-size: 13px;">
-                            © 2024 ${logoText}. All rights reserved.
-                        </div>
-                    </footer>
+                    ${renderFooter(primary, footerBg, logoText, phone, email)}
                 </div>
             `;
             
             $('#live-preview').html(previewHtml);
         }
         
-        function getContentForSection(pageIndex, secIndex) {
-            const prefix = `page_${pageIndex}_sec_${secIndex}_`;
-            const content = {};
-            Object.keys(pageContents).forEach(key => {
-                if (key.startsWith(prefix)) {
-                    const fieldName = key.replace(prefix, '');
-                    content[fieldName] = pageContents[key];
-                }
-            });
-            return content;
-        }
-        
-        function renderPageSections(page, pageIndex, primary, secondary, accent, textColor, background) {
+        function renderPreviewSections(page, pageIndex, primary, secondary, accent, textColor, background, footerBg) {
             let html = '';
             
             if (!page.sections) return html;
             
             page.sections.forEach((section, secIndex) => {
-                const content = getContentForSection(pageIndex, secIndex);
-                
                 switch (section.section_type) {
                     case 'hero':
-                        const headline = content.headline || 'Your Health, Our Priority';
-                        const subheadline = content.subheadline || 'Providing compassionate, world-class healthcare services.';
-                        const ctaText = content.cta_text || 'Book Appointment';
-                        const cta2Text = content.cta2_text || 'Our Services';
+                        const headline = getFieldValue(pageIndex, secIndex, 'headline', 'Your Health, Our Priority');
+                        const subheadline = getFieldValue(pageIndex, secIndex, 'subheadline', 'Providing compassionate, world-class healthcare services with state-of-the-art facilities.');
+                        const ctaText = getFieldValue(pageIndex, secIndex, 'cta_text', 'Book Appointment');
+                        const cta2Text = getFieldValue(pageIndex, secIndex, 'cta2_text', 'Our Services');
                         
                         html += `
                             <div style="background: linear-gradient(135deg, ${primary} 0%, ${secondary} 100%); padding: 80px 20px; text-align: center; color: #fff;">
@@ -1372,27 +1535,34 @@ $allow_color_customization = $form->allow_color_customization;
                         break;
                         
                     case 'info_cards':
+                        const card1Title = getFieldValue(pageIndex, secIndex, 'card1_title', '24/7 Emergency');
+                        const card1Text = getFieldValue(pageIndex, secIndex, 'card1_text', 'Round-the-clock emergency care with rapid response team.');
+                        const card2Title = getFieldValue(pageIndex, secIndex, 'card2_title', 'Easy Appointments');
+                        const card2Text = getFieldValue(pageIndex, secIndex, 'card2_text', 'Book appointments online or call us anytime.');
+                        const card3Title = getFieldValue(pageIndex, secIndex, 'card3_title', 'Quality Care');
+                        const card3Text = getFieldValue(pageIndex, secIndex, 'card3_text', 'Accredited facility with certified medical professionals.');
+                        
                         html += `
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: -40px auto 40px; padding: 0 20px; position: relative; z-index: 10;">
                                 <div style="background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); display: flex; gap: 15px;">
-                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, ${primary}, ${accent}); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;">🕐</div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, ${primary}, ${accent}); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0;">🕐</div>
                                     <div>
-                                        <h3 style="font-size: 16px; margin-bottom: 5px;">${content.card1_title || '24/7 Emergency'}</h3>
-                                        <p style="font-size: 13px; color: #666;">${content.card1_text || 'Round-the-clock emergency care.'}</p>
+                                        <h3 style="font-size: 16px; margin: 0 0 5px 0; color: ${textColor};">${card1Title}</h3>
+                                        <p style="font-size: 13px; color: #666; margin: 0; line-height: 1.5;">${card1Text}</p>
                                     </div>
                                 </div>
                                 <div style="background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); display: flex; gap: 15px;">
-                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, ${primary}, ${accent}); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;">📅</div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, ${primary}, ${accent}); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0;">📅</div>
                                     <div>
-                                        <h3 style="font-size: 16px; margin-bottom: 5px;">${content.card2_title || 'Easy Appointments'}</h3>
-                                        <p style="font-size: 13px; color: #666;">${content.card2_text || 'Book appointments online or by phone.'}</p>
+                                        <h3 style="font-size: 16px; margin: 0 0 5px 0; color: ${textColor};">${card2Title}</h3>
+                                        <p style="font-size: 13px; color: #666; margin: 0; line-height: 1.5;">${card2Text}</p>
                                     </div>
                                 </div>
                                 <div style="background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); display: flex; gap: 15px;">
-                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, ${primary}, ${accent}); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;">🛡️</div>
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, ${primary}, ${accent}); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0;">🛡️</div>
                                     <div>
-                                        <h3 style="font-size: 16px; margin-bottom: 5px;">${content.card3_title || 'Quality Care'}</h3>
-                                        <p style="font-size: 13px; color: #666;">${content.card3_text || 'Accredited facility with certified professionals.'}</p>
+                                        <h3 style="font-size: 16px; margin: 0 0 5px 0; color: ${textColor};">${card3Title}</h3>
+                                        <p style="font-size: 13px; color: #666; margin: 0; line-height: 1.5;">${card3Text}</p>
                                     </div>
                                 </div>
                             </div>
@@ -1400,16 +1570,22 @@ $allow_color_customization = $form->allow_color_customization;
                         break;
                         
                     case 'services':
-                        const servicesTitle = content.section_title || 'Our Medical Services';
+                    case 'services_list':
+                        const servicesTitle = getFieldValue(pageIndex, secIndex, 'section_title', 'Our Medical Services');
+                        const servicesSubtitle = getFieldValue(pageIndex, secIndex, 'section_subtitle', 'Comprehensive healthcare solutions for you and your family');
+                        
                         html += `
                             <div style="padding: 60px 20px; background: ${background};">
-                                <h2 style="text-align: center; font-size: 32px; color: ${primary}; margin-bottom: 40px;">${servicesTitle}</h2>
+                                <div style="text-align: center; margin-bottom: 40px;">
+                                    <h2 style="font-size: 32px; color: ${primary}; margin: 0 0 10px 0;">${servicesTitle}</h2>
+                                    <p style="color: #666; font-size: 16px; margin: 0;">${servicesSubtitle}</p>
+                                </div>
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto;">
                                     ${['Emergency Care', 'Surgery', 'Internal Medicine', 'Pediatrics', 'Cardiology', 'Orthopedics'].map(service => `
                                         <div style="background: #fff; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
                                             <div style="width: 70px; height: 70px; background: linear-gradient(135deg, ${primary}, ${secondary}); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #fff; font-size: 28px;">❤️</div>
-                                            <h3 style="font-size: 18px; margin-bottom: 10px;">${service}</h3>
-                                            <p style="color: #666; font-size: 14px;">Quality care for your health needs.</p>
+                                            <h3 style="font-size: 18px; margin: 0 0 10px 0; color: ${textColor};">${service}</h3>
+                                            <p style="color: #666; font-size: 14px; margin: 0; line-height: 1.6;">Quality care for your health needs.</p>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -1418,24 +1594,33 @@ $allow_color_customization = $form->allow_color_customization;
                         break;
                         
                     case 'stats':
+                        const stat1Num = getFieldValue(pageIndex, secIndex, 'stat1_number', '50+');
+                        const stat1Label = getFieldValue(pageIndex, secIndex, 'stat1_label', 'Years Experience');
+                        const stat2Num = getFieldValue(pageIndex, secIndex, 'stat2_number', '200+');
+                        const stat2Label = getFieldValue(pageIndex, secIndex, 'stat2_label', 'Expert Doctors');
+                        const stat3Num = getFieldValue(pageIndex, secIndex, 'stat3_number', '100K+');
+                        const stat3Label = getFieldValue(pageIndex, secIndex, 'stat3_label', 'Patients Served');
+                        const stat4Num = getFieldValue(pageIndex, secIndex, 'stat4_number', '50+');
+                        const stat4Label = getFieldValue(pageIndex, secIndex, 'stat4_label', 'Specialties');
+                        
                         html += `
                             <div style="background: linear-gradient(135deg, ${primary}, ${secondary}); padding: 60px 20px; color: #fff;">
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 30px; max-width: 1000px; margin: 0 auto; text-align: center;">
                                     <div>
-                                        <div style="font-size: 42px; font-weight: 700;">${content.stat1_number || '50+'}</div>
-                                        <div style="opacity: 0.9;">${content.stat1_label || 'Years Experience'}</div>
+                                        <div style="font-size: 42px; font-weight: 700;">${stat1Num}</div>
+                                        <div style="opacity: 0.9;">${stat1Label}</div>
                                     </div>
                                     <div>
-                                        <div style="font-size: 42px; font-weight: 700;">${content.stat2_number || '200+'}</div>
-                                        <div style="opacity: 0.9;">${content.stat2_label || 'Expert Doctors'}</div>
+                                        <div style="font-size: 42px; font-weight: 700;">${stat2Num}</div>
+                                        <div style="opacity: 0.9;">${stat2Label}</div>
                                     </div>
                                     <div>
-                                        <div style="font-size: 42px; font-weight: 700;">${content.stat3_number || '100K+'}</div>
-                                        <div style="opacity: 0.9;">${content.stat3_label || 'Patients Served'}</div>
+                                        <div style="font-size: 42px; font-weight: 700;">${stat3Num}</div>
+                                        <div style="opacity: 0.9;">${stat3Label}</div>
                                     </div>
                                     <div>
-                                        <div style="font-size: 42px; font-weight: 700;">${content.stat4_number || '50+'}</div>
-                                        <div style="opacity: 0.9;">${content.stat4_label || 'Specialties'}</div>
+                                        <div style="font-size: 42px; font-weight: 700;">${stat4Num}</div>
+                                        <div style="opacity: 0.9;">${stat4Label}</div>
                                     </div>
                                 </div>
                             </div>
@@ -1443,46 +1628,82 @@ $allow_color_customization = $form->allow_color_customization;
                         break;
                         
                     case 'page_header':
+                        const pageTitle = getFieldValue(pageIndex, secIndex, 'title', page.page_name);
+                        const breadcrumb = getFieldValue(pageIndex, secIndex, 'breadcrumb', 'Home / ' + page.page_name);
+                        
                         html += `
                             <div style="background: linear-gradient(135deg, ${primary}, ${secondary}); padding: 60px 20px; text-align: center; color: #fff;">
-                                <h1 style="font-size: 36px; font-weight: 700; margin-bottom: 10px;">${content.title || section.section_name}</h1>
-                                <p style="opacity: 0.8;">${content.breadcrumb || 'Home / ' + (content.title || section.section_name)}</p>
+                                <h1 style="font-size: 36px; font-weight: 700; margin: 0 0 10px 0;">${pageTitle}</h1>
+                                <p style="opacity: 0.8; margin: 0;">${breadcrumb}</p>
                             </div>
                         `;
                         break;
                         
                     case 'content':
+                        const contentTitle = getFieldValue(pageIndex, secIndex, 'title', 'About Us');
+                        const contentText = getFieldValue(pageIndex, secIndex, 'content', 'We are committed to providing excellent healthcare services to our community with compassion and expertise.');
+                        
                         html += `
                             <div style="padding: 60px 20px; max-width: 900px; margin: 0 auto;">
-                                <h2 style="font-size: 28px; color: ${primary}; margin-bottom: 20px;">${content.title || 'About Us'}</h2>
-                                <p style="color: ${textColor}; line-height: 1.8; font-size: 16px;">${content.content || 'We are committed to providing excellent healthcare services to our community.'}</p>
+                                <h2 style="font-size: 28px; color: ${primary}; margin: 0 0 20px 0;">${contentTitle}</h2>
+                                <p style="color: ${textColor}; line-height: 1.8; font-size: 16px;">${contentText.replace(/\n/g, '<br>')}</p>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'mission':
+                        const missionTitle = getFieldValue(pageIndex, secIndex, 'mission_title', 'Our Mission');
+                        const missionText = getFieldValue(pageIndex, secIndex, 'mission_text', 'To provide exceptional healthcare services that improve the health and well-being of our community.');
+                        const visionTitle = getFieldValue(pageIndex, secIndex, 'vision_title', 'Our Vision');
+                        const visionText = getFieldValue(pageIndex, secIndex, 'vision_text', 'To be the most trusted healthcare provider, recognized for outstanding patient care.');
+                        
+                        html += `
+                            <div style="padding: 60px 20px; background: ${background};">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1000px; margin: 0 auto;">
+                                    <div style="background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
+                                        <h3 style="color: ${primary}; margin: 0 0 15px 0;">${missionTitle}</h3>
+                                        <p style="color: #666; line-height: 1.7; margin: 0;">${missionText}</p>
+                                    </div>
+                                    <div style="background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
+                                        <h3 style="color: ${primary}; margin: 0 0 15px 0;">${visionTitle}</h3>
+                                        <p style="color: #666; line-height: 1.7; margin: 0;">${visionText}</p>
+                                    </div>
+                                </div>
                             </div>
                         `;
                         break;
                         
                     case 'contact_info':
+                        const address = getFieldValue(pageIndex, secIndex, 'address', '123 Medical Center Drive\nHealthcare District\nYour City, State 12345');
+                        const contactPhone = getFieldValue(pageIndex, secIndex, 'phone', '+1 (555) 123-4567');
+                        const contactEmergency = getFieldValue(pageIndex, secIndex, 'emergency', '+1 (555) 999-0000');
+                        const contactEmail = getFieldValue(pageIndex, secIndex, 'email', 'info@hospital.com');
+                        const hours = getFieldValue(pageIndex, secIndex, 'hours', 'Monday - Friday: 8:00 AM - 8:00 PM\nSaturday: 9:00 AM - 5:00 PM\nSunday: Emergency Only');
+                        
                         html += `
                             <div style="padding: 60px 20px; background: ${background};">
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1000px; margin: 0 auto;">
-                                    <div style="background: #fff; padding: 30px; border-radius: 15px; display: flex; gap: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
-                                        <div style="width: 50px; height: 50px; background: ${primary}; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;">📍</div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; max-width: 1000px; margin: 0 auto;">
+                                    <div style="background: #fff; padding: 25px; border-radius: 15px; display: flex; gap: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
+                                        <div style="width: 50px; height: 50px; background: ${primary}; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0;">📍</div>
                                         <div>
-                                            <h4 style="margin-bottom: 5px;">Address</h4>
-                                            <p style="color: #666; font-size: 14px;">${(content.address || '123 Medical Center Drive').replace(/\n/g, '<br>')}</p>
+                                            <h4 style="margin: 0 0 8px 0; color: ${textColor};">Address</h4>
+                                            <p style="color: #666; font-size: 14px; margin: 0; line-height: 1.6;">${address.replace(/\n/g, '<br>')}</p>
                                         </div>
                                     </div>
-                                    <div style="background: #fff; padding: 30px; border-radius: 15px; display: flex; gap: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
-                                        <div style="width: 50px; height: 50px; background: ${primary}; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;">📞</div>
+                                    <div style="background: #fff; padding: 25px; border-radius: 15px; display: flex; gap: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
+                                        <div style="width: 50px; height: 50px; background: ${primary}; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0;">📞</div>
                                         <div>
-                                            <h4 style="margin-bottom: 5px;">Phone</h4>
-                                            <p style="color: #666; font-size: 14px;">${content.phone || '+1 (555) 123-4567'}<br>Emergency: ${content.emergency || '+1 (555) 999-0000'}</p>
+                                            <h4 style="margin: 0 0 8px 0; color: ${textColor};">Phone</h4>
+                                            <p style="color: #666; font-size: 14px; margin: 0; line-height: 1.6;">
+                                                Main: ${contactPhone}<br>Emergency: ${contactEmergency}
+                                            </p>
                                         </div>
                                     </div>
-                                    <div style="background: #fff; padding: 30px; border-radius: 15px; display: flex; gap: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
-                                        <div style="width: 50px; height: 50px; background: ${primary}; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;">🕐</div>
+                                    <div style="background: #fff; padding: 25px; border-radius: 15px; display: flex; gap: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
+                                        <div style="width: 50px; height: 50px; background: ${primary}; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; flex-shrink: 0;">🕐</div>
                                         <div>
-                                            <h4 style="margin-bottom: 5px;">Hours</h4>
-                                            <p style="color: #666; font-size: 14px;">${(content.hours || 'Mon-Fri: 8AM - 8PM').replace(/\n/g, '<br>')}</p>
+                                            <h4 style="margin: 0 0 8px 0; color: ${textColor};">Working Hours</h4>
+                                            <p style="color: #666; font-size: 14px; margin: 0; line-height: 1.6;">${hours.replace(/\n/g, '<br>')}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -1491,11 +1712,15 @@ $allow_color_customization = $form->allow_color_customization;
                         break;
                         
                     case 'cta':
+                        const ctaHeadline = getFieldValue(pageIndex, secIndex, 'cta_headline', 'Need Emergency Care?');
+                        const ctaTextContent = getFieldValue(pageIndex, secIndex, 'cta_text', 'Our emergency department is open 24/7. Don\'t wait - get the care you need now.');
+                        const ctaButton = getFieldValue(pageIndex, secIndex, 'cta_button', 'Call Now');
+                        
                         html += `
                             <div style="background: linear-gradient(135deg, ${accent}, ${primary}); padding: 60px 20px; text-align: center; color: #fff;">
-                                <h2 style="font-size: 32px; margin-bottom: 15px;">${content.cta_headline || 'Need Emergency Care?'}</h2>
-                                <p style="font-size: 18px; opacity: 0.9; margin-bottom: 25px;">${content.cta_text || 'Our emergency department is open 24/7.'}</p>
-                                <a href="#" style="background: #fff; color: ${primary}; padding: 15px 35px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 16px;">${content.cta_button || 'Call Now'}</a>
+                                <h2 style="font-size: 32px; margin: 0 0 15px 0;">${ctaHeadline}</h2>
+                                <p style="font-size: 18px; opacity: 0.9; margin: 0 0 25px 0; max-width: 600px; margin-left: auto; margin-right: auto;">${ctaTextContent}</p>
+                                <a href="#" style="display: inline-block; background: #fff; color: ${primary}; padding: 15px 35px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 16px;">${ctaButton}</a>
                             </div>
                         `;
                         break;
@@ -1503,16 +1728,19 @@ $allow_color_customization = $form->allow_color_customization;
                     case 'blog':
                         html += `
                             <div style="padding: 60px 20px; background: ${background};">
-                                <h2 style="text-align: center; font-size: 32px; color: ${primary}; margin-bottom: 40px;">Health Blog</h2>
+                                <div style="text-align: center; margin-bottom: 40px;">
+                                    <h2 style="font-size: 32px; color: ${primary}; margin: 0 0 10px 0;">Health Blog</h2>
+                                    <p style="color: #666; margin: 0;">Expert health advice and tips from our medical team</p>
+                                </div>
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto;">
-                                    ${['Health Tips', 'Preventive Care', 'Wellness Guide'].map((title, i) => `
+                                    ${['Health Tips for Better Living', 'Understanding Preventive Care', 'Wellness Guide for Families'].map((title, i) => `
                                         <div style="background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
                                             <div style="height: 160px; background: linear-gradient(135deg, ${primary}, ${accent}); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 40px;">📰</div>
                                             <div style="padding: 25px;">
                                                 <div style="font-size: 12px; color: #999; margin-bottom: 10px;">Dec ${15 + i}, 2024 • Health</div>
-                                                <h3 style="font-size: 18px; margin-bottom: 10px;">${title}</h3>
-                                                <p style="color: #666; font-size: 14px; line-height: 1.6;">Expert advice for better health...</p>
-                                                <a href="#" style="color: ${primary}; font-weight: 600; text-decoration: none; display: inline-block; margin-top: 15px;">Read More →</a>
+                                                <h3 style="font-size: 18px; margin: 0 0 10px 0; color: ${textColor};">${title}</h3>
+                                                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 0 0 15px 0;">Expert advice from our medical professionals...</p>
+                                                <a href="#" style="color: ${primary}; font-weight: 600; text-decoration: none;">Read More →</a>
                                             </div>
                                         </div>
                                     `).join('')}
@@ -1521,27 +1749,91 @@ $allow_color_customization = $form->allow_color_customization;
                         `;
                         break;
                         
-                    default:
-                        if (section.section_type !== 'header' && section.section_type !== 'footer') {
-                            html += `
-                                <div style="padding: 40px 20px;">
-                                    <h3 style="color: ${primary}; margin-bottom: 15px;">${section.section_name}</h3>
-                                    <p style="color: #666;">Content section</p>
+                    case 'team':
+                        html += `
+                            <div style="padding: 60px 20px; background: ${background};">
+                                <div style="text-align: center; margin-bottom: 40px;">
+                                    <h2 style="font-size: 32px; color: ${primary}; margin: 0 0 10px 0;">Our Medical Team</h2>
+                                    <p style="color: #666; margin: 0;">Meet our experienced healthcare professionals</p>
                                 </div>
-                            `;
-                        }
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; max-width: 1000px; margin: 0 auto;">
+                                    ${['Dr. Sarah Johnson', 'Dr. Michael Chen', 'Dr. Emily Brown'].map((name, i) => `
+                                        <div style="background: #fff; border-radius: 15px; padding: 30px; text-align: center; box-shadow: 0 5px 25px rgba(0,0,0,0.08);">
+                                            <div style="width: 100px; height: 100px; background: linear-gradient(135deg, ${primary}, ${secondary}); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #fff; font-size: 36px; font-weight: 700;">${name.charAt(4)}</div>
+                                            <h3 style="font-size: 18px; margin: 0 0 5px 0; color: ${textColor};">${name}</h3>
+                                            <p style="color: ${primary}; font-weight: 600; margin: 0 0 10px 0;">${['Cardiology', 'Neurology', 'Pediatrics'][i]}</p>
+                                            <p style="color: #666; font-size: 14px; margin: 0;">15+ years experience</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
                 }
             });
             
             return html;
         }
         
+        function renderFooter(primary, footerBg, logoText, phone, email) {
+            // Get footer values if available
+            const footerAbout = getFieldValue(0, 7, 'footer_about', `${logoText} has been serving our community for decades, providing exceptional healthcare with compassion and excellence.`);
+            const footerAddress = getFieldValue(0, 7, 'footer_address', '123 Medical Center Drive\nHealthcare District\nYour City, State 12345');
+            const copyright = getFieldValue(0, 7, 'copyright', `© ${new Date().getFullYear()} ${logoText}. All rights reserved.`);
+            
+            return `
+                <footer style="background: ${footerBg}; color: #fff; padding: 50px 20px 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto 30px;">
+                        <div>
+                            <h4 style="font-size: 18px; margin: 0 0 15px 0; position: relative; padding-bottom: 10px;">
+                                About Us
+                                <span style="position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: ${primary};"></span>
+                            </h4>
+                            <p style="opacity: 0.8; font-size: 14px; line-height: 1.7; margin: 0;">${footerAbout}</p>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 18px; margin: 0 0 15px 0; position: relative; padding-bottom: 10px;">
+                                Quick Links
+                                <span style="position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: ${primary};"></span>
+                            </h4>
+                            <p style="opacity: 0.8; font-size: 14px; line-height: 2.2; margin: 0;">
+                                <a href="#" style="color: rgba(255,255,255,0.8); text-decoration: none;">Home</a><br>
+                                <a href="#" style="color: rgba(255,255,255,0.8); text-decoration: none;">About Us</a><br>
+                                <a href="#" style="color: rgba(255,255,255,0.8); text-decoration: none;">Services</a><br>
+                                <a href="#" style="color: rgba(255,255,255,0.8); text-decoration: none;">Contact</a>
+                            </p>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 18px; margin: 0 0 15px 0; position: relative; padding-bottom: 10px;">
+                                Contact Info
+                                <span style="position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: ${primary};"></span>
+                            </h4>
+                            <p style="opacity: 0.8; font-size: 14px; line-height: 1.8; margin: 0;">
+                                📍 ${footerAddress.replace(/\n/g, '<br>')}<br><br>
+                                📞 ${phone}<br>
+                                ✉️ ${email}
+                            </p>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; opacity: 0.7; font-size: 13px;">
+                        ${copyright}
+                    </div>
+                </footer>
+            `;
+        }
+        
         function submitOrder() {
-            const customerName = $('#customer-name').val();
-            const customerEmail = $('#customer-email').val();
+            const customerName = $('#customer-name').val().trim();
+            const customerEmail = $('#customer-email').val().trim();
             
             if (!customerName || !customerEmail) {
-                alert('Please enter your name and email.');
+                alert('Please enter your name and email address.');
+                return;
+            }
+            
+            // Validate email
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+                alert('Please enter a valid email address.');
                 return;
             }
             
@@ -1560,19 +1852,20 @@ $allow_color_customization = $form->allow_color_customization;
                 customer_phone: $('#customer-phone').val()
             };
             
-            $('.btn-submit').text('Submitting...').prop('disabled', true);
+            $('.btn-submit').html('<i class="bi bi-hourglass-split"></i> Submitting...').prop('disabled', true);
             
             $.post(ajaxUrl, data, function(response) {
                 if (response.success) {
                     $('.step-section').removeClass('active');
                     $('#step-success').addClass('active');
                     $('.progress-steps').hide();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
-                    alert(response.data.message || 'Failed to submit. Please try again.');
+                    alert(response.data.message || 'Failed to submit order. Please try again.');
                     $('.btn-submit').html('<i class="bi bi-check-lg"></i> Submit Website Order').prop('disabled', false);
                 }
             }).fail(function() {
-                alert('An error occurred. Please try again.');
+                alert('An error occurred. Please check your connection and try again.');
                 $('.btn-submit').html('<i class="bi bi-check-lg"></i> Submit Website Order').prop('disabled', false);
             });
         }

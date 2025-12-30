@@ -22,13 +22,13 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
 
 <div class="wrap spfm-admin-wrap">
     <h1 class="wp-heading-inline">
-        <span class="dashicons dashicons-media-document"></span> Website Orders
+        <span class="dashicons dashicons-feedback"></span> Forms
     </h1>
     
     <?php if ($action === 'list'): ?>
-        <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="page-title-action">Create New Order Form</a>
+        <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="page-title-action">Create New Form</a>
         
-        <p class="description">Create order forms and share with customers. Customers can select a website template, fill their content, and submit.</p>
+        <p class="description">Create forms and share with customers. Customers can select a website template, fill their content, and submit.</p>
         
         <?php 
         $forms = $forms_handler->get_all(array('per_page' => 50));
@@ -37,10 +37,10 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
         <div class="forms-container">
             <?php if (empty($forms)): ?>
                 <div class="empty-state">
-                    <span class="dashicons dashicons-media-document"></span>
-                    <h3>No Order Forms Yet</h3>
-                    <p>Create your first order form to let customers select and customize website templates.</p>
-                    <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="button button-primary button-hero">Create Order Form</a>
+                    <span class="dashicons dashicons-feedback"></span>
+                    <h3>No Forms Yet</h3>
+                    <p>Create your first form to let customers select and customize website templates.</p>
+                    <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="button button-primary button-hero">Create Form</a>
                 </div>
             <?php else: ?>
                 <div class="forms-grid">
@@ -120,7 +120,7 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
             <div class="share-header">
                 <div class="share-header-content">
                     <h2><?php echo esc_html($form->name); ?></h2>
-                    <p>Share this order form with customers via email, WhatsApp, or copy the link.</p>
+                    <p>Share this form with customers via email, WhatsApp, or copy the link.</p>
                 </div>
             </div>
             
@@ -260,7 +260,7 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="<?php echo home_url('/spfm-form/' . $s->token . '/'); ?>" target="_blank" class="button button-small">
+                                        <a href="<?php echo home_url('/?spfm_token=' . $s->token); ?>" target="_blank" class="button button-small">
                                             <span class="dashicons dashicons-external"></span>
                                         </a>
                                     </td>
@@ -290,7 +290,7 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                             <label for="name">Form Name *</label>
                             <input type="text" name="name" id="name" required 
                                    value="<?php echo $form ? esc_attr($form->name) : ''; ?>" 
-                                   placeholder="e.g., Website Order Form">
+                                   placeholder="e.g., Hospital Website Form">
                         </div>
                         
                         <div class="form-field">
@@ -317,7 +317,6 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                                     <div class="template-select-info">
                                         <h4><?php echo esc_html($theme->name); ?></h4>
                                         <span class="category"><?php echo esc_html($themes_handler->get_categories()[$theme->category] ?? $theme->category); ?></span>
-                                        <span class="pages-count"><?php echo count($themes_handler->get_theme_pages($theme->id)); ?> pages</span>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -370,7 +369,7 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
                         <div class="form-field">
                             <label for="success_message">Success Message</label>
                             <textarea name="success_message" id="success_message" rows="2" 
-                                      placeholder="Thank you! Your website order has been submitted successfully."><?php echo $form ? esc_textarea($form->success_message) : 'Thank you! Your website order has been submitted successfully. We will contact you shortly.'; ?></textarea>
+                                      placeholder="Thank you! Your submission has been received successfully."><?php echo $form ? esc_textarea($form->success_message) : 'Thank you! Your submission has been received successfully. We will contact you shortly.'; ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -427,7 +426,7 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
     color: #fff;
 }
 .form-card-header h3 {
@@ -466,7 +465,7 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
 }
 .stat-icon {
     display: block;
-    color: #667eea;
+    color: #0891b2;
 }
 .stat-value {
     display: block;
@@ -519,7 +518,7 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
     margin-top: 20px;
 }
 .share-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
     padding: 30px;
     border-radius: 12px;
     color: #fff;
@@ -663,9 +662,9 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
 .form-field input:focus,
 .form-field textarea:focus,
 .form-field select:focus {
-    border-color: #667eea;
+    border-color: #0891b2;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    box-shadow: 0 0 0 3px rgba(8,145,178,0.1);
 }
 .checkbox-field label {
     display: flex;
@@ -699,11 +698,11 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
     transition: all 0.2s;
 }
 .template-select-card:hover {
-    border-color: #667eea;
+    border-color: #0891b2;
 }
 .template-select-card.selected {
-    border-color: #667eea;
-    background: #f0f4ff;
+    border-color: #0891b2;
+    background: #f0fdfa;
 }
 .select-indicator {
     position: absolute;
@@ -718,7 +717,7 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
     justify-content: center;
 }
 .template-select-card.selected .select-indicator {
-    background: #667eea;
+    background: #0891b2;
 }
 .select-indicator .dashicons {
     color: #fff;
@@ -745,11 +744,6 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
     padding: 2px 8px;
     border-radius: 10px;
     color: #666;
-}
-.template-select-info .pages-count {
-    font-size: 11px;
-    color: #999;
-    margin-left: 5px;
 }
 
 /* Editor Sidebar */
@@ -779,7 +773,7 @@ $customers = $customers_handler->get_all(array('per_page' => 200, 'status' => 1)
 #selected-count .count {
     font-size: 28px;
     font-weight: 700;
-    color: #667eea;
+    color: #0891b2;
     display: block;
 }
 

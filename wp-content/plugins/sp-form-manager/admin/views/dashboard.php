@@ -38,8 +38,8 @@ $recent_submissions = $wpdb->get_results("
             <p>Create, customize, and share professional hospital website templates with your clients</p>
         </div>
         <div class="header-actions">
-            <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=new'); ?>" class="btn btn-white">
-                <span class="dashicons dashicons-plus-alt"></span> New Order Form
+            <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="btn btn-white">
+                <span class="dashicons dashicons-plus-alt"></span> New Form
             </a>
             <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="btn btn-outline">
                 <span class="dashicons dashicons-layout"></span> View Templates
@@ -67,7 +67,7 @@ $recent_submissions = $wpdb->get_results("
             <div class="stat-content">
                 <div class="stat-number"><?php echo intval($forms_count); ?></div>
                 <div class="stat-label">Active Forms</div>
-                <div class="stat-detail">Order forms ready to share</div>
+                <div class="stat-detail">Forms ready to share</div>
             </div>
         </div>
         
@@ -77,11 +77,11 @@ $recent_submissions = $wpdb->get_results("
             </div>
             <div class="stat-content">
                 <div class="stat-number"><?php echo intval($submissions_count); ?></div>
-                <div class="stat-label">Total Orders</div>
+                <div class="stat-label">Total Submissions</div>
                 <?php if ($new_submissions > 0): ?>
-                    <div class="stat-detail stat-highlight"><?php echo $new_submissions; ?> new orders pending</div>
+                    <div class="stat-detail stat-highlight"><?php echo $new_submissions; ?> new submissions pending</div>
                 <?php else: ?>
-                    <div class="stat-detail">Website orders received</div>
+                    <div class="stat-detail">Form submissions received</div>
                 <?php endif; ?>
             </div>
         </div>
@@ -117,17 +117,17 @@ $recent_submissions = $wpdb->get_results("
                         </div>
                     </a>
                     
-                    <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=new'); ?>" class="action-btn">
+                    <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="action-btn">
                         <div class="action-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
                             <span class="dashicons dashicons-plus-alt"></span>
                         </div>
                         <div class="action-text">
-                            <strong>Create Order Form</strong>
+                            <strong>Create Form</strong>
                             <span>Set up new form for clients</span>
                         </div>
                     </a>
                     
-                    <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=new'); ?>" class="action-btn">
+                    <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=add'); ?>" class="action-btn">
                         <div class="action-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                             <span class="dashicons dashicons-businessman"></span>
                         </div>
@@ -143,7 +143,7 @@ $recent_submissions = $wpdb->get_results("
                         </div>
                         <div class="action-text">
                             <strong>View Submissions</strong>
-                            <span>Review website orders</span>
+                            <span>Review form submissions</span>
                         </div>
                     </a>
                 </div>
@@ -153,7 +153,7 @@ $recent_submissions = $wpdb->get_results("
         <!-- Recent Submissions -->
         <div class="dashboard-card">
             <div class="card-header">
-                <h3><span class="dashicons dashicons-clock"></span> Recent Website Orders</h3>
+                <h3><span class="dashicons dashicons-clock"></span> Recent Submissions</h3>
                 <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="view-all">View All →</a>
             </div>
             <div class="card-body">
@@ -183,8 +183,8 @@ $recent_submissions = $wpdb->get_results("
                 <?php else: ?>
                     <div class="empty-state">
                         <span class="dashicons dashicons-portfolio"></span>
-                        <p>No website orders yet</p>
-                        <small>Orders will appear here when customers submit</small>
+                        <p>No submissions yet</p>
+                        <small>Submissions will appear here when customers submit forms</small>
                     </div>
                 <?php endif; ?>
             </div>
