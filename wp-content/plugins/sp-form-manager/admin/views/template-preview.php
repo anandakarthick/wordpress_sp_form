@@ -44,13 +44,6 @@ $footerBg = $theme->footer_bg_color ?: '#0f172a';
 $fontFamily = $theme->font_family ?: 'Inter';
 $headingFont = $theme->heading_font ?: 'Poppins';
 
-// Get content values
-$logoText = get_preview_value($defaults, 'logo_text', $theme->name);
-$phone = get_preview_value($defaults, 'phone', '+1 (555) 123-4567');
-$email = get_preview_value($defaults, 'email', 'info@example.com');
-$headline = get_preview_value($defaults, 'headline', 'Your Health, Our Priority');
-$subheadline = get_preview_value($defaults, 'subheadline', 'Providing compassionate, world-class healthcare services.');
-
 // Category icons and data
 $categoryData = array(
     'hospital' => array('icon' => '🏥', 'name' => 'General Hospital'),
@@ -80,29 +73,41 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             --text: <?php echo esc_attr($textColor); ?>;
             --header-bg: <?php echo esc_attr($headerBg); ?>;
             --footer-bg: <?php echo esc_attr($footerBg); ?>;
+            --admin-bar-height: 70px;
         }
         
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        html {
+            height: 100%;
+            overflow-x: hidden;
+        }
         
         body {
             font-family: '<?php echo esc_attr($fontFamily); ?>', sans-serif;
             color: var(--text);
             background: var(--background);
             line-height: 1.6;
-            padding-top: 70px;
+            min-height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
         
         h1, h2, h3, h4 {
             font-family: '<?php echo esc_attr($headingFont); ?>', sans-serif;
         }
         
-        /* Admin Bar */
+        /* Admin Bar - Fixed at top */
         .admin-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 70px;
+            height: var(--admin-bar-height);
             background: linear-gradient(135deg, #1e293b, #0f172a);
             color: #fff;
             padding: 0 30px;
@@ -156,8 +161,20 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
         }
         .admin-bar .btn-edit:hover { opacity: 0.9; }
         
+        /* Preview Content Wrapper - Below admin bar */
+        .preview-wrapper {
+            margin-top: var(--admin-bar-height);
+            min-height: calc(100vh - var(--admin-bar-height));
+            position: relative;
+            z-index: 1;
+        }
+        
         /* Common Styles */
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 20px; 
+        }
         
         /* Top Bar */
         .top-bar {
@@ -167,6 +184,8 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             font-size: 13px;
             display: flex;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         /* Header */
@@ -178,8 +197,10 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             align-items: center;
             box-shadow: 0 2px 15px rgba(0,0,0,0.05);
             position: sticky;
-            top: 70px;
+            top: var(--admin-bar-height);
             z-index: 1000;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         .logo {
             font-size: 24px;
@@ -189,7 +210,11 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             align-items: center;
             gap: 10px;
         }
-        .nav { display: flex; gap: 25px; }
+        .nav { 
+            display: flex; 
+            gap: 25px; 
+            flex-wrap: wrap;
+        }
         .nav a {
             color: var(--text);
             text-decoration: none;
@@ -206,6 +231,7 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
+            white-space: nowrap;
         }
         
         /* Hero */
@@ -246,6 +272,7 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             font-size: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             transition: transform 0.3s;
+            display: inline-block;
         }
         .btn-primary:hover { transform: translateY(-3px); }
         .btn-outline {
@@ -256,11 +283,16 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             text-decoration: none;
             font-weight: 600;
             border: 2px solid rgba(255,255,255,0.5);
+            display: inline-block;
         }
         .btn-outline:hover { background: rgba(255,255,255,0.1); }
         
         /* Section */
-        section { padding: 80px 30px; }
+        section { 
+            padding: 80px 30px; 
+            position: relative;
+            z-index: 1;
+        }
         .section-title {
             text-align: center;
             margin-bottom: 50px;
@@ -280,6 +312,8 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         .card {
             background: #fff;
@@ -288,6 +322,7 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             text-align: center;
             box-shadow: 0 10px 40px rgba(0,0,0,0.08);
             transition: transform 0.3s;
+            position: relative;
         }
         .card:hover { transform: translateY(-8px); }
         .card-icon {
@@ -339,6 +374,8 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             background: var(--footer-bg);
             color: #fff;
             padding: 60px 30px 30px;
+            position: relative;
+            z-index: 1;
         }
         .footer-grid {
             display: grid;
@@ -358,6 +395,7 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             opacity: 0.8;
             font-size: 14px;
             margin-bottom: 8px;
+            line-height: 1.7;
         }
         .footer ul { list-style: none; }
         .footer a {
@@ -373,81 +411,6 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             font-size: 13px;
         }
         
-        /* Category Specific Styles */
-        <?php if ($category === 'dental'): ?>
-        .hero::before {
-            content: '😊';
-            position: absolute;
-            font-size: 200px;
-            opacity: 0.1;
-            right: 10%;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        <?php elseif ($category === 'eye_care'): ?>
-        .hero::before {
-            content: '👁️';
-            position: absolute;
-            font-size: 200px;
-            opacity: 0.1;
-            right: 10%;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        <?php elseif ($category === 'pediatric'): ?>
-        .hero::before {
-            content: '🎈🌈⭐';
-            position: absolute;
-            font-size: 100px;
-            opacity: 0.15;
-            right: 5%;
-            top: 20%;
-        }
-        <?php elseif ($category === 'cardiology'): ?>
-        .hero::before {
-            content: '❤️';
-            position: absolute;
-            font-size: 200px;
-            opacity: 0.1;
-            right: 10%;
-            top: 50%;
-            transform: translateY(-50%);
-            animation: heartbeat 1s ease-in-out infinite;
-        }
-        @keyframes heartbeat {
-            0%, 100% { transform: translateY(-50%) scale(1); }
-            50% { transform: translateY(-50%) scale(1.1); }
-        }
-        <?php elseif ($category === 'mental_health'): ?>
-        .hero::before {
-            content: '🌿🦋🌸';
-            position: absolute;
-            font-size: 80px;
-            opacity: 0.15;
-            right: 5%;
-            top: 20%;
-        }
-        <?php elseif ($category === 'orthopedic'): ?>
-        .hero::before {
-            content: '🏃';
-            position: absolute;
-            font-size: 200px;
-            opacity: 0.1;
-            right: 10%;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        <?php elseif ($category === 'diagnostic'): ?>
-        .hero::before {
-            content: '🔬🧪';
-            position: absolute;
-            font-size: 120px;
-            opacity: 0.1;
-            right: 5%;
-            top: 30%;
-        }
-        <?php endif; ?>
-        
         /* Alert Banner */
         .alert-banner {
             background: #dc2626;
@@ -457,12 +420,14 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             justify-content: space-between;
             align-items: center;
             font-size: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .alert-banner.crisis {
             background: var(--primary);
         }
         
-        /* LASIK Banner */
+        /* Promo Banner */
         .promo-banner {
             background: linear-gradient(90deg, var(--accent), var(--primary));
             color: #fff;
@@ -470,6 +435,8 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         .promo-banner h3 {
             font-size: 20px;
@@ -518,6 +485,8 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
+            max-width: 1000px;
+            margin: 0 auto;
         }
         .package-card {
             background: #fff;
@@ -576,8 +545,10 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
         /* Team Grid */
         .team-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 30px;
+            max-width: 1100px;
+            margin: 0 auto;
         }
         .team-card {
             background: #fff;
@@ -587,28 +558,29 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
             text-align: center;
         }
         .team-photo {
-            height: 200px;
+            height: 180px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .team-avatar {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             background: rgba(255,255,255,0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            font-size: 36px;
             color: #fff;
+            font-weight: 700;
         }
         .team-info {
             padding: 25px;
         }
         .team-info h3 {
-            font-size: 20px;
+            font-size: 18px;
             margin-bottom: 5px;
         }
         .team-info .role {
@@ -639,7 +611,10 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
         
         /* Responsive */
         @media (max-width: 768px) {
-            body { padding-top: 0; }
+            :root {
+                --admin-bar-height: auto;
+            }
+            
             .admin-bar {
                 position: relative;
                 flex-direction: column;
@@ -651,23 +626,49 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
                 flex-wrap: wrap;
                 justify-content: center;
             }
+            
+            .preview-wrapper {
+                margin-top: 0;
+            }
+            
             .header {
                 position: relative;
                 top: 0;
                 flex-direction: column;
                 gap: 15px;
+                text-align: center;
             }
-            .nav { display: none; }
-            .hero { padding: 50px 20px; }
-            .hero h1 { font-size: 32px; }
-            .hero p { font-size: 16px; }
-            section { padding: 50px 20px; }
-            .section-title h2 { font-size: 28px; }
-            .stat-num { font-size: 36px; }
+            .nav { 
+                display: none; 
+            }
+            .hero { 
+                padding: 50px 20px; 
+            }
+            .hero h1 { 
+                font-size: 32px; 
+            }
+            .hero p { 
+                font-size: 16px; 
+            }
+            section { 
+                padding: 50px 20px; 
+            }
+            .section-title h2 { 
+                font-size: 28px; 
+            }
+            .stat-num { 
+                font-size: 36px; 
+            }
             .promo-banner {
                 flex-direction: column;
                 gap: 15px;
                 text-align: center;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .team-grid {
+                grid-template-columns: 1fr !important;
             }
         }
     </style>
@@ -688,37 +689,18 @@ $catInfo = $categoryData[$category] ?? array('icon' => '🏥', 'name' => 'Hospit
         </div>
     </div>
 
-    <?php 
-    // Include category-specific preview
-    switch ($category) {
-        case 'hospital':
+    <!-- Preview Content Wrapper -->
+    <div class="preview-wrapper">
+        <?php 
+        // Include category-specific preview
+        $preview_file = __DIR__ . '/previews/preview-' . str_replace('_', '-', $category) . '.php';
+        if (file_exists($preview_file)) {
+            include $preview_file;
+        } else {
             include __DIR__ . '/previews/preview-hospital.php';
-            break;
-        case 'dental':
-            include __DIR__ . '/previews/preview-dental.php';
-            break;
-        case 'eye_care':
-            include __DIR__ . '/previews/preview-eye-care.php';
-            break;
-        case 'pediatric':
-            include __DIR__ . '/previews/preview-pediatric.php';
-            break;
-        case 'cardiology':
-            include __DIR__ . '/previews/preview-cardiology.php';
-            break;
-        case 'mental_health':
-            include __DIR__ . '/previews/preview-mental-health.php';
-            break;
-        case 'orthopedic':
-            include __DIR__ . '/previews/preview-orthopedic.php';
-            break;
-        case 'diagnostic':
-            include __DIR__ . '/previews/preview-diagnostic.php';
-            break;
-        default:
-            include __DIR__ . '/previews/preview-hospital.php';
-    }
-    ?>
+        }
+        ?>
+    </div>
 
 </body>
 </html>

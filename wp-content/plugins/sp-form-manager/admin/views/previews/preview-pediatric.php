@@ -10,7 +10,7 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'A magical place wher
 
 <style>
 .playful-float {
-    position: fixed;
+    position: absolute;
     font-size: 40px;
     opacity: 0.15;
     z-index: 0;
@@ -22,10 +22,7 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'A magical place wher
 }
 </style>
 
-<span class="playful-float" style="top: 100px; left: 5%;">⭐</span>
-<span class="playful-float" style="top: 200px; right: 8%; animation-delay: 1s;">🎈</span>
-<span class="playful-float" style="top: 400px; left: 3%; animation-delay: 2s;">🌈</span>
-<span class="playful-float" style="top: 600px; right: 5%; animation-delay: 0.5s;">🦋</span>
+
 
 <!-- Header -->
 <header class="header" style="background: linear-gradient(90deg, #fff 0%, #fef3c7 100%);">
@@ -44,7 +41,11 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'A magical place wher
 </header>
 
 <!-- Hero -->
-<section class="hero" style="padding: 80px 30px;">
+<section class="hero" style="padding: 80px 30px; position: relative; overflow: hidden;">
+    <span style="position: absolute; top: 20px; left: 5%; font-size: 40px; opacity: 0.2; animation: float 4s ease-in-out infinite;">⭐</span>
+    <span style="position: absolute; top: 40px; right: 8%; font-size: 40px; opacity: 0.2; animation: float 4s ease-in-out infinite; animation-delay: 1s;">🎈</span>
+    <span style="position: absolute; bottom: 30px; left: 8%; font-size: 40px; opacity: 0.2; animation: float 4s ease-in-out infinite; animation-delay: 2s;">🌈</span>
+    <span style="position: absolute; bottom: 20px; right: 5%; font-size: 40px; opacity: 0.2; animation: float 4s ease-in-out infinite; animation-delay: 0.5s;">🦋</span>
     <div style="font-size: 80px; margin-bottom: 20px;">🦸‍♀️ 🦸‍♂️</div>
     <h1><?php echo esc_html($headline); ?></h1>
     <p><?php echo esc_html($subheadline); ?></p>

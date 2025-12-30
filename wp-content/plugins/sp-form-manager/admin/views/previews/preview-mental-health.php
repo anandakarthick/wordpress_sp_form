@@ -10,7 +10,7 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Compassionate mental
 
 <style>
 .nature-float {
-    position: fixed;
+    position: absolute;
     font-size: 30px;
     opacity: 0.2;
     z-index: 0;
@@ -22,10 +22,7 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Compassionate mental
 }
 </style>
 
-<span class="nature-float" style="top: 120px; left: 3%;">🍃</span>
-<span class="nature-float" style="top: 250px; right: 5%; animation-delay: 1s;">🦋</span>
-<span class="nature-float" style="top: 450px; left: 5%; animation-delay: 2s;">🌸</span>
-<span class="nature-float" style="top: 650px; right: 3%; animation-delay: 1.5s;">🌿</span>
+
 
 <!-- Crisis Banner -->
 <div class="alert-banner crisis">
@@ -51,7 +48,11 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Compassionate mental
 </header>
 
 <!-- Hero -->
-<section class="hero" style="padding: 100px 30px;">
+<section class="hero" style="padding: 100px 30px; position: relative; overflow: hidden;">
+    <span style="position: absolute; top: 30px; left: 5%; font-size: 30px; opacity: 0.15; animation: floatGentle 5s ease-in-out infinite;">🍃</span>
+    <span style="position: absolute; top: 50px; right: 8%; font-size: 30px; opacity: 0.15; animation: floatGentle 5s ease-in-out infinite; animation-delay: 1s;">🦋</span>
+    <span style="position: absolute; bottom: 40px; left: 8%; font-size: 30px; opacity: 0.15; animation: floatGentle 5s ease-in-out infinite; animation-delay: 2s;">🌸</span>
+    <span style="position: absolute; bottom: 30px; right: 5%; font-size: 30px; opacity: 0.15; animation: floatGentle 5s ease-in-out infinite; animation-delay: 1.5s;">🌿</span>
     <div style="font-size: 80px; margin-bottom: 20px; animation: grow 3s ease-in-out infinite;">🌱</div>
     <h1><?php echo esc_html($headline); ?></h1>
     <p><?php echo esc_html($subheadline); ?></p>
