@@ -1,18 +1,44 @@
 <?php
 /**
  * Preview: Diagnostic Lab - Tech-Forward Data-Centric
+ * Uses site_content values for all editable fields
  */
-$logoText = get_preview_value($defaults, 'logo_text', 'PrecisionLab Diagnostics');
-$phone = get_preview_value($defaults, 'phone', '+1 (555) 890-1234');
-$headline = get_preview_value($defaults, 'headline', 'Accurate Results, Better Health');
-$subheadline = get_preview_value($defaults, 'subheadline', 'State-of-the-art diagnostic testing with quick turnaround. 500+ tests, online reports, and convenient home collection.');
+
+// Get values from site_content (set in template-preview.php)
+$businessName = get_site_content($site_content, 'business_name', 'PrecisionLab Diagnostics');
+$tagline = get_site_content($site_content, 'tagline', 'NABL Accredited');
+$aboutShort = get_site_content($site_content, 'about_short', 'Your trusted partner for accurate diagnostic testing. NABL accredited labs with state-of-the-art technology.');
+
+$phone = get_site_content($site_content, 'phone', '+1 (555) 890-1234');
+$emergency = get_site_content($site_content, 'emergency', '+1 (555) 890-9999');
+$email = get_site_content($site_content, 'email', 'tests@precisionlab.com');
+$hours = get_site_content($site_content, 'hours', '24/7 Online Booking');
+$address = get_site_content($site_content, 'address', '111 Lab Lane, Diagnostic Center');
+
+$heroHeadline = get_site_content($site_content, 'hero_headline', 'Accurate Results, Better Health');
+$heroSubheadline = get_site_content($site_content, 'hero_subheadline', 'State-of-the-art diagnostic testing with quick turnaround. 500+ tests, online reports, and convenient home collection.');
+$heroBtnPrimary = get_site_content($site_content, 'hero_btn_primary', 'Book a Test');
+$heroBtnSecondary = get_site_content($site_content, 'hero_btn_secondary', 'View Test Catalog');
+
+$stat1Num = get_site_content($site_content, 'stat1_num', '1M+');
+$stat1Label = get_site_content($site_content, 'stat1_label', 'Tests Done');
+$stat2Num = get_site_content($site_content, 'stat2_num', '99.9%');
+$stat2Label = get_site_content($site_content, 'stat2_label', 'Accuracy');
+$stat3Num = get_site_content($site_content, 'stat3_num', '50+');
+$stat3Label = get_site_content($site_content, 'stat3_label', 'Centers');
+$stat4Num = get_site_content($site_content, 'stat4_num', '24h');
+$stat4Label = get_site_content($site_content, 'stat4_label', 'Report Time');
+
+$ctaHeadline = get_site_content($site_content, 'cta_headline', 'Book Your Health Checkup Today');
+$ctaDescription = get_site_content($site_content, 'cta_description', 'Take charge of your health with regular preventive testing. Accurate results, trusted care.');
+$ctaButton = get_site_content($site_content, 'cta_button', 'Book a Test');
 ?>
 
 <!-- Header -->
 <header class="header">
     <div class="logo">
         <span>🔬</span>
-        <?php echo esc_html($logoText); ?>
+        <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav">
         <a href="#">Home</a>
@@ -34,11 +60,11 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'State-of-the-art dia
         <span style="animation: shake 0.5s ease-in-out infinite;">🧪</span>
         <span>🔬</span>
     </div>
-    <h1><?php echo esc_html($headline); ?></h1>
-    <p><?php echo esc_html($subheadline); ?></p>
+    <h1><?php echo esc_html($heroHeadline); ?></h1>
+    <p><?php echo esc_html($heroSubheadline); ?></p>
     <div class="hero-btns">
-        <a href="#" class="btn-primary">Book a Test</a>
-        <a href="#" class="btn-outline">View Test Catalog</a>
+        <a href="#" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
+        <a href="#" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
     </div>
 </section>
 
@@ -148,20 +174,20 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'State-of-the-art dia
 <section class="stats-section">
     <div class="stats-grid">
         <div>
-            <div class="stat-num">1M+</div>
-            <div class="stat-label">Tests Done</div>
+            <div class="stat-num"><?php echo esc_html($stat1Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat1Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">99.9%</div>
-            <div class="stat-label">Accuracy</div>
+            <div class="stat-num"><?php echo esc_html($stat2Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat2Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">50+</div>
-            <div class="stat-label">Centers</div>
+            <div class="stat-num"><?php echo esc_html($stat3Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat3Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">24h</div>
-            <div class="stat-label">Report Time</div>
+            <div class="stat-num"><?php echo esc_html($stat4Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat4Label); ?></div>
         </div>
     </div>
 </section>
@@ -207,17 +233,17 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'State-of-the-art dia
 
 <!-- CTA -->
 <section class="cta-section">
-    <h2>Book Your Health Checkup Today</h2>
-    <p>Take charge of your health with regular preventive testing. Accurate results, trusted care.</p>
-    <a href="#" class="btn-primary">🧪 Book a Test</a>
+    <h2><?php echo esc_html($ctaHeadline); ?></h2>
+    <p><?php echo esc_html($ctaDescription); ?></p>
+    <a href="#" class="btn-primary">🧪 <?php echo esc_html($ctaButton); ?></a>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
     <div class="footer-grid">
         <div>
-            <h4>🔬 <?php echo esc_html($logoText); ?></h4>
-            <p>Your trusted partner for accurate diagnostic testing. NABL accredited labs with state-of-the-art technology.</p>
+            <h4>🔬 <?php echo esc_html($businessName); ?></h4>
+            <p><?php echo esc_html($aboutShort); ?></p>
         </div>
         <div>
             <h4>Popular Tests</h4>
@@ -242,14 +268,14 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'State-of-the-art dia
         <div>
             <h4>Contact</h4>
             <p>
-                📍 111 Lab Lane<br>
-                Diagnostic Center<br><br>
+                📍 <?php echo nl2br(esc_html($address)); ?><br><br>
                 📞 <?php echo esc_html($phone); ?><br>
-                ⏰ 24/7 Online Booking
+                ✉️ <?php echo esc_html($email); ?><br>
+                ⏰ <?php echo esc_html($hours); ?>
             </p>
         </div>
     </div>
     <div class="footer-bottom">
-        © <?php echo date('Y'); ?> <?php echo esc_html($logoText); ?>. NABL Accredited.
+        © <?php echo date('Y'); ?> <?php echo esc_html($businessName); ?>. <?php echo esc_html($tagline); ?>.
     </div>
 </footer>

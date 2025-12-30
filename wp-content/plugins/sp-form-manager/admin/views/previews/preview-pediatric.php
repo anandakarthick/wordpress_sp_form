@@ -1,11 +1,37 @@
 <?php
 /**
  * Preview: Pediatric Hospital - Child-Friendly Playful
+ * Uses site_content values for all editable fields
  */
-$logoText = get_preview_value($defaults, 'logo_text', 'Happy Kids Hospital');
-$phone = get_preview_value($defaults, 'phone', '+1 (555) 456-7890');
-$headline = get_preview_value($defaults, 'headline', 'Where Little Heroes Get Big Care!');
-$subheadline = get_preview_value($defaults, 'subheadline', 'A magical place where healing happens with smiles. Our child-friendly environment makes hospital visits fun and less scary.');
+
+// Get values from site_content (set in template-preview.php)
+$businessName = get_site_content($site_content, 'business_name', 'Happy Kids Hospital');
+$tagline = get_site_content($site_content, 'tagline', 'Where Healing is Fun!');
+$aboutShort = get_site_content($site_content, 'about_short', 'Where healing is an adventure! We make hospital visits fun and comfortable for children of all ages.');
+
+$phone = get_site_content($site_content, 'phone', '+1 (555) 456-7890');
+$emergency = get_site_content($site_content, 'emergency', '911');
+$email = get_site_content($site_content, 'email', 'info@happykids.com');
+$hours = get_site_content($site_content, 'hours', 'Open 24/7');
+$address = get_site_content($site_content, 'address', '123 Rainbow Lane, Kidsville, State 12345');
+
+$heroHeadline = get_site_content($site_content, 'hero_headline', 'Where Little Heroes Get Big Care!');
+$heroSubheadline = get_site_content($site_content, 'hero_subheadline', 'A magical place where healing happens with smiles. Our child-friendly environment makes hospital visits fun and less scary.');
+$heroBtnPrimary = get_site_content($site_content, 'hero_btn_primary', 'Virtual Tour');
+$heroBtnSecondary = get_site_content($site_content, 'hero_btn_secondary', 'Book Visit');
+
+$stat1Num = get_site_content($site_content, 'stat1_num', '100K+');
+$stat1Label = get_site_content($site_content, 'stat1_label', 'Kids Treated');
+$stat2Num = get_site_content($site_content, 'stat2_num', '150');
+$stat2Label = get_site_content($site_content, 'stat2_label', 'Specialists');
+$stat3Num = get_site_content($site_content, 'stat3_num', '24/7');
+$stat3Label = get_site_content($site_content, 'stat3_label', 'Pediatric ER');
+$stat4Num = get_site_content($site_content, 'stat4_num', '4.9');
+$stat4Label = get_site_content($site_content, 'stat4_label', 'Parent Rating');
+
+$ctaHeadline = get_site_content($site_content, 'cta_headline', 'Schedule a Fun Visit!');
+$ctaDescription = get_site_content($site_content, 'cta_description', 'Our kid-friendly facility makes healthcare an adventure. Book your child\'s appointment today!');
+$ctaButton = get_site_content($site_content, 'cta_button', 'Book Appointment');
 ?>
 
 <style>
@@ -22,13 +48,11 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'A magical place wher
 }
 </style>
 
-
-
 <!-- Header -->
 <header class="header" style="background: linear-gradient(90deg, #fff 0%, #fef3c7 100%);">
     <div class="logo">
         <span>🧸</span>
-        <?php echo esc_html($logoText); ?>
+        <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav" style="font-size: 20px;">
         <a href="#">🏠</a>
@@ -47,11 +71,11 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'A magical place wher
     <span style="position: absolute; bottom: 30px; left: 8%; font-size: 40px; opacity: 0.2; animation: float 4s ease-in-out infinite; animation-delay: 2s;">🌈</span>
     <span style="position: absolute; bottom: 20px; right: 5%; font-size: 40px; opacity: 0.2; animation: float 4s ease-in-out infinite; animation-delay: 0.5s;">🦋</span>
     <div style="font-size: 80px; margin-bottom: 20px;">🦸‍♀️ 🦸‍♂️</div>
-    <h1><?php echo esc_html($headline); ?></h1>
-    <p><?php echo esc_html($subheadline); ?></p>
+    <h1><?php echo esc_html($heroHeadline); ?></h1>
+    <p><?php echo esc_html($heroSubheadline); ?></p>
     <div class="hero-btns">
-        <a href="#" class="btn-primary">🎮 Virtual Tour</a>
-        <a href="#" class="btn-outline">📅 Book Visit</a>
+        <a href="#" class="btn-primary">🎮 <?php echo esc_html($heroBtnPrimary); ?></a>
+        <a href="#" class="btn-outline">📅 <?php echo esc_html($heroBtnSecondary); ?></a>
     </div>
 </section>
 
@@ -107,20 +131,20 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'A magical place wher
 <section class="stats-section">
     <div class="stats-grid">
         <div>
-            <div class="stat-num">🌟 100K+</div>
-            <div class="stat-label">Kids Treated</div>
+            <div class="stat-num">🌟 <?php echo esc_html($stat1Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat1Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">👨‍⚕️ 150</div>
-            <div class="stat-label">Specialists</div>
+            <div class="stat-num">👨‍⚕️ <?php echo esc_html($stat2Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat2Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">🏥 24/7</div>
-            <div class="stat-label">Pediatric ER</div>
+            <div class="stat-num">🏥 <?php echo esc_html($stat3Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat3Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">⭐ 4.9</div>
-            <div class="stat-label">Parent Rating</div>
+            <div class="stat-num">⭐ <?php echo esc_html($stat4Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat4Label); ?></div>
         </div>
     </div>
 </section>
@@ -157,17 +181,17 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'A magical place wher
 
 <!-- CTA -->
 <section class="cta-section">
-    <h2>🎈 Schedule a Fun Visit!</h2>
-    <p>Our kid-friendly facility makes healthcare an adventure. Book your child's appointment today!</p>
-    <a href="#" class="btn-primary">📅 Book Appointment</a>
+    <h2>🎈 <?php echo esc_html($ctaHeadline); ?></h2>
+    <p><?php echo esc_html($ctaDescription); ?></p>
+    <a href="#" class="btn-primary">📅 <?php echo esc_html($ctaButton); ?></a>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
     <div class="footer-grid">
         <div>
-            <h4>🧸 <?php echo esc_html($logoText); ?></h4>
-            <p>Where healing is an adventure! We make hospital visits fun and comfortable for children of all ages.</p>
+            <h4>🧸 <?php echo esc_html($businessName); ?></h4>
+            <p><?php echo esc_html($aboutShort); ?></p>
         </div>
         <div>
             <h4>Services</h4>
@@ -192,14 +216,14 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'A magical place wher
         <div>
             <h4>Contact</h4>
             <p>
-                📍 123 Rainbow Lane<br>
-                Kidsville, State 12345<br><br>
+                📍 <?php echo nl2br(esc_html($address)); ?><br><br>
                 📞 <?php echo esc_html($phone); ?><br>
-                🚑 Emergency: 911
+                ✉️ <?php echo esc_html($email); ?><br>
+                🚑 Emergency: <?php echo esc_html($emergency); ?>
             </p>
         </div>
     </div>
     <div class="footer-bottom">
-        © <?php echo date('Y'); ?> <?php echo esc_html($logoText); ?> 🎈 Where Healing is Fun!
+        © <?php echo date('Y'); ?> <?php echo esc_html($businessName); ?> 🎈 <?php echo esc_html($tagline); ?>
     </div>
 </footer>

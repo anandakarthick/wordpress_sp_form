@@ -530,6 +530,7 @@ class SPFM_Themes {
             $update_data['features'] = is_array($data['features']) ? json_encode($data['features']) : $data['features'];
         }
         if (isset($data['custom_css'])) $update_data['custom_css'] = $data['custom_css'];
+        if (isset($data['site_content'])) $update_data['site_content'] = $data['site_content'];
         if (isset($data['status'])) $update_data['status'] = intval($data['status']);
         
         if (empty($update_data)) {

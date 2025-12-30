@@ -46,6 +46,17 @@ $footerBg = $theme->footer_bg_color ?: '#0f172a';
 $fontFamily = $theme->font_family ?: 'Inter';
 $headingFont = $theme->heading_font ?: 'Poppins';
 
+// Get site content from theme
+$site_content = isset($theme->site_content) ? (is_string($theme->site_content) ? json_decode($theme->site_content, true) : $theme->site_content) : array();
+$site_content = $site_content ?: array();
+
+// Helper function to get site content value
+if (!function_exists('get_site_content')) {
+    function get_site_content($site_content, $key, $fallback = '') {
+        return isset($site_content[$key]) && !empty($site_content[$key]) ? $site_content[$key] : $fallback;
+    }
+}
+
 // Category icons and data
 $categoryData = array(
     'hospital' => array('icon' => '🏥', 'name' => 'General Hospital'),

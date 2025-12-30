@@ -1,18 +1,44 @@
 <?php
 /**
  * Preview: Eye Care Center - Vision-Centric Elegant
+ * Uses site_content values for all editable fields
  */
-$logoText = get_preview_value($defaults, 'logo_text', 'ClearView Eye Center');
-$phone = get_preview_value($defaults, 'phone', '+1 (555) 345-6789');
-$headline = get_preview_value($defaults, 'headline', 'See Life More Clearly');
-$subheadline = get_preview_value($defaults, 'subheadline', 'Advanced eye care and vision correction from the region\'s leading ophthalmologists. Experience the freedom of clear vision.');
+
+// Get values from site_content (set in template-preview.php)
+$businessName = get_site_content($site_content, 'business_name', 'ClearView Eye Center');
+$tagline = get_site_content($site_content, 'tagline', 'Your Vision, Our Mission');
+$aboutShort = get_site_content($site_content, 'about_short', 'Your vision is our mission. We\'ve helped over 50,000 patients see life more clearly with advanced eye care and vision correction.');
+
+$phone = get_site_content($site_content, 'phone', '+1 (555) 345-6789');
+$emergency = get_site_content($site_content, 'emergency', '+1 (555) 345-9999');
+$email = get_site_content($site_content, 'email', 'care@clearvieweye.com');
+$hours = get_site_content($site_content, 'hours', 'Mon-Sat: 8am-6pm');
+$address = get_site_content($site_content, 'address', '789 Vision Way, Eye Care Plaza, Suite 100');
+
+$heroHeadline = get_site_content($site_content, 'hero_headline', 'See Life More Clearly');
+$heroSubheadline = get_site_content($site_content, 'hero_subheadline', 'Advanced eye care and vision correction from the region\'s leading ophthalmologists. Experience the freedom of clear vision.');
+$heroBtnPrimary = get_site_content($site_content, 'hero_btn_primary', 'Free LASIK Consultation');
+$heroBtnSecondary = get_site_content($site_content, 'hero_btn_secondary', 'Schedule Eye Exam');
+
+$stat1Num = get_site_content($site_content, 'stat1_num', '50K+');
+$stat1Label = get_site_content($site_content, 'stat1_label', 'LASIK Procedures');
+$stat2Num = get_site_content($site_content, 'stat2_num', '99%');
+$stat2Label = get_site_content($site_content, 'stat2_label', 'Success Rate');
+$stat3Num = get_site_content($site_content, 'stat3_num', '20+');
+$stat3Label = get_site_content($site_content, 'stat3_label', 'Years Experience');
+$stat4Num = get_site_content($site_content, 'stat4_num', '4.9');
+$stat4Label = get_site_content($site_content, 'stat4_label', 'Patient Rating');
+
+$ctaHeadline = get_site_content($site_content, 'cta_headline', 'Ready to See Clearly?');
+$ctaDescription = get_site_content($site_content, 'cta_description', 'Schedule your free LASIK consultation and discover if you\'re a candidate for vision freedom.');
+$ctaButton = get_site_content($site_content, 'cta_button', 'Free LASIK Consultation');
 ?>
 
 <!-- Header -->
 <header class="header">
     <div class="logo">
         <span>👁️</span>
-        <?php echo esc_html($logoText); ?>
+        <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav">
         <a href="#">Home</a>
@@ -35,11 +61,11 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Advanced eye care an
             <span style="display: block; height: 4px; background: #fff; border-radius: 4px; width: 40px;"></span>
         </div>
     </div>
-    <h1><?php echo esc_html($headline); ?></h1>
-    <p><?php echo esc_html($subheadline); ?></p>
+    <h1><?php echo esc_html($heroHeadline); ?></h1>
+    <p><?php echo esc_html($heroSubheadline); ?></p>
     <div class="hero-btns">
-        <a href="#" class="btn-primary">Free LASIK Consultation</a>
-        <a href="#" class="btn-outline">Schedule Eye Exam</a>
+        <a href="#" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
+        <a href="#" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
     </div>
 </section>
 
@@ -92,20 +118,20 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Advanced eye care an
 <section class="stats-section">
     <div class="stats-grid">
         <div>
-            <div class="stat-num">50K+</div>
-            <div class="stat-label">LASIK Procedures</div>
+            <div class="stat-num"><?php echo esc_html($stat1Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat1Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">99%</div>
-            <div class="stat-label">Success Rate</div>
+            <div class="stat-num"><?php echo esc_html($stat2Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat2Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">20+</div>
-            <div class="stat-label">Years Experience</div>
+            <div class="stat-num"><?php echo esc_html($stat3Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat3Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">4.9</div>
-            <div class="stat-label">Patient Rating</div>
+            <div class="stat-num"><?php echo esc_html($stat4Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat4Label); ?></div>
         </div>
     </div>
 </section>
@@ -166,17 +192,17 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Advanced eye care an
 
 <!-- CTA Section -->
 <section class="cta-section">
-    <h2>Ready to See Clearly?</h2>
-    <p>Schedule your free LASIK consultation and discover if you're a candidate for vision freedom.</p>
-    <a href="#" class="btn-primary">👁️ Free LASIK Consultation</a>
+    <h2><?php echo esc_html($ctaHeadline); ?></h2>
+    <p><?php echo esc_html($ctaDescription); ?></p>
+    <a href="#" class="btn-primary">👁️ <?php echo esc_html($ctaButton); ?></a>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
     <div class="footer-grid">
         <div>
-            <h4>👁️ <?php echo esc_html($logoText); ?></h4>
-            <p>Your vision is our mission. We've helped over 50,000 patients see life more clearly with advanced eye care and vision correction.</p>
+            <h4>👁️ <?php echo esc_html($businessName); ?></h4>
+            <p><?php echo esc_html($aboutShort); ?></p>
         </div>
         <div>
             <h4>Our Services</h4>
@@ -201,14 +227,14 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Advanced eye care an
         <div>
             <h4>Contact Us</h4>
             <p>
-                📍 789 Vision Way<br>
-                Eye Care Plaza, Suite 100<br><br>
+                📍 <?php echo nl2br(esc_html($address)); ?><br><br>
                 📞 <?php echo esc_html($phone); ?><br>
-                ⏰ Mon-Sat: 8am-6pm
+                ✉️ <?php echo esc_html($email); ?><br>
+                ⏰ <?php echo esc_html($hours); ?>
             </p>
         </div>
     </div>
     <div class="footer-bottom">
-        © <?php echo date('Y'); ?> <?php echo esc_html($logoText); ?>. Your Vision, Our Mission.
+        © <?php echo date('Y'); ?> <?php echo esc_html($businessName); ?>. <?php echo esc_html($tagline); ?>.
     </div>
 </footer>

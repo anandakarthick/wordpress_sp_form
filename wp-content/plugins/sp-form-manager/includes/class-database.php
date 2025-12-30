@@ -79,6 +79,7 @@ class SPFM_Database {
             hero_style VARCHAR(50) DEFAULT 'centered',
             buttons_config LONGTEXT,
             links_config LONGTEXT,
+            site_content LONGTEXT,
             custom_css LONGTEXT,
             is_template TINYINT(1) DEFAULT 1,
             status TINYINT(1) DEFAULT 1,

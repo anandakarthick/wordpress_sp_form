@@ -70,6 +70,9 @@ $category_data = array(
             <button class="tab-btn active" data-tab="settings">
                 <span class="dashicons dashicons-admin-settings"></span> Settings
             </button>
+            <button class="tab-btn" data-tab="content">
+                <span class="dashicons dashicons-edit-page"></span> Site Content
+            </button>
             <button class="tab-btn" data-tab="pages">
                 <span class="dashicons dashicons-admin-page"></span> Pages & Sections
             </button>
@@ -163,6 +166,172 @@ $category_data = array(
                                     <span class="value"><?php echo $edit_theme->is_template ? 'Pre-built' : 'Custom'; ?></span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TAB: Site Content -->
+            <div class="tab-content" id="tab-content">
+                <?php 
+                // Get site content from theme or use defaults
+                $site_content = isset($edit_theme->site_content) ? (is_array($edit_theme->site_content) ? $edit_theme->site_content : json_decode($edit_theme->site_content, true)) : array();
+                $site_content = $site_content ?: array();
+                ?>
+                <div class="editor-grid">
+                    <div class="editor-main">
+                        <!-- Business Information -->
+                        <div class="editor-section">
+                            <h3><span class="dashicons dashicons-building"></span> Business Information</h3>
+                            <p class="section-desc">Basic information about your hospital/clinic</p>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Business/Hospital Name</label>
+                                    <input type="text" name="site_content[business_name]" value="<?php echo esc_attr($site_content['business_name'] ?? 'City General Hospital'); ?>" placeholder="e.g., City General Hospital">
+                                </div>
+                                <div class="form-group">
+                                    <label>Tagline/Slogan</label>
+                                    <input type="text" name="site_content[tagline]" value="<?php echo esc_attr($site_content['tagline'] ?? 'Excellence in Healthcare'); ?>" placeholder="e.g., Excellence in Healthcare">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>About Us (Short)</label>
+                                <textarea name="site_content[about_short]" rows="3" placeholder="Brief description for footer..."><?php echo esc_textarea($site_content['about_short'] ?? 'We have been serving our community for over 50 years, providing exceptional healthcare with compassion and excellence.'); ?></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Contact Information -->
+                        <div class="editor-section">
+                            <h3><span class="dashicons dashicons-phone"></span> Contact Information</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Phone Number</label>
+                                    <input type="text" name="site_content[phone]" value="<?php echo esc_attr($site_content['phone'] ?? '+1 (555) 123-4567'); ?>" placeholder="+1 (555) 123-4567">
+                                </div>
+                                <div class="form-group">
+                                    <label>Emergency Number</label>
+                                    <input type="text" name="site_content[emergency]" value="<?php echo esc_attr($site_content['emergency'] ?? '911'); ?>" placeholder="911">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Email Address</label>
+                                    <input type="email" name="site_content[email]" value="<?php echo esc_attr($site_content['email'] ?? 'info@hospital.com'); ?>" placeholder="info@hospital.com">
+                                </div>
+                                <div class="form-group">
+                                    <label>Working Hours</label>
+                                    <input type="text" name="site_content[hours]" value="<?php echo esc_attr($site_content['hours'] ?? 'Mon-Fri: 8AM-8PM, Sat-Sun: 9AM-5PM'); ?>" placeholder="Mon-Fri: 8AM-8PM">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Full Address</label>
+                                <input type="text" name="site_content[address]" value="<?php echo esc_attr($site_content['address'] ?? '123 Medical Center Drive, Healthcare City, State 12345'); ?>" placeholder="123 Medical Center Drive, City, State 12345">
+                            </div>
+                        </div>
+                        
+                        <!-- Hero Section -->
+                        <div class="editor-section">
+                            <h3><span class="dashicons dashicons-megaphone"></span> Hero Section</h3>
+                            <p class="section-desc">Main headline and call-to-action on homepage</p>
+                            <div class="form-group">
+                                <label>Main Headline</label>
+                                <input type="text" name="site_content[hero_headline]" value="<?php echo esc_attr($site_content['hero_headline'] ?? 'World-Class Healthcare for Everyone'); ?>" placeholder="World-Class Healthcare for Everyone">
+                            </div>
+                            <div class="form-group">
+                                <label>Sub-headline</label>
+                                <textarea name="site_content[hero_subheadline]" rows="2" placeholder="Supporting text..."><?php echo esc_textarea($site_content['hero_subheadline'] ?? 'Comprehensive medical care with over 50 departments, 200+ expert physicians, and state-of-the-art facilities.'); ?></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Primary Button Text</label>
+                                    <input type="text" name="site_content[hero_btn_primary]" value="<?php echo esc_attr($site_content['hero_btn_primary'] ?? 'Book Appointment'); ?>" placeholder="Book Appointment">
+                                </div>
+                                <div class="form-group">
+                                    <label>Secondary Button Text</label>
+                                    <input type="text" name="site_content[hero_btn_secondary]" value="<?php echo esc_attr($site_content['hero_btn_secondary'] ?? 'Our Services'); ?>" placeholder="Our Services">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistics -->
+                        <div class="editor-section">
+                            <h3><span class="dashicons dashicons-chart-bar"></span> Statistics</h3>
+                            <p class="section-desc">Key numbers to showcase (displayed in stats section)</p>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Stat 1 Number</label>
+                                    <input type="text" name="site_content[stat1_num]" value="<?php echo esc_attr($site_content['stat1_num'] ?? '500+'); ?>" placeholder="500+">
+                                </div>
+                                <div class="form-group">
+                                    <label>Stat 1 Label</label>
+                                    <input type="text" name="site_content[stat1_label]" value="<?php echo esc_attr($site_content['stat1_label'] ?? 'Hospital Beds'); ?>" placeholder="Hospital Beds">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Stat 2 Number</label>
+                                    <input type="text" name="site_content[stat2_num]" value="<?php echo esc_attr($site_content['stat2_num'] ?? '200+'); ?>" placeholder="200+">
+                                </div>
+                                <div class="form-group">
+                                    <label>Stat 2 Label</label>
+                                    <input type="text" name="site_content[stat2_label]" value="<?php echo esc_attr($site_content['stat2_label'] ?? 'Expert Doctors'); ?>" placeholder="Expert Doctors">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Stat 3 Number</label>
+                                    <input type="text" name="site_content[stat3_num]" value="<?php echo esc_attr($site_content['stat3_num'] ?? '50+'); ?>" placeholder="50+">
+                                </div>
+                                <div class="form-group">
+                                    <label>Stat 3 Label</label>
+                                    <input type="text" name="site_content[stat3_label]" value="<?php echo esc_attr($site_content['stat3_label'] ?? 'Departments'); ?>" placeholder="Departments">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Stat 4 Number</label>
+                                    <input type="text" name="site_content[stat4_num]" value="<?php echo esc_attr($site_content['stat4_num'] ?? '1M+'); ?>" placeholder="1M+">
+                                </div>
+                                <div class="form-group">
+                                    <label>Stat 4 Label</label>
+                                    <input type="text" name="site_content[stat4_label]" value="<?php echo esc_attr($site_content['stat4_label'] ?? 'Patients Served'); ?>" placeholder="Patients Served">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- CTA Section -->
+                        <div class="editor-section">
+                            <h3><span class="dashicons dashicons-megaphone"></span> Call-to-Action Section</h3>
+                            <p class="section-desc">Bottom CTA section before footer</p>
+                            <div class="form-group">
+                                <label>CTA Headline</label>
+                                <input type="text" name="site_content[cta_headline]" value="<?php echo esc_attr($site_content['cta_headline'] ?? 'Need Emergency Care?'); ?>" placeholder="Need Emergency Care?">
+                            </div>
+                            <div class="form-group">
+                                <label>CTA Description</label>
+                                <textarea name="site_content[cta_description]" rows="2"><?php echo esc_textarea($site_content['cta_description'] ?? 'Our emergency department is open 24/7 with expert trauma care and rapid response teams.'); ?></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>CTA Button Text</label>
+                                <input type="text" name="site_content[cta_button]" value="<?php echo esc_attr($site_content['cta_button'] ?? 'Call Emergency'); ?>" placeholder="Call Emergency">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="editor-sidebar">
+                        <div class="sidebar-card">
+                            <h4>Preview Tips</h4>
+                            <p style="font-size: 13px; color: #64748b; line-height: 1.6;">Changes made here will reflect in the Live Preview. Click "Live Preview" to see your updates.</p>
+                        </div>
+                        <div class="sidebar-card">
+                            <h4>Content Sections</h4>
+                            <ul style="font-size: 13px; color: #64748b; line-height: 2;">
+                                <li>✅ Business Information</li>
+                                <li>✅ Contact Details</li>
+                                <li>✅ Hero Section</li>
+                                <li>✅ Statistics</li>
+                                <li>✅ CTA Section</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

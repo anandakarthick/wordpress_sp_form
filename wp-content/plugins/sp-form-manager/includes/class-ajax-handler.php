@@ -186,6 +186,15 @@ class SPFM_Ajax_Handler {
             'status' => isset($_POST['status']) ? 1 : 0
         );
         
+        // Handle site_content
+        if (isset($_POST['site_content']) && is_array($_POST['site_content'])) {
+            $site_content = array();
+            foreach ($_POST['site_content'] as $key => $value) {
+                $site_content[sanitize_key($key)] = sanitize_textarea_field($value);
+            }
+            $data['site_content'] = json_encode($site_content);
+        }
+        
         $id = isset($_POST['id']) && !empty($_POST['id']) ? intval($_POST['id']) : 0;
         
         if ($id) {

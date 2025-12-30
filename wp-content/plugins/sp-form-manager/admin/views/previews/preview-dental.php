@@ -1,18 +1,44 @@
 <?php
 /**
  * Preview: Dental Clinic - Smile-Focused Modern
+ * Uses site_content values for all editable fields
  */
-$logoText = get_preview_value($defaults, 'logo_text', 'Bright Smile Dental');
-$phone = get_preview_value($defaults, 'phone', '+1 (555) 234-5678');
-$headline = get_preview_value($defaults, 'headline', 'Your Perfect Smile Starts Here');
-$subheadline = get_preview_value($defaults, 'subheadline', 'Modern dentistry with a gentle touch. We create beautiful, healthy smiles for the whole family.');
+
+// Get values from site_content (set in template-preview.php)
+$businessName = get_site_content($site_content, 'business_name', 'Bright Smile Dental');
+$tagline = get_site_content($site_content, 'tagline', 'Creating Beautiful Smiles');
+$aboutShort = get_site_content($site_content, 'about_short', 'Creating beautiful, healthy smiles since 1999. We combine advanced technology with a gentle touch for exceptional dental care.');
+
+$phone = get_site_content($site_content, 'phone', '+1 (555) 234-5678');
+$emergency = get_site_content($site_content, 'emergency', '+1 (555) 234-9999');
+$email = get_site_content($site_content, 'email', 'smile@brightdental.com');
+$hours = get_site_content($site_content, 'hours', 'Mon-Fri: 8am-6pm, Sat: 9am-2pm');
+$address = get_site_content($site_content, 'address', '456 Smile Avenue, Dental Plaza, Suite 200');
+
+$heroHeadline = get_site_content($site_content, 'hero_headline', 'Your Perfect Smile Starts Here');
+$heroSubheadline = get_site_content($site_content, 'hero_subheadline', 'Modern dentistry with a gentle touch. We create beautiful, healthy smiles for the whole family.');
+$heroBtnPrimary = get_site_content($site_content, 'hero_btn_primary', 'Schedule Visit');
+$heroBtnSecondary = get_site_content($site_content, 'hero_btn_secondary', 'Free Consultation');
+
+$stat1Num = get_site_content($site_content, 'stat1_num', '15K+');
+$stat1Label = get_site_content($site_content, 'stat1_label', 'Happy Smiles');
+$stat2Num = get_site_content($site_content, 'stat2_num', '25+');
+$stat2Label = get_site_content($site_content, 'stat2_label', 'Years Experience');
+$stat3Num = get_site_content($site_content, 'stat3_num', '5.0');
+$stat3Label = get_site_content($site_content, 'stat3_label', 'Star Rating');
+$stat4Num = get_site_content($site_content, 'stat4_num', '98%');
+$stat4Label = get_site_content($site_content, 'stat4_label', 'Satisfaction Rate');
+
+$ctaHeadline = get_site_content($site_content, 'cta_headline', 'Ready for Your Best Smile?');
+$ctaDescription = get_site_content($site_content, 'cta_description', 'Schedule your free consultation today and take the first step towards the smile you\'ve always wanted.');
+$ctaButton = get_site_content($site_content, 'cta_button', 'Book Free Consultation');
 ?>
 
 <!-- Header -->
 <header class="header">
     <div class="logo">
         <span>🦷</span>
-        <?php echo esc_html($logoText); ?>
+        <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav">
         <a href="#">Home</a>
@@ -31,14 +57,14 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Modern dentistry wit
 <!-- Hero -->
 <section class="hero" style="text-align: center; padding: 100px 30px;">
     <div style="font-size: 100px; margin-bottom: 20px; animation: bounce 2s infinite;">😊</div>
-    <h1><?php echo esc_html($headline); ?></h1>
-    <p><?php echo esc_html($subheadline); ?></p>
+    <h1><?php echo esc_html($heroHeadline); ?></h1>
+    <p><?php echo esc_html($heroSubheadline); ?></p>
     <div style="background: rgba(255,255,255,0.2); display: inline-block; padding: 10px 25px; border-radius: 30px; margin-bottom: 30px; font-size: 16px;">
         ✨ Free Whitening with New Patient Exam!
     </div>
     <div class="hero-btns">
-        <a href="#" class="btn-primary">Schedule Visit</a>
-        <a href="#" class="btn-outline">Free Consultation</a>
+        <a href="#" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
+        <a href="#" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
     </div>
 </section>
 
@@ -112,20 +138,20 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Modern dentistry wit
 <section class="stats-section">
     <div class="stats-grid">
         <div>
-            <div class="stat-num">15K+</div>
-            <div class="stat-label">Happy Smiles</div>
+            <div class="stat-num"><?php echo esc_html($stat1Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat1Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">25+</div>
-            <div class="stat-label">Years Experience</div>
+            <div class="stat-num"><?php echo esc_html($stat2Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat2Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">5.0</div>
-            <div class="stat-label">Star Rating</div>
+            <div class="stat-num"><?php echo esc_html($stat3Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat3Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">98%</div>
-            <div class="stat-label">Satisfaction Rate</div>
+            <div class="stat-num"><?php echo esc_html($stat4Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat4Label); ?></div>
         </div>
     </div>
 </section>
@@ -174,17 +200,17 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Modern dentistry wit
 
 <!-- CTA Section -->
 <section class="cta-section">
-    <h2>Ready for Your Best Smile?</h2>
-    <p>Schedule your free consultation today and take the first step towards the smile you've always wanted.</p>
-    <a href="#" class="btn-primary">📅 Book Free Consultation</a>
+    <h2><?php echo esc_html($ctaHeadline); ?></h2>
+    <p><?php echo esc_html($ctaDescription); ?></p>
+    <a href="#" class="btn-primary">📅 <?php echo esc_html($ctaButton); ?></a>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
     <div class="footer-grid">
         <div>
-            <h4>🦷 <?php echo esc_html($logoText); ?></h4>
-            <p>Creating beautiful, healthy smiles since 1999. We combine advanced technology with a gentle touch for exceptional dental care.</p>
+            <h4>🦷 <?php echo esc_html($businessName); ?></h4>
+            <p><?php echo esc_html($aboutShort); ?></p>
         </div>
         <div>
             <h4>Our Services</h4>
@@ -209,14 +235,14 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Modern dentistry wit
         <div>
             <h4>Contact Us</h4>
             <p>
-                📍 456 Smile Avenue<br>
-                Dental Plaza, Suite 200<br><br>
+                📍 <?php echo nl2br(esc_html($address)); ?><br><br>
                 📞 <?php echo esc_html($phone); ?><br>
-                ⏰ Mon-Fri: 8am-6pm
+                ✉️ <?php echo esc_html($email); ?><br>
+                ⏰ <?php echo esc_html($hours); ?>
             </p>
         </div>
     </div>
     <div class="footer-bottom">
-        © <?php echo date('Y'); ?> <?php echo esc_html($logoText); ?>. Creating Beautiful Smiles.
+        © <?php echo date('Y'); ?> <?php echo esc_html($businessName); ?>. Creating Beautiful Smiles.
     </div>
 </footer>

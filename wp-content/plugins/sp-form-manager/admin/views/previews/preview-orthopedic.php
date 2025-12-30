@@ -1,18 +1,44 @@
 <?php
 /**
  * Preview: Orthopedic Center - Motion-Focused Dynamic
+ * Uses site_content values for all editable fields
  */
-$logoText = get_preview_value($defaults, 'logo_text', 'SpineFirst Orthopedics');
-$phone = get_preview_value($defaults, 'phone', '+1 (555) 789-0123');
-$headline = get_preview_value($defaults, 'headline', 'Get Moving Again');
-$subheadline = get_preview_value($defaults, 'subheadline', 'Expert bone, joint, and spine care to get you back to the activities you love. From sports injuries to joint replacement.');
+
+// Get values from site_content (set in template-preview.php)
+$businessName = get_site_content($site_content, 'business_name', 'SpineFirst Orthopedics');
+$tagline = get_site_content($site_content, 'tagline', 'Move Better, Live Better');
+$aboutShort = get_site_content($site_content, 'about_short', 'Get back to doing what you love. Our team of orthopedic specialists will help you move better and live better.');
+
+$phone = get_site_content($site_content, 'phone', '+1 (555) 789-0123');
+$emergency = get_site_content($site_content, 'emergency', '+1 (555) 789-9999');
+$email = get_site_content($site_content, 'email', 'info@spinefirst.com');
+$hours = get_site_content($site_content, 'hours', 'Mon-Fri: 7am-6pm');
+$address = get_site_content($site_content, 'address', '333 Motion Drive, Orthopedic Plaza');
+
+$heroHeadline = get_site_content($site_content, 'hero_headline', 'Get Moving Again');
+$heroSubheadline = get_site_content($site_content, 'hero_subheadline', 'Expert bone, joint, and spine care to get you back to the activities you love. From sports injuries to joint replacement.');
+$heroBtnPrimary = get_site_content($site_content, 'hero_btn_primary', 'Schedule Consultation');
+$heroBtnSecondary = get_site_content($site_content, 'hero_btn_secondary', 'Our Treatments');
+
+$stat1Num = get_site_content($site_content, 'stat1_num', '25K+');
+$stat1Label = get_site_content($site_content, 'stat1_label', 'Surgeries');
+$stat2Num = get_site_content($site_content, 'stat2_num', '99%');
+$stat2Label = get_site_content($site_content, 'stat2_label', 'Success Rate');
+$stat3Num = get_site_content($site_content, 'stat3_num', '20');
+$stat3Label = get_site_content($site_content, 'stat3_label', 'Surgeons');
+$stat4Num = get_site_content($site_content, 'stat4_num', '4.9');
+$stat4Label = get_site_content($site_content, 'stat4_label', 'Patient Rating');
+
+$ctaHeadline = get_site_content($site_content, 'cta_headline', 'Ready to Move Without Pain?');
+$ctaDescription = get_site_content($site_content, 'cta_description', 'Schedule your consultation and take the first step toward an active, pain-free life.');
+$ctaButton = get_site_content($site_content, 'cta_button', 'Book Consultation');
 ?>
 
 <!-- Header -->
 <header class="header">
     <div class="logo">
         <span>🦴</span>
-        <?php echo esc_html($logoText); ?>
+        <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav">
         <a href="#">Home</a>
@@ -31,11 +57,11 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Expert bone, joint, 
         <span style="font-size: 70px; animation: run 0.5s steps(2) infinite;">🏃</span>
         <span style="font-size: 30px; opacity: 0.6; animation: trail 1s ease-in-out infinite;">→→→</span>
     </div>
-    <h1><?php echo esc_html($headline); ?></h1>
-    <p><?php echo esc_html($subheadline); ?></p>
+    <h1><?php echo esc_html($heroHeadline); ?></h1>
+    <p><?php echo esc_html($heroSubheadline); ?></p>
     <div class="hero-btns">
-        <a href="#" class="btn-primary">Schedule Consultation</a>
-        <a href="#" class="btn-outline">Our Treatments</a>
+        <a href="#" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
+        <a href="#" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
     </div>
 </section>
 
@@ -97,20 +123,20 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Expert bone, joint, 
 <section class="stats-section">
     <div class="stats-grid">
         <div>
-            <div class="stat-num">25K+</div>
-            <div class="stat-label">Surgeries</div>
+            <div class="stat-num"><?php echo esc_html($stat1Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat1Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">99%</div>
-            <div class="stat-label">Success Rate</div>
+            <div class="stat-num"><?php echo esc_html($stat2Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat2Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">20</div>
-            <div class="stat-label">Surgeons</div>
+            <div class="stat-num"><?php echo esc_html($stat3Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat3Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">4.9</div>
-            <div class="stat-label">Patient Rating</div>
+            <div class="stat-num"><?php echo esc_html($stat4Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat4Label); ?></div>
         </div>
     </div>
 </section>
@@ -159,17 +185,17 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Expert bone, joint, 
 
 <!-- CTA -->
 <section class="cta-section">
-    <h2>Ready to Move Without Pain?</h2>
-    <p>Schedule your consultation and take the first step toward an active, pain-free life.</p>
-    <a href="#" class="btn-primary">📅 Book Consultation</a>
+    <h2><?php echo esc_html($ctaHeadline); ?></h2>
+    <p><?php echo esc_html($ctaDescription); ?></p>
+    <a href="#" class="btn-primary">📅 <?php echo esc_html($ctaButton); ?></a>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
     <div class="footer-grid">
         <div>
-            <h4>🦴 <?php echo esc_html($logoText); ?></h4>
-            <p>Get back to doing what you love. Our team of orthopedic specialists will help you move better and live better.</p>
+            <h4>🦴 <?php echo esc_html($businessName); ?></h4>
+            <p><?php echo esc_html($aboutShort); ?></p>
         </div>
         <div>
             <h4>Services</h4>
@@ -194,14 +220,14 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Expert bone, joint, 
         <div>
             <h4>Contact</h4>
             <p>
-                📍 333 Motion Drive<br>
-                Orthopedic Plaza<br><br>
+                📍 <?php echo nl2br(esc_html($address)); ?><br><br>
                 📞 <?php echo esc_html($phone); ?><br>
-                ⏰ Mon-Fri: 7am-6pm
+                ✉️ <?php echo esc_html($email); ?><br>
+                ⏰ <?php echo esc_html($hours); ?>
             </p>
         </div>
     </div>
     <div class="footer-bottom">
-        © <?php echo date('Y'); ?> <?php echo esc_html($logoText); ?>. Move Better, Live Better.
+        © <?php echo date('Y'); ?> <?php echo esc_html($businessName); ?>. <?php echo esc_html($tagline); ?>.
     </div>
 </footer>

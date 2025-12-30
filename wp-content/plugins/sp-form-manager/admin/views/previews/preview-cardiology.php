@@ -1,18 +1,43 @@
 <?php
 /**
  * Preview: Cardiology Center - Heart-Focused Urgent
+ * Uses site_content values for all editable fields
  */
-$logoText = get_preview_value($defaults, 'logo_text', 'HeartCare Center');
-$phone = get_preview_value($defaults, 'phone', '+1 (555) 567-8901');
-$emergency = get_preview_value($defaults, 'emergency_number', '911');
-$headline = get_preview_value($defaults, 'headline', 'Your Heart in Expert Hands');
-$subheadline = get_preview_value($defaults, 'subheadline', 'Leading cardiac care from prevention to intervention. Our team of expert cardiologists provides comprehensive heart health services.');
+
+// Get values from site_content (set in template-preview.php)
+$businessName = get_site_content($site_content, 'business_name', 'HeartCare Center');
+$tagline = get_site_content($site_content, 'tagline', '24/7 Cardiac Emergency Care');
+$aboutShort = get_site_content($site_content, 'about_short', 'Protecting hearts, saving lives. Our cardiac team provides comprehensive care from prevention to intervention.');
+
+$phone = get_site_content($site_content, 'phone', '+1 (555) 567-8901');
+$emergency = get_site_content($site_content, 'emergency', '911');
+$email = get_site_content($site_content, 'email', 'info@heartcare.com');
+$hours = get_site_content($site_content, 'hours', '24/7 Emergency Care');
+$address = get_site_content($site_content, 'address', '999 Heart Boulevard, Cardiac Center, Suite 100');
+
+$heroHeadline = get_site_content($site_content, 'hero_headline', 'Your Heart in Expert Hands');
+$heroSubheadline = get_site_content($site_content, 'hero_subheadline', 'Leading cardiac care from prevention to intervention. Our team of expert cardiologists provides comprehensive heart health services.');
+$heroBtnPrimary = get_site_content($site_content, 'hero_btn_primary', 'Book Heart Screening');
+$heroBtnSecondary = get_site_content($site_content, 'hero_btn_secondary', 'Our Expertise');
+
+$stat1Num = get_site_content($site_content, 'stat1_num', '50K+');
+$stat1Label = get_site_content($site_content, 'stat1_label', 'Procedures');
+$stat2Num = get_site_content($site_content, 'stat2_num', '98%');
+$stat2Label = get_site_content($site_content, 'stat2_label', 'Success Rate');
+$stat3Num = get_site_content($site_content, 'stat3_num', '25');
+$stat3Label = get_site_content($site_content, 'stat3_label', 'Cardiologists');
+$stat4Num = get_site_content($site_content, 'stat4_num', '24/7');
+$stat4Label = get_site_content($site_content, 'stat4_label', 'Cardiac ER');
+
+$ctaHeadline = get_site_content($site_content, 'cta_headline', 'Cardiac Emergency?');
+$ctaDescription = get_site_content($site_content, 'cta_description', 'Don\'t wait! Every second counts during a heart attack. Our cardiac ER is ready 24/7.');
+$ctaButton = get_site_content($site_content, 'cta_button', 'Call 911 Now');
 ?>
 
 <!-- Emergency Alert Banner -->
 <div class="alert-banner" style="animation: alertPulse 2s infinite;">
-    <span>⚠️ <strong>Heart Attack Warning Signs:</strong> Chest pain, shortness of breath, arm pain → Call 911 immediately</span>
-    <a href="tel:911" style="background: #fff; color: #dc2626; padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: 700;">Call 911</a>
+    <span>⚠️ <strong>Heart Attack Warning Signs:</strong> Chest pain, shortness of breath, arm pain → Call <?php echo esc_html($emergency); ?> immediately</span>
+    <a href="tel:<?php echo esc_attr($emergency); ?>" style="background: #fff; color: #dc2626; padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: 700;">Call <?php echo esc_html($emergency); ?></a>
 </div>
 
 <style>
@@ -32,7 +57,7 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Leading cardiac care
 <header class="header">
     <div class="logo">
         <span>❤️</span>
-        <?php echo esc_html($logoText); ?>
+        <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav">
         <a href="#">Home</a>
@@ -42,7 +67,7 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Leading cardiac care
         <a href="#">Heart Health</a>
         <a href="#">Contact</a>
     </nav>
-    <a href="tel:911" style="background: #dc2626; color: #fff; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: 700; animation: pulse 1.5s infinite;">🚨 Emergency</a>
+    <a href="tel:<?php echo esc_attr($emergency); ?>" style="background: #dc2626; color: #fff; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: 700; animation: pulse 1.5s infinite;">🚨 Emergency</a>
 </header>
 
 <!-- Hero -->
@@ -54,11 +79,11 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Leading cardiac care
                   stroke="white" stroke-width="2" fill="none" style="stroke-dasharray: 200; animation: ecgDraw 2s linear infinite;"/>
         </svg>
     </div>
-    <h1><?php echo esc_html($headline); ?></h1>
-    <p><?php echo esc_html($subheadline); ?></p>
+    <h1><?php echo esc_html($heroHeadline); ?></h1>
+    <p><?php echo esc_html($heroSubheadline); ?></p>
     <div class="hero-btns">
-        <a href="#" class="btn-primary">Book Heart Screening</a>
-        <a href="#" class="btn-outline">Our Expertise</a>
+        <a href="#" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
+        <a href="#" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
     </div>
 </section>
 
@@ -115,20 +140,20 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Leading cardiac care
 <section class="stats-section">
     <div class="stats-grid">
         <div>
-            <div class="stat-num">50K+</div>
-            <div class="stat-label">Procedures</div>
+            <div class="stat-num"><?php echo esc_html($stat1Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat1Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">98%</div>
-            <div class="stat-label">Success Rate</div>
+            <div class="stat-num"><?php echo esc_html($stat2Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat2Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">25</div>
-            <div class="stat-label">Cardiologists</div>
+            <div class="stat-num"><?php echo esc_html($stat3Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat3Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">24/7</div>
-            <div class="stat-label">Cardiac ER</div>
+            <div class="stat-num"><?php echo esc_html($stat4Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat4Label); ?></div>
         </div>
     </div>
 </section>
@@ -165,17 +190,17 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Leading cardiac care
 
 <!-- CTA -->
 <section class="cta-section" style="background: linear-gradient(135deg, #dc2626, var(--primary));">
-    <h2>🚨 Cardiac Emergency?</h2>
-    <p>Don't wait! Every second counts during a heart attack. Our cardiac ER is ready 24/7.</p>
-    <a href="tel:911" class="btn-primary" style="background: #fff; color: #dc2626;">📞 Call 911 Now</a>
+    <h2>🚨 <?php echo esc_html($ctaHeadline); ?></h2>
+    <p><?php echo esc_html($ctaDescription); ?></p>
+    <a href="tel:<?php echo esc_attr($emergency); ?>" class="btn-primary" style="background: #fff; color: #dc2626;">📞 <?php echo esc_html($ctaButton); ?></a>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
     <div class="footer-grid">
         <div>
-            <h4>❤️ <?php echo esc_html($logoText); ?></h4>
-            <p>Protecting hearts, saving lives. Our cardiac team provides comprehensive care from prevention to intervention.</p>
+            <h4>❤️ <?php echo esc_html($businessName); ?></h4>
+            <p><?php echo esc_html($aboutShort); ?></p>
         </div>
         <div>
             <h4>Services</h4>
@@ -200,14 +225,14 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Leading cardiac care
         <div>
             <h4>Contact</h4>
             <p>
-                📍 999 Heart Boulevard<br>
-                Cardiac Center, Suite 100<br><br>
+                📍 <?php echo nl2br(esc_html($address)); ?><br><br>
                 📞 <?php echo esc_html($phone); ?><br>
+                ✉️ <?php echo esc_html($email); ?><br>
                 🚨 Emergency: <?php echo esc_html($emergency); ?>
             </p>
         </div>
     </div>
     <div class="footer-bottom">
-        © <?php echo date('Y'); ?> <?php echo esc_html($logoText); ?>. 24/7 Cardiac Emergency Care.
+        © <?php echo date('Y'); ?> <?php echo esc_html($businessName); ?>. <?php echo esc_html($tagline); ?>.
     </div>
 </footer>

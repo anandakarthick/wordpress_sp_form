@@ -92,6 +92,27 @@ class SP_Form_Manager {
         if (version_compare($db_version, '2.0.0', '<')) {
             SPFM_Database::create_tables();
         }
+        
+        // Ensure site_content column exists
+        $this->ensure_site_content_column();
+    }
+    
+    /**
+     * Ensure site_content column exists in themes table
+     */
+    private function ensure_site_content_column() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'spfm_themes';
+        
+        // Check if column exists
+        $column_exists = $wpdb->get_var(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_NAME = '$table' AND COLUMN_NAME = 'site_content'"
+        );
+        
+        if (!$column_exists) {
+            $wpdb->query("ALTER TABLE $table ADD COLUMN site_content LONGTEXT AFTER links_config");
+        }
     }
     
     /**

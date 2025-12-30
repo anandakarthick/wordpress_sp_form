@@ -1,11 +1,37 @@
 <?php
 /**
  * Preview: Mental Health Clinic - Calming Supportive
+ * Uses site_content values for all editable fields
  */
-$logoText = get_preview_value($defaults, 'logo_text', 'Serenity Wellness');
-$phone = get_preview_value($defaults, 'phone', '+1 (555) 678-9012');
-$headline = get_preview_value($defaults, 'headline', 'Your Journey to Wellness Begins Here');
-$subheadline = get_preview_value($defaults, 'subheadline', 'Compassionate mental health care in a safe, supportive environment. You\'re not alone – we\'re here to help.');
+
+// Get values from site_content (set in template-preview.php)
+$businessName = get_site_content($site_content, 'business_name', 'Serenity Wellness');
+$tagline = get_site_content($site_content, 'tagline', 'Your Safe Space for Healing');
+$aboutShort = get_site_content($site_content, 'about_short', 'A safe space for healing and growth. We believe everyone deserves compassionate mental health care.');
+
+$phone = get_site_content($site_content, 'phone', '+1 (555) 678-9012');
+$emergency = get_site_content($site_content, 'emergency', '988');
+$email = get_site_content($site_content, 'email', 'care@serenitywellness.com');
+$hours = get_site_content($site_content, 'hours', 'Mon-Fri: 8am-8pm, Sat: 9am-3pm');
+$address = get_site_content($site_content, 'address', '222 Peaceful Path, Wellness Center, Suite 300');
+
+$heroHeadline = get_site_content($site_content, 'hero_headline', 'Your Journey to Wellness Begins Here');
+$heroSubheadline = get_site_content($site_content, 'hero_subheadline', 'Compassionate mental health care in a safe, supportive environment. You\'re not alone – we\'re here to help.');
+$heroBtnPrimary = get_site_content($site_content, 'hero_btn_primary', 'Start Your Journey');
+$heroBtnSecondary = get_site_content($site_content, 'hero_btn_secondary', 'Learn More');
+
+$stat1Num = get_site_content($site_content, 'stat1_num', '10K+');
+$stat1Label = get_site_content($site_content, 'stat1_label', 'Patients Helped');
+$stat2Num = get_site_content($site_content, 'stat2_num', '15+');
+$stat2Label = get_site_content($site_content, 'stat2_label', 'Therapists');
+$stat3Num = get_site_content($site_content, 'stat3_num', '98%');
+$stat3Label = get_site_content($site_content, 'stat3_label', 'Satisfaction');
+$stat4Num = get_site_content($site_content, 'stat4_num', '24/7');
+$stat4Label = get_site_content($site_content, 'stat4_label', 'Crisis Support');
+
+$ctaHeadline = get_site_content($site_content, 'cta_headline', 'Ready to Take the First Step?');
+$ctaDescription = get_site_content($site_content, 'cta_description', 'Your journey to wellness begins with a single step. We\'re here to support you.');
+$ctaButton = get_site_content($site_content, 'cta_button', 'Schedule Consultation');
 ?>
 
 <style>
@@ -22,19 +48,17 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Compassionate mental
 }
 </style>
 
-
-
 <!-- Crisis Banner -->
 <div class="alert-banner crisis">
     <span>💚 In crisis? You matter. Help is available 24/7.</span>
-    <a href="tel:988" style="background: #fff; color: var(--primary); padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: 700;">Call 988</a>
+    <a href="tel:<?php echo esc_attr($emergency); ?>" style="background: #fff; color: var(--primary); padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: 700;">Call <?php echo esc_html($emergency); ?></a>
 </div>
 
 <!-- Header -->
 <header class="header" style="background: rgba(255,255,255,0.95);">
     <div class="logo">
         <span>🧘</span>
-        <?php echo esc_html($logoText); ?>
+        <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav">
         <a href="#">Home</a>
@@ -54,10 +78,10 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Compassionate mental
     <span style="position: absolute; bottom: 40px; left: 8%; font-size: 30px; opacity: 0.15; animation: floatGentle 5s ease-in-out infinite; animation-delay: 2s;">🌸</span>
     <span style="position: absolute; bottom: 30px; right: 5%; font-size: 30px; opacity: 0.15; animation: floatGentle 5s ease-in-out infinite; animation-delay: 1.5s;">🌿</span>
     <div style="font-size: 80px; margin-bottom: 20px; animation: grow 3s ease-in-out infinite;">🌱</div>
-    <h1><?php echo esc_html($headline); ?></h1>
-    <p><?php echo esc_html($subheadline); ?></p>
+    <h1><?php echo esc_html($heroHeadline); ?></h1>
+    <p><?php echo esc_html($heroSubheadline); ?></p>
     <div class="hero-btns">
-        <a href="#" class="btn-primary">Start Your Journey</a>
+        <a href="#" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
     </div>
 </section>
 
@@ -177,17 +201,17 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Compassionate mental
 
 <!-- CTA -->
 <section class="cta-section">
-    <h2>Ready to Take the First Step?</h2>
-    <p>Your journey to wellness begins with a single step. We're here to support you.</p>
-    <a href="#" class="btn-primary">🌱 Schedule Consultation</a>
+    <h2><?php echo esc_html($ctaHeadline); ?></h2>
+    <p><?php echo esc_html($ctaDescription); ?></p>
+    <a href="#" class="btn-primary">🌱 <?php echo esc_html($ctaButton); ?></a>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
     <div class="footer-grid">
         <div>
-            <h4>🧘 <?php echo esc_html($logoText); ?></h4>
-            <p>A safe space for healing and growth. We believe everyone deserves compassionate mental health care.</p>
+            <h4>🧘 <?php echo esc_html($businessName); ?></h4>
+            <p><?php echo esc_html($aboutShort); ?></p>
         </div>
         <div>
             <h4>Services</h4>
@@ -212,14 +236,14 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Compassionate mental
         <div>
             <h4>Contact</h4>
             <p>
-                📍 222 Peaceful Path<br>
-                Wellness Center, Suite 300<br><br>
+                📍 <?php echo nl2br(esc_html($address)); ?><br><br>
                 📞 <?php echo esc_html($phone); ?><br>
-                💚 Crisis: 988
+                ✉️ <?php echo esc_html($email); ?><br>
+                💚 Crisis: <?php echo esc_html($emergency); ?>
             </p>
         </div>
     </div>
     <div class="footer-bottom">
-        © <?php echo date('Y'); ?> <?php echo esc_html($logoText); ?>. 988 Crisis Line Available 24/7.
+        © <?php echo date('Y'); ?> <?php echo esc_html($businessName); ?>. <?php echo esc_html($emergency); ?> Crisis Line Available 24/7.
     </div>
 </footer>

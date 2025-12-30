@@ -1,25 +1,50 @@
 <?php
 /**
  * Preview: General Hospital - Multi-Department Professional
+ * Uses site_content values for all editable fields
  */
-$logoText = get_preview_value($defaults, 'logo_text', 'City General Hospital');
-$phone = get_preview_value($defaults, 'phone', '+1 (555) 123-4567');
-$emergency = get_preview_value($defaults, 'emergency_number', '911');
-$headline = get_preview_value($defaults, 'headline', 'World-Class Healthcare for Everyone');
-$subheadline = get_preview_value($defaults, 'subheadline', 'Comprehensive medical care with over 50 departments, 200+ expert physicians, and state-of-the-art facilities.');
+
+// Get values from site_content (set in template-preview.php)
+$businessName = get_site_content($site_content, 'business_name', 'City General Hospital');
+$tagline = get_site_content($site_content, 'tagline', 'Excellence in Healthcare');
+$aboutShort = get_site_content($site_content, 'about_short', 'We have been serving our community for over 50 years, providing exceptional healthcare with compassion and excellence.');
+
+$phone = get_site_content($site_content, 'phone', '+1 (555) 123-4567');
+$emergency = get_site_content($site_content, 'emergency', '911');
+$email = get_site_content($site_content, 'email', 'info@hospital.com');
+$hours = get_site_content($site_content, 'hours', 'Mon-Fri: 8AM-8PM, Sat-Sun: 9AM-5PM');
+$address = get_site_content($site_content, 'address', '123 Medical Center Drive, Healthcare City, State 12345');
+
+$heroHeadline = get_site_content($site_content, 'hero_headline', 'World-Class Healthcare for Everyone');
+$heroSubheadline = get_site_content($site_content, 'hero_subheadline', 'Comprehensive medical care with over 50 departments, 200+ expert physicians, and state-of-the-art facilities.');
+$heroBtnPrimary = get_site_content($site_content, 'hero_btn_primary', 'Find a Doctor');
+$heroBtnSecondary = get_site_content($site_content, 'hero_btn_secondary', 'Our Services');
+
+$stat1Num = get_site_content($site_content, 'stat1_num', '500+');
+$stat1Label = get_site_content($site_content, 'stat1_label', 'Hospital Beds');
+$stat2Num = get_site_content($site_content, 'stat2_num', '200+');
+$stat2Label = get_site_content($site_content, 'stat2_label', 'Expert Doctors');
+$stat3Num = get_site_content($site_content, 'stat3_num', '50+');
+$stat3Label = get_site_content($site_content, 'stat3_label', 'Departments');
+$stat4Num = get_site_content($site_content, 'stat4_num', '1M+');
+$stat4Label = get_site_content($site_content, 'stat4_label', 'Patients Served');
+
+$ctaHeadline = get_site_content($site_content, 'cta_headline', 'Need Emergency Care?');
+$ctaDescription = get_site_content($site_content, 'cta_description', 'Our emergency department is open 24/7 with expert trauma care and rapid response teams.');
+$ctaButton = get_site_content($site_content, 'cta_button', 'Call Emergency');
 ?>
 
 <!-- Top Bar -->
 <div class="top-bar">
     <span>🚨 24/7 Emergency: <?php echo esc_html($emergency); ?> &nbsp;|&nbsp; 📞 <?php echo esc_html($phone); ?></span>
-    <span>📍 123 Medical Center Drive, Healthcare City</span>
+    <span>📍 <?php echo esc_html($address); ?></span>
 </div>
 
 <!-- Header -->
 <header class="header">
     <div class="logo">
         <span>🏥</span>
-        <?php echo esc_html($logoText); ?>
+        <?php echo esc_html($businessName); ?>
     </div>
     <nav class="nav">
         <a href="#">Home</a>
@@ -34,11 +59,11 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Comprehensive medica
 
 <!-- Hero -->
 <section class="hero">
-    <h1><?php echo esc_html($headline); ?></h1>
-    <p><?php echo esc_html($subheadline); ?></p>
+    <h1><?php echo esc_html($heroHeadline); ?></h1>
+    <p><?php echo esc_html($heroSubheadline); ?></p>
     <div class="hero-btns">
-        <a href="#" class="btn-primary">Find a Doctor</a>
-        <a href="#" class="btn-outline">Our Services</a>
+        <a href="#" class="btn-primary"><?php echo esc_html($heroBtnPrimary); ?></a>
+        <a href="#" class="btn-outline"><?php echo esc_html($heroBtnSecondary); ?></a>
     </div>
 </section>
 
@@ -72,7 +97,7 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Comprehensive medica
 <section style="background: var(--background);">
     <div class="section-title">
         <h2>Our Departments</h2>
-        <p>Comprehensive care across 50+ medical specialties</p>
+        <p>Comprehensive care across <?php echo esc_html($stat3Num); ?> medical specialties</p>
     </div>
     <div class="container">
         <div class="cards-grid" style="grid-template-columns: repeat(6, 1fr);">
@@ -105,20 +130,20 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Comprehensive medica
 <section class="stats-section">
     <div class="stats-grid">
         <div>
-            <div class="stat-num">500+</div>
-            <div class="stat-label">Hospital Beds</div>
+            <div class="stat-num"><?php echo esc_html($stat1Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat1Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">200+</div>
-            <div class="stat-label">Expert Doctors</div>
+            <div class="stat-num"><?php echo esc_html($stat2Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat2Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">50+</div>
-            <div class="stat-label">Departments</div>
+            <div class="stat-num"><?php echo esc_html($stat3Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat3Label); ?></div>
         </div>
         <div>
-            <div class="stat-num">1M+</div>
-            <div class="stat-label">Patients Served</div>
+            <div class="stat-num"><?php echo esc_html($stat4Num); ?></div>
+            <div class="stat-label"><?php echo esc_html($stat4Label); ?></div>
         </div>
     </div>
 </section>
@@ -155,9 +180,9 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Comprehensive medica
 
 <!-- CTA Section -->
 <section class="cta-section">
-    <h2>Need Emergency Care?</h2>
-    <p>Our emergency department is open 24/7 with expert trauma care and rapid response teams.</p>
-    <a href="#" class="btn-primary">🚨 Call Emergency: <?php echo esc_html($emergency); ?></a>
+    <h2><?php echo esc_html($ctaHeadline); ?></h2>
+    <p><?php echo esc_html($ctaDescription); ?></p>
+    <a href="#" class="btn-primary">🚨 <?php echo esc_html($ctaButton); ?>: <?php echo esc_html($emergency); ?></a>
 </section>
 
 <!-- Footer -->
@@ -165,7 +190,7 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Comprehensive medica
     <div class="footer-grid">
         <div>
             <h4>About Us</h4>
-            <p><?php echo esc_html($logoText); ?> has been serving our community for over 50 years, providing exceptional healthcare with compassion and excellence.</p>
+            <p><?php echo esc_html($aboutShort); ?></p>
         </div>
         <div>
             <h4>Quick Links</h4>
@@ -190,14 +215,14 @@ $subheadline = get_preview_value($defaults, 'subheadline', 'Comprehensive medica
         <div>
             <h4>Contact Info</h4>
             <p>
-                📍 123 Medical Center Drive<br>
-                Healthcare City, State 12345<br><br>
+                📍 <?php echo nl2br(esc_html($address)); ?><br><br>
                 📞 <?php echo esc_html($phone); ?><br>
+                ✉️ <?php echo esc_html($email); ?><br>
                 🚨 Emergency: <?php echo esc_html($emergency); ?>
             </p>
         </div>
     </div>
     <div class="footer-bottom">
-        © <?php echo date('Y'); ?> <?php echo esc_html($logoText); ?>. All rights reserved.
+        © <?php echo date('Y'); ?> <?php echo esc_html($businessName); ?>. All rights reserved.
     </div>
 </footer>
