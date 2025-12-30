@@ -43,12 +43,14 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background: #f5f7fa;
         }
         
         .spfm-customer-page {
             flex: 1;
             display: flex;
             flex-direction: column;
+            padding: 20px;
         }
         
         .spfm-form-wrapper {
@@ -66,6 +68,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             text-align: center;
             color: #fff;
             position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         .spfm-form-header h1 {
@@ -103,6 +106,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
+            color: #333;
         }
         
         .spfm-form-group .required {
@@ -115,10 +119,23 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             border-radius: 8px;
             font-size: 15px;
             transition: all 0.3s;
+            width: 100%;
         }
         
         .form-control:focus {
             outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-check {
+            margin-bottom: 8px;
+        }
+        
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
         }
         
         .btn-primary {
@@ -128,6 +145,15 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             border: none;
             cursor: pointer;
             transition: all 0.3s;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-radius: 50px;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
         
         .spfm-form-footer {
@@ -136,6 +162,25 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             background: #f8f9fa;
             color: #666;
             font-size: 14px;
+        }
+        
+        .spfm-section-heading {
+            font-size: 20px;
+            color: #333;
+            margin: 20px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .spfm-divider {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 25px 0;
+        }
+        
+        .spfm-paragraph {
+            color: #666;
+            line-height: 1.6;
         }
         
         /* Customization Panel */
@@ -153,6 +198,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             box-shadow: -5px 0 15px rgba(0,0,0,0.2);
             writing-mode: vertical-rl;
             text-orientation: mixed;
+            border: none;
         }
         
         .spfm-customize-panel {
@@ -193,6 +239,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid #eee;
+            font-size: 16px;
         }
         
         .color-picker-group {
@@ -204,6 +251,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
         
         .color-picker-group label {
             flex: 1;
+            font-size: 14px;
         }
         
         .color-picker-group input[type="color"] {
@@ -211,6 +259,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             height: 35px;
             border: none;
             cursor: pointer;
+            border-radius: 5px;
         }
         
         .theme-cards {
@@ -262,6 +311,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             max-width: 100%;
             max-height: 100px;
             margin-top: 10px;
+            border-radius: 5px;
         }
         
         /* Success Message */
@@ -276,10 +326,27 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
             margin-bottom: 20px;
         }
         
+        .spfm-success-message h2 {
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+        
         @media (max-width: 768px) {
+            .spfm-customer-page {
+                padding: 10px;
+            }
+            
             .spfm-form-wrapper {
-                margin: 15px;
+                margin: 15px auto;
                 border-radius: 10px;
+            }
+            
+            .spfm-form-header {
+                padding: 30px 20px;
+            }
+            
+            .spfm-form-body {
+                padding: 20px;
             }
             
             .spfm-customize-panel {
@@ -326,7 +393,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
                     
                     <?php foreach ($fields as $field): ?>
                         <?php if ($field->status): ?>
-                            <?php $this->render_customer_field($field); ?>
+                            <?php spfm_render_customer_field($field); ?>
                         <?php endif; ?>
                     <?php endforeach; ?>
                     
@@ -347,9 +414,9 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
         
         <?php if ($allow_customization): ?>
             <!-- Customization Toggle -->
-            <div class="spfm-customize-toggle" id="customize-toggle">
+            <button class="spfm-customize-toggle" id="customize-toggle">
                 <i class="bi bi-palette"></i> Customize
-            </div>
+            </button>
             
             <!-- Customization Panel -->
             <div class="spfm-customize-panel" id="customize-panel">
@@ -379,11 +446,11 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
                             <h4><i class="bi bi-droplet"></i> Colors</h4>
                             <div class="color-picker-group">
                                 <label>Primary Color</label>
-                                <input type="color" name="primary_color" value="<?php echo esc_attr($current_theme->primary_color ?? '#007bff'); ?>">
+                                <input type="color" name="primary_color" value="<?php echo esc_attr($current_theme->primary_color ?? '#667eea'); ?>">
                             </div>
                             <div class="color-picker-group">
                                 <label>Secondary Color</label>
-                                <input type="color" name="secondary_color" value="<?php echo esc_attr($current_theme->secondary_color ?? '#6c757d'); ?>">
+                                <input type="color" name="secondary_color" value="<?php echo esc_attr($current_theme->secondary_color ?? '#764ba2'); ?>">
                             </div>
                             <div class="color-picker-group">
                                 <label>Background Color</label>
@@ -455,7 +522,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
         const formToken = '<?php echo esc_js($token); ?>';
         const nonce = '<?php echo wp_create_nonce('spfm_nonce'); ?>';
         
-        $(document).ready(function() {
+        jQuery(document).ready(function($) {
             // Toggle customization panel
             $('#customize-toggle').on('click', function() {
                 $('#customize-panel').addClass('open');
@@ -536,7 +603,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
                 
                 switch(name) {
                     case 'primary_color':
-                        $('.btn-primary').css('background-color', value);
+                        $('.btn-primary').css('background', value);
                         break;
                     case 'background_color':
                         $('.spfm-form-wrapper').css('background-color', value);
@@ -570,13 +637,13 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
                     success: function(response) {
                         if (response.success) {
                             // Show success message
-                            $('.spfm-form-body').html(`
-                                <div class="spfm-success-message">
-                                    <div class="icon"><i class="bi bi-check-circle"></i></div>
-                                    <h2>Thank You!</h2>
-                                    <p>${response.data.message}</p>
-                                </div>
-                            `);
+                            $('.spfm-form-body').html(
+                                '<div class="spfm-success-message">' +
+                                '<div class="icon"><i class="bi bi-check-circle"></i></div>' +
+                                '<h2>Thank You!</h2>' +
+                                '<p>' + response.data.message + '</p>' +
+                                '</div>'
+                            );
                         } else {
                             alert(response.data.message || 'Failed to submit form');
                             $btn.text(originalText).prop('disabled', false);
@@ -595,7 +662,7 @@ $layout_class = $current_theme ? 'layout-' . $current_theme->layout_style : 'lay
 <?php
 
 // Helper function to render field
-function render_customer_field($field) {
+function spfm_render_customer_field($field) {
     $required = $field->is_required ? 'required' : '';
     $required_mark = $field->is_required ? '<span class="required">*</span>' : '';
     

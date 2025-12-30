@@ -30,6 +30,7 @@ class SPFM_Ajax_Handler {
         add_action('wp_ajax_spfm_get_theme', array($this, 'get_theme'));
         add_action('wp_ajax_spfm_toggle_theme_status', array($this, 'toggle_theme_status'));
         add_action('wp_ajax_spfm_duplicate_theme', array($this, 'duplicate_theme'));
+        add_action('wp_ajax_spfm_theme_preview', array($this, 'theme_preview'));
         
         // Form AJAX actions
         add_action('wp_ajax_spfm_save_form', array($this, 'save_form'));
@@ -820,6 +821,14 @@ class SPFM_Ajax_Handler {
             'admin_email' => sanitize_email($_POST['admin_email'] ?? ''),
             'email_from_name' => sanitize_text_field($_POST['email_from_name'] ?? ''),
             'email_from_address' => sanitize_email($_POST['email_from_address'] ?? ''),
+            // SMTP Settings
+            'smtp_enabled' => isset($_POST['smtp_enabled']) ? 1 : 0,
+            'smtp_host' => sanitize_text_field($_POST['smtp_host'] ?? ''),
+            'smtp_port' => intval($_POST['smtp_port'] ?? 587),
+            'smtp_encryption' => sanitize_text_field($_POST['smtp_encryption'] ?? 'tls'),
+            'smtp_username' => sanitize_text_field($_POST['smtp_username'] ?? ''),
+            'smtp_password' => sanitize_text_field($_POST['smtp_password'] ?? ''),
+            // Nexmo Settings
             'nexmo_api_key' => sanitize_text_field($_POST['nexmo_api_key'] ?? ''),
             'nexmo_api_secret' => sanitize_text_field($_POST['nexmo_api_secret'] ?? ''),
             'nexmo_from_number' => sanitize_text_field($_POST['nexmo_from_number'] ?? '')
@@ -830,6 +839,307 @@ class SPFM_Ajax_Handler {
         }
         
         wp_send_json_success(array('message' => 'Settings saved successfully.'));
+    }
+    
+    public function theme_preview() {
+        // Check nonce from GET for iframe loading
+        if (!isset($_GET['nonce']) || !wp_verify_nonce($_GET['nonce'], 'spfm_nonce')) {
+            wp_die('Security check failed.');
+        }
+        
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        
+        if (!$id) {
+            wp_die('Invalid theme ID.');
+        }
+        
+        $themes = SPFM_Themes::get_instance();
+        $theme = $themes->get_by_id($id);
+        
+        if (!$theme) {
+            wp_die('Theme not found.');
+        }
+        
+        // Allow live customization from URL params
+        $custom = array();
+        $color_params = array('primary_color', 'secondary_color', 'background_color', 'text_color', 'accent_color', 'header_bg_color');
+        foreach ($color_params as $param) {
+            if (isset($_GET[$param])) {
+                $custom[$param] = sanitize_hex_color($_GET[$param]);
+            }
+        }
+        if (isset($_GET['layout_style'])) {
+            $custom['layout_style'] = sanitize_text_field($_GET['layout_style']);
+        }
+        if (isset($_GET['button_style'])) {
+            $custom['button_style'] = sanitize_text_field($_GET['button_style']);
+        }
+        if (isset($_GET['body_font'])) {
+            $custom['body_font'] = sanitize_text_field($_GET['body_font']);
+        }
+        if (isset($_GET['header_font'])) {
+            $custom['header_font'] = sanitize_text_field($_GET['header_font']);
+        }
+        
+        // Merge custom values with theme defaults
+        $preview_theme = clone $theme;
+        foreach ($custom as $key => $value) {
+            if (!empty($value)) {
+                $preview_theme->$key = $value;
+            }
+        }
+        
+        // Output preview HTML
+        $this->render_theme_preview($preview_theme);
+        exit;
+    }
+    
+    private function render_theme_preview($theme) {
+        $primary = $theme->primary_color;
+        $secondary = $theme->secondary_color;
+        $background = $theme->background_color;
+        $text = $theme->text_color;
+        $accent = $theme->accent_color ?: $primary;
+        $header_bg = $theme->header_bg_color ?: $primary;
+        $body_font = $theme->body_font ?: 'Poppins';
+        $header_font = $theme->header_font ?: 'Poppins';
+        $button_style = $theme->button_style ?: 'rounded';
+        $layout_style = $theme->layout_style ?: 'default';
+        
+        $button_radius = '8px';
+        if ($button_style === 'pill') $button_radius = '50px';
+        elseif ($button_style === 'square') $button_radius = '0';
+        
+        $header_gradient = "linear-gradient(135deg, {$header_bg} 0%, {$secondary} 100%)";
+        if ($layout_style === 'minimal') $header_gradient = $header_bg;
+        
+        $button_bg = $button_style === 'gradient' ? $header_gradient : $accent;
+        $button_border = $button_style === 'outline' ? "2px solid {$accent}" : 'none';
+        $button_text_color = $button_style === 'outline' ? $accent : '#fff';
+        $button_bg_outline = $button_style === 'outline' ? 'transparent' : $button_bg;
+        $button_shadow = $button_style === 'shadow' ? 'box-shadow: 0 5px 20px rgba(0,0,0,0.2);' : '';
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link href="https://fonts.googleapis.com/css2?family=<?php echo urlencode($body_font); ?>:wght@400;500;600;700&family=<?php echo urlencode($header_font); ?>:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                    font-family: '<?php echo $body_font; ?>', sans-serif;
+                    background: #f5f5f5;
+                    padding: 30px;
+                    min-height: 100vh;
+                }
+                .form-wrapper {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background: <?php echo $background; ?>;
+                    border-radius: 15px;
+                    overflow: hidden;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                }
+                .form-header {
+                    background: <?php echo $header_gradient; ?>;
+                    padding: 40px 30px;
+                    text-align: center;
+                }
+                .form-header h1 {
+                    font-family: '<?php echo $header_font; ?>', sans-serif;
+                    color: #fff;
+                    font-size: 24px;
+                    margin-bottom: 8px;
+                }
+                .form-header p {
+                    color: rgba(255,255,255,0.9);
+                    font-size: 14px;
+                }
+                .form-body {
+                    padding: 30px;
+                    color: <?php echo $text; ?>;
+                }
+                .form-group {
+                    margin-bottom: 20px;
+                }
+                .form-group label {
+                    display: block;
+                    margin-bottom: 8px;
+                    font-weight: 600;
+                    font-size: 14px;
+                }
+                .form-group label .required {
+                    color: #dc3545;
+                }
+                .form-control {
+                    width: 100%;
+                    padding: 12px 15px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-family: inherit;
+                    transition: all 0.3s;
+                }
+                .form-control:focus {
+                    border-color: <?php echo $primary; ?>;
+                    outline: none;
+                    box-shadow: 0 0 0 3px <?php echo $primary; ?>20;
+                }
+                textarea.form-control {
+                    resize: vertical;
+                    min-height: 100px;
+                }
+                .form-check {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 8px;
+                }
+                .form-check input {
+                    width: 18px;
+                    height: 18px;
+                    accent-color: <?php echo $primary; ?>;
+                }
+                .btn-submit {
+                    display: block;
+                    width: 100%;
+                    padding: 15px 30px;
+                    background: <?php echo $button_bg_outline; ?>;
+                    color: <?php echo $button_text_color; ?>;
+                    border: <?php echo $button_border; ?>;
+                    border-radius: <?php echo $button_radius; ?>;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-family: inherit;
+                    transition: all 0.3s;
+                    <?php echo $button_shadow; ?>
+                }
+                .btn-submit:hover {
+                    transform: translateY(-2px);
+                    opacity: 0.9;
+                }
+                .form-footer {
+                    background: #f8f9fa;
+                    padding: 20px 30px;
+                    text-align: center;
+                    font-size: 13px;
+                    color: #666;
+                    border-top: 1px solid #eee;
+                }
+                .page-nav {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 20px;
+                    padding-top: 20px;
+                    border-top: 1px solid #eee;
+                }
+                .btn-nav {
+                    padding: 10px 25px;
+                    background: #e9ecef;
+                    border: none;
+                    border-radius: <?php echo $button_radius; ?>;
+                    cursor: pointer;
+                    font-family: inherit;
+                    transition: all 0.3s;
+                }
+                .btn-nav:hover {
+                    background: #dee2e6;
+                }
+                .btn-nav.primary {
+                    background: <?php echo $accent; ?>;
+                    color: #fff;
+                }
+                .progress-bar {
+                    height: 4px;
+                    background: #e9ecef;
+                    margin-bottom: 0;
+                }
+                .progress-fill {
+                    height: 100%;
+                    background: <?php echo $header_gradient; ?>;
+                    width: 33%;
+                    transition: width 0.3s;
+                }
+                .section-title {
+                    font-family: '<?php echo $header_font; ?>', sans-serif;
+                    font-size: 18px;
+                    color: <?php echo $primary; ?>;
+                    margin: 20px 0 15px;
+                    padding-bottom: 10px;
+                    border-bottom: 2px solid <?php echo $primary; ?>30;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="form-wrapper">
+                <div class="progress-bar"><div class="progress-fill"></div></div>
+                <div class="form-header">
+                    <h1>Sample Form</h1>
+                    <p>Preview of <?php echo esc_html($theme->name); ?> theme</p>
+                </div>
+                <div class="form-body">
+                    <h3 class="section-title">Personal Information</h3>
+                    
+                    <div class="form-group">
+                        <label>Full Name <span class="required">*</span></label>
+                        <input type="text" class="form-control" placeholder="Enter your full name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email Address <span class="required">*</span></label>
+                        <input type="email" class="form-control" placeholder="Enter your email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" class="form-control" placeholder="+1 (234) 567-8900">
+                    </div>
+                    
+                    <h3 class="section-title">Additional Details</h3>
+                    
+                    <div class="form-group">
+                        <label>Select Option</label>
+                        <select class="form-control">
+                            <option value="">Choose an option...</option>
+                            <option>Option 1</option>
+                            <option>Option 2</option>
+                            <option>Option 3</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Preferences</label>
+                        <div class="form-check">
+                            <input type="checkbox" id="opt1" checked>
+                            <label for="opt1">Email notifications</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" id="opt2">
+                            <label for="opt2">SMS notifications</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea class="form-control" placeholder="Enter your message here..."></textarea>
+                    </div>
+                    
+                    <button type="button" class="btn-submit">Submit Form</button>
+                    
+                    <div class="page-nav">
+                        <button class="btn-nav">← Previous</button>
+                        <button class="btn-nav primary">Next →</button>
+                    </div>
+                </div>
+                <div class="form-footer">
+                    Thank you for using our service. Your privacy is important to us.
+                </div>
+            </div>
+        </body>
+        </html>
+        <?php
     }
     
     public function test_email() {

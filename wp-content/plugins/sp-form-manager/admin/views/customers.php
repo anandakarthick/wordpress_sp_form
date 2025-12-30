@@ -12,155 +12,147 @@ if ($action === 'edit' && $id) {
     $customer = $customers_handler->get_by_id($id);
 }
 
-$search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
-$paged = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
-$per_page = 20;
-
-$customers = $customers_handler->get_all(array(
-    'search' => $search,
-    'page' => $paged,
-    'per_page' => $per_page
-));
-
-$total = $customers_handler->get_total(array('search' => $search));
-$total_pages = ceil($total / $per_page);
+$customers = $customers_handler->get_all(array('per_page' => 50));
 ?>
 
 <div class="wrap spfm-admin-wrap">
     <h1 class="wp-heading-inline">Customers</h1>
     
     <?php if ($action === 'list'): ?>
-        <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=add'); ?>" class="page-title-action">Add New</a>
+        <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=add'); ?>" class="page-title-action">Add New Customer</a>
         
-        <form method="get" class="spfm-search-form">
-            <input type="hidden" name="page" value="spfm-customers">
-            <p class="search-box">
-                <input type="search" name="s" value="<?php echo esc_attr($search); ?>" placeholder="Search customers...">
-                <input type="submit" class="button" value="Search">
-            </p>
-        </form>
-        
-        <table class="wp-list-table widefat fixed striped">
-            <thead>
-                <tr>
-                    <th width="5%">ID</th>
-                    <th width="20%">Name</th>
-                    <th width="20%">Email</th>
-                    <th width="15%">Phone</th>
-                    <th width="15%">Company</th>
-                    <th width="10%">Status</th>
-                    <th width="15%">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($customers)): ?>
-                    <tr>
-                        <td colspan="7">No customers found.</td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($customers as $cust): ?>
-                        <tr>
-                            <td><?php echo $cust->id; ?></td>
-                            <td><strong><?php echo esc_html($cust->name); ?></strong></td>
-                            <td><?php echo esc_html($cust->email); ?></td>
-                            <td><?php echo esc_html($cust->phone); ?></td>
-                            <td><?php echo esc_html($cust->company); ?></td>
-                            <td>
-                                <span class="spfm-status spfm-status-<?php echo $cust->status ? 'active' : 'inactive'; ?>">
-                                    <?php echo $cust->status ? 'Active' : 'Inactive'; ?>
-                                </span>
-                            </td>
-                            <td>
-                                <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=edit&id=' . $cust->id); ?>" class="button button-small">Edit</a>
-                                <button type="button" class="button button-small button-link-delete spfm-delete-customer" data-id="<?php echo $cust->id; ?>">Delete</button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        
-        <?php if ($total_pages > 1): ?>
-            <div class="tablenav bottom">
-                <div class="tablenav-pages">
-                    <span class="displaying-num"><?php echo $total; ?> items</span>
-                    <span class="pagination-links">
-                        <?php if ($paged > 1): ?>
-                            <a class="prev-page button" href="<?php echo admin_url('admin.php?page=spfm-customers&paged=' . ($paged - 1) . ($search ? '&s=' . urlencode($search) : '')); ?>">‹</a>
-                        <?php endif; ?>
-                        <span class="paging-input"><?php echo $paged; ?> of <?php echo $total_pages; ?></span>
-                        <?php if ($paged < $total_pages): ?>
-                            <a class="next-page button" href="<?php echo admin_url('admin.php?page=spfm-customers&paged=' . ($paged + 1) . ($search ? '&s=' . urlencode($search) : '')); ?>">›</a>
-                        <?php endif; ?>
-                    </span>
+        <div class="spfm-customers-container">
+            <?php if (empty($customers)): ?>
+                <div class="empty-state">
+                    <span class="dashicons dashicons-groups"></span>
+                    <p>No customers yet. Add your first customer!</p>
+                    <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=add'); ?>" class="button button-primary">Add Customer</a>
                 </div>
-            </div>
-        <?php endif; ?>
+            <?php else: ?>
+                <table class="wp-list-table widefat fixed striped">
+                    <thead>
+                        <tr>
+                            <th width="5%">ID</th>
+                            <th width="20%">Name</th>
+                            <th width="20%">Email</th>
+                            <th width="15%">Phone</th>
+                            <th width="15%">Company</th>
+                            <th width="10%">Status</th>
+                            <th width="15%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($customers as $c): ?>
+                            <tr>
+                                <td><?php echo $c->id; ?></td>
+                                <td><strong><?php echo esc_html($c->name); ?></strong></td>
+                                <td><a href="mailto:<?php echo esc_attr($c->email); ?>"><?php echo esc_html($c->email); ?></a></td>
+                                <td><?php echo esc_html($c->phone ?: '-'); ?></td>
+                                <td><?php echo esc_html($c->company ?: '-'); ?></td>
+                                <td>
+                                    <span class="status-badge <?php echo $c->status ? 'active' : 'inactive'; ?>">
+                                        <?php echo $c->status ? 'Active' : 'Inactive'; ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=edit&id=' . $c->id); ?>" class="button button-small" title="Edit">
+                                        <span class="dashicons dashicons-edit"></span>
+                                    </a>
+                                    <button class="button button-small button-link-delete delete-customer" data-id="<?php echo $c->id; ?>" title="Delete">
+                                        <span class="dashicons dashicons-trash"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        </div>
         
     <?php else: ?>
-        <a href="<?php echo admin_url('admin.php?page=spfm-customers'); ?>" class="page-title-action">Back to List</a>
+        <!-- Add/Edit Customer -->
+        <a href="<?php echo admin_url('admin.php?page=spfm-customers'); ?>" class="page-title-action">Back to Customers</a>
         
         <div class="spfm-form-container">
             <form id="spfm-customer-form" class="spfm-admin-form">
                 <input type="hidden" name="id" value="<?php echo $customer ? $customer->id : ''; ?>">
                 
-                <table class="form-table">
-                    <tr>
-                        <th><label for="name">Name <span class="required">*</span></label></th>
-                        <td><input type="text" name="name" id="name" class="regular-text" required value="<?php echo $customer ? esc_attr($customer->name) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th><label for="email">Email <span class="required">*</span></label></th>
-                        <td><input type="email" name="email" id="email" class="regular-text" required value="<?php echo $customer ? esc_attr($customer->email) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th><label for="phone">Phone</label></th>
-                        <td><input type="text" name="phone" id="phone" class="regular-text" value="<?php echo $customer ? esc_attr($customer->phone) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th><label for="company">Company</label></th>
-                        <td><input type="text" name="company" id="company" class="regular-text" value="<?php echo $customer ? esc_attr($customer->company) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th><label for="address">Address</label></th>
-                        <td><textarea name="address" id="address" rows="3" class="large-text"><?php echo $customer ? esc_textarea($customer->address) : ''; ?></textarea></td>
-                    </tr>
-                    <tr>
-                        <th><label for="city">City</label></th>
-                        <td><input type="text" name="city" id="city" class="regular-text" value="<?php echo $customer ? esc_attr($customer->city) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th><label for="state">State</label></th>
-                        <td><input type="text" name="state" id="state" class="regular-text" value="<?php echo $customer ? esc_attr($customer->state) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th><label for="country">Country</label></th>
-                        <td><input type="text" name="country" id="country" class="regular-text" value="<?php echo $customer ? esc_attr($customer->country) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th><label for="zip_code">ZIP Code</label></th>
-                        <td><input type="text" name="zip_code" id="zip_code" class="regular-text" value="<?php echo $customer ? esc_attr($customer->zip_code) : ''; ?>"></td>
-                    </tr>
-                    <tr>
-                        <th><label for="notes">Notes</label></th>
-                        <td><textarea name="notes" id="notes" rows="4" class="large-text"><?php echo $customer ? esc_textarea($customer->notes) : ''; ?></textarea></td>
-                    </tr>
-                    <tr>
-                        <th><label for="status">Status</label></th>
-                        <td>
-                            <select name="status" id="status">
-                                <option value="1" <?php selected($customer ? $customer->status : 1, 1); ?>>Active</option>
-                                <option value="0" <?php selected($customer ? $customer->status : 1, 0); ?>>Inactive</option>
-                            </select>
-                        </td>
-                    </tr>
-                </table>
+                <div class="form-columns">
+                    <div class="form-column">
+                        <h3>Basic Information</h3>
+                        
+                        <table class="form-table">
+                            <tr>
+                                <th><label for="name">Name *</label></th>
+                                <td><input type="text" name="name" id="name" class="regular-text" required value="<?php echo $customer ? esc_attr($customer->name) : ''; ?>"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="email">Email *</label></th>
+                                <td><input type="email" name="email" id="email" class="regular-text" required value="<?php echo $customer ? esc_attr($customer->email) : ''; ?>"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="phone">Phone</label></th>
+                                <td><input type="tel" name="phone" id="phone" class="regular-text" value="<?php echo $customer ? esc_attr($customer->phone) : ''; ?>" placeholder="+1234567890"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="company">Company</label></th>
+                                <td><input type="text" name="company" id="company" class="regular-text" value="<?php echo $customer ? esc_attr($customer->company) : ''; ?>"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="form-column">
+                        <h3>Address</h3>
+                        
+                        <table class="form-table">
+                            <tr>
+                                <th><label for="address">Address</label></th>
+                                <td><textarea name="address" id="address" rows="2" class="large-text"><?php echo $customer ? esc_textarea($customer->address) : ''; ?></textarea></td>
+                            </tr>
+                            <tr>
+                                <th><label for="city">City</label></th>
+                                <td><input type="text" name="city" id="city" value="<?php echo $customer ? esc_attr($customer->city) : ''; ?>"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="state">State/Province</label></th>
+                                <td><input type="text" name="state" id="state" value="<?php echo $customer ? esc_attr($customer->state) : ''; ?>"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="country">Country</label></th>
+                                <td><input type="text" name="country" id="country" value="<?php echo $customer ? esc_attr($customer->country) : ''; ?>"></td>
+                            </tr>
+                            <tr>
+                                <th><label for="zip_code">Zip/Postal Code</label></th>
+                                <td><input type="text" name="zip_code" id="zip_code" value="<?php echo $customer ? esc_attr($customer->zip_code) : ''; ?>"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Additional Information</h3>
+                    <table class="form-table">
+                        <tr>
+                            <th><label for="notes">Notes</label></th>
+                            <td><textarea name="notes" id="notes" rows="3" class="large-text"><?php echo $customer ? esc_textarea($customer->notes) : ''; ?></textarea></td>
+                        </tr>
+                        <tr>
+                            <th><label for="status">Status</label></th>
+                            <td>
+                                <select name="status" id="status">
+                                    <option value="1" <?php selected($customer ? $customer->status : 1, 1); ?>>Active</option>
+                                    <option value="0" <?php selected($customer ? $customer->status : 1, 0); ?>>Inactive</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
                 
                 <p class="submit">
-                    <button type="submit" class="button button-primary">
-                        <?php echo $customer ? 'Update Customer' : 'Add Customer'; ?>
+                    <button type="submit" class="button button-primary button-large">
+                        <?php echo $customer ? 'Update Customer' : 'Create Customer'; ?>
                     </button>
-                    <a href="<?php echo admin_url('admin.php?page=spfm-customers'); ?>" class="button">Cancel</a>
+                    <a href="<?php echo admin_url('admin.php?page=spfm-customers'); ?>" class="button button-large">Cancel</a>
                 </p>
             </form>
         </div>
@@ -168,61 +160,83 @@ $total_pages = ceil($total / $per_page);
 </div>
 
 <style>
-.spfm-search-form {
-    float: right;
-    margin-bottom: 10px;
+.spfm-customers-container,
+.spfm-form-container {
+    background: #fff;
+    padding: 25px;
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
 }
-.spfm-status {
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+.empty-state .dashicons {
+    font-size: 60px;
+    width: 60px;
+    height: 60px;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+.status-badge {
     display: inline-block;
-    padding: 3px 8px;
-    border-radius: 3px;
+    padding: 3px 10px;
+    border-radius: 15px;
     font-size: 12px;
 }
-.spfm-status-active {
+.status-badge.active {
     background: #d4edda;
     color: #155724;
 }
-.spfm-status-inactive {
+.status-badge.inactive {
     background: #f8d7da;
     color: #721c24;
 }
-.spfm-form-container {
-    background: #fff;
-    padding: 20px;
-    margin-top: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+.wp-list-table .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
 }
-.required {
-    color: #dc3545;
+.form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+.form-column h3,
+.form-section h3 {
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+.form-section {
+    margin-top: 30px;
+}
+@media (max-width: 900px) {
+    .form-columns {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 
 <script>
 jQuery(document).ready(function($) {
     // Delete customer
-    $('.spfm-delete-customer').on('click', function() {
-        if (!confirm('Are you sure you want to delete this customer?')) {
-            return;
-        }
+    $('.delete-customer').on('click', function() {
+        if (!confirm('Are you sure you want to delete this customer?')) return;
         
         var id = $(this).data('id');
         var $row = $(this).closest('tr');
         
-        $.ajax({
-            url: spfm_ajax.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'spfm_delete_customer',
-                nonce: spfm_ajax.nonce,
-                id: id
-            },
-            success: function(response) {
-                if (response.success) {
-                    $row.fadeOut(300, function() { $(this).remove(); });
-                } else {
-                    alert(response.data.message);
-                }
+        $.post(spfm_ajax.ajax_url, {
+            action: 'spfm_delete_customer',
+            nonce: spfm_ajax.nonce,
+            id: id
+        }, function(response) {
+            if (response.success) {
+                $row.fadeOut(300, function() { $(this).remove(); });
+            } else {
+                alert(response.data.message);
             }
         });
     });
@@ -230,31 +244,20 @@ jQuery(document).ready(function($) {
     // Save customer
     $('#spfm-customer-form').on('submit', function(e) {
         e.preventDefault();
-        
         var $form = $(this);
         var $btn = $form.find('button[type="submit"]');
-        var originalText = $btn.text();
         
         $btn.text('Saving...').prop('disabled', true);
         
         var formData = $form.serialize();
         formData += '&action=spfm_save_customer&nonce=' + spfm_ajax.nonce;
         
-        $.ajax({
-            url: spfm_ajax.ajax_url,
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                if (response.success) {
-                    window.location.href = '<?php echo admin_url('admin.php?page=spfm-customers'); ?>';
-                } else {
-                    alert(response.data.message);
-                    $btn.text(originalText).prop('disabled', false);
-                }
-            },
-            error: function() {
-                alert('An error occurred. Please try again.');
-                $btn.text(originalText).prop('disabled', false);
+        $.post(spfm_ajax.ajax_url, formData, function(response) {
+            if (response.success) {
+                window.location.href = '<?php echo admin_url('admin.php?page=spfm-customers'); ?>';
+            } else {
+                alert(response.data.message);
+                $btn.text('Save Customer').prop('disabled', false);
             }
         });
     });
