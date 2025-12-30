@@ -32,6 +32,30 @@ $stat4Label = get_site_content($site_content, 'stat4_label', 'Patients Served');
 $ctaHeadline = get_site_content($site_content, 'cta_headline', 'Need Emergency Care?');
 $ctaDescription = get_site_content($site_content, 'cta_description', 'Our emergency department is open 24/7 with expert trauma care and rapid response teams.');
 $ctaButton = get_site_content($site_content, 'cta_button', 'Call Emergency');
+
+// Get repeater data with defaults
+$services = isset($site_content['services']) && is_array($site_content['services']) ? $site_content['services'] : array(
+    array('icon' => '❤️', 'name' => 'Cardiology', 'desc' => 'Heart and cardiovascular care'),
+    array('icon' => '🧠', 'name' => 'Neurology', 'desc' => 'Brain and nervous system'),
+    array('icon' => '🦴', 'name' => 'Orthopedics', 'desc' => 'Bone and joint specialists'),
+    array('icon' => '👶', 'name' => 'Pediatrics', 'desc' => 'Children healthcare'),
+    array('icon' => '👁️', 'name' => 'Ophthalmology', 'desc' => 'Eye care services'),
+    array('icon' => '🦷', 'name' => 'Dental', 'desc' => 'Dental care services'),
+);
+
+$team = isset($site_content['team']) && is_array($site_content['team']) ? $site_content['team'] : array(
+    array('name' => 'Dr. Sarah Johnson', 'role' => 'Chief Medical Officer', 'initial' => 'S'),
+    array('name' => 'Dr. Michael Chen', 'role' => 'Head of Cardiology', 'initial' => 'M'),
+    array('name' => 'Dr. Emily Brown', 'role' => 'Neurology Specialist', 'initial' => 'E'),
+    array('name' => 'Dr. David Wilson', 'role' => 'Orthopedic Surgeon', 'initial' => 'D'),
+);
+
+$quick_features = isset($site_content['quick_features']) && is_array($site_content['quick_features']) ? $site_content['quick_features'] : array(
+    array('icon' => '🚑', 'name' => 'Emergency Care', 'desc' => '24/7 emergency services with rapid response'),
+    array('icon' => '📅', 'name' => 'Appointments', 'desc' => 'Easy online booking system'),
+    array('icon' => '💊', 'name' => 'Pharmacy', 'desc' => 'On-site pharmacy services'),
+    array('icon' => '📱', 'name' => 'Patient Portal', 'desc' => 'Access records online'),
+);
 ?>
 
 <!-- Top Bar -->
@@ -69,27 +93,14 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Call Emergency');
 
 <!-- Quick Services Cards -->
 <div class="container" style="margin-top: -60px; position: relative; z-index: 10;">
-    <div class="cards-grid" style="grid-template-columns: repeat(4, 1fr);">
-        <div class="card">
-            <div class="card-icon">🚑</div>
-            <h3>Emergency Care</h3>
-            <p>24/7 emergency services with rapid response</p>
-        </div>
-        <div class="card">
-            <div class="card-icon">📅</div>
-            <h3>Appointments</h3>
-            <p>Easy online booking system</p>
-        </div>
-        <div class="card">
-            <div class="card-icon">💊</div>
-            <h3>Pharmacy</h3>
-            <p>On-site pharmacy services</p>
-        </div>
-        <div class="card">
-            <div class="card-icon">📱</div>
-            <h3>Patient Portal</h3>
-            <p>Access records online</p>
-        </div>
+    <div class="cards-grid" style="grid-template-columns: repeat(<?php echo min(count($quick_features), 4); ?>, 1fr);">
+        <?php foreach ($quick_features as $feature): ?>
+            <div class="card">
+                <div class="card-icon"><?php echo esc_html($feature['icon'] ?? '✅'); ?></div>
+                <h3><?php echo esc_html($feature['name'] ?? 'Feature'); ?></h3>
+                <p><?php echo esc_html($feature['desc'] ?? ''); ?></p>
+            </div>
+        <?php endforeach; ?>
     </div>
 </div>
 
@@ -100,26 +111,11 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Call Emergency');
         <p>Comprehensive care across <?php echo esc_html($stat3Num); ?> medical specialties</p>
     </div>
     <div class="container">
-        <div class="cards-grid" style="grid-template-columns: repeat(6, 1fr);">
-            <?php 
-            $departments = array(
-                array('icon' => '❤️', 'name' => 'Cardiology'),
-                array('icon' => '🧠', 'name' => 'Neurology'),
-                array('icon' => '🦴', 'name' => 'Orthopedics'),
-                array('icon' => '👶', 'name' => 'Pediatrics'),
-                array('icon' => '🔬', 'name' => 'Oncology'),
-                array('icon' => '🫁', 'name' => 'Pulmonology'),
-                array('icon' => '👁️', 'name' => 'Ophthalmology'),
-                array('icon' => '🦷', 'name' => 'Dental'),
-                array('icon' => '🧬', 'name' => 'Genetics'),
-                array('icon' => '🩺', 'name' => 'Internal Med'),
-                array('icon' => '🤰', 'name' => 'OB/GYN'),
-                array('icon' => '🧪', 'name' => 'Pathology'),
-            );
-            foreach ($departments as $dept): ?>
+        <div class="cards-grid" style="grid-template-columns: repeat(<?php echo min(count($services), 6); ?>, 1fr);">
+            <?php foreach ($services as $service): ?>
                 <div class="card" style="padding: 25px 15px;">
-                    <div class="card-icon" style="width: 60px; height: 60px; font-size: 28px;"><?php echo $dept['icon']; ?></div>
-                    <h3 style="font-size: 14px;"><?php echo $dept['name']; ?></h3>
+                    <div class="card-icon" style="width: 60px; height: 60px; font-size: 28px;"><?php echo esc_html($service['icon'] ?? '🏥'); ?></div>
+                    <h3 style="font-size: 14px;"><?php echo esc_html($service['name'] ?? 'Service'); ?></h3>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -156,21 +152,14 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Call Emergency');
     </div>
     <div class="container">
         <div class="team-grid">
-            <?php 
-            $doctors = array(
-                array('name' => 'Dr. Sarah Johnson', 'role' => 'Chief Medical Officer', 'initial' => 'S'),
-                array('name' => 'Dr. Michael Chen', 'role' => 'Head of Cardiology', 'initial' => 'M'),
-                array('name' => 'Dr. Emily Brown', 'role' => 'Neurology Specialist', 'initial' => 'E'),
-                array('name' => 'Dr. David Wilson', 'role' => 'Orthopedic Surgeon', 'initial' => 'D'),
-            );
-            foreach ($doctors as $doc): ?>
+            <?php foreach ($team as $member): ?>
                 <div class="team-card">
                     <div class="team-photo">
-                        <div class="team-avatar"><?php echo $doc['initial']; ?></div>
+                        <div class="team-avatar"><?php echo esc_html($member['initial'] ?? substr($member['name'] ?? 'D', 0, 1)); ?></div>
                     </div>
                     <div class="team-info">
-                        <h3><?php echo $doc['name']; ?></h3>
-                        <div class="role"><?php echo $doc['role']; ?></div>
+                        <h3><?php echo esc_html($member['name'] ?? 'Doctor'); ?></h3>
+                        <div class="role"><?php echo esc_html($member['role'] ?? 'Specialist'); ?></div>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -205,11 +194,9 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Call Emergency');
         <div>
             <h4>Departments</h4>
             <ul>
-                <li><a href="#">Emergency Care</a></li>
-                <li><a href="#">Cardiology</a></li>
-                <li><a href="#">Neurology</a></li>
-                <li><a href="#">Orthopedics</a></li>
-                <li><a href="#">Pediatrics</a></li>
+                <?php foreach (array_slice($services, 0, 5) as $service): ?>
+                    <li><a href="#"><?php echo esc_html($service['name'] ?? 'Department'); ?></a></li>
+                <?php endforeach; ?>
             </ul>
         </div>
         <div>

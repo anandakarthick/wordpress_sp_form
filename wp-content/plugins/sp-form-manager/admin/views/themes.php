@@ -316,6 +316,152 @@ $category_data = array(
                                 <input type="text" name="site_content[cta_button]" value="<?php echo esc_attr($site_content['cta_button'] ?? 'Call Emergency'); ?>" placeholder="Call Emergency">
                             </div>
                         </div>
+                        
+                        <!-- Services/Departments Section -->
+                        <div class="editor-section">
+                            <h3><span class="dashicons dashicons-grid-view"></span> Services / Departments</h3>
+                            <p class="section-desc">Add your hospital services or departments (up to 12 items)</p>
+                            
+                            <div class="repeater-container" id="services-repeater">
+                                <?php 
+                                $services = isset($site_content['services']) ? (is_array($site_content['services']) ? $site_content['services'] : json_decode($site_content['services'], true)) : array();
+                                if (empty($services)) {
+                                    $services = array(
+                                        array('icon' => '❤️', 'name' => 'Cardiology', 'desc' => 'Heart and cardiovascular care'),
+                                        array('icon' => '🧠', 'name' => 'Neurology', 'desc' => 'Brain and nervous system'),
+                                        array('icon' => '🦴', 'name' => 'Orthopedics', 'desc' => 'Bone and joint specialists'),
+                                        array('icon' => '👶', 'name' => 'Pediatrics', 'desc' => 'Children healthcare'),
+                                        array('icon' => '👁️', 'name' => 'Ophthalmology', 'desc' => 'Eye care services'),
+                                        array('icon' => '🦷', 'name' => 'Dental', 'desc' => 'Dental care services'),
+                                    );
+                                }
+                                foreach ($services as $i => $service): 
+                                ?>
+                                <div class="repeater-item" data-index="<?php echo $i; ?>">
+                                    <div class="repeater-item-header">
+                                        <span class="repeater-drag-handle">≡</span>
+                                        <span class="repeater-item-title"><?php echo esc_html($service['name'] ?? 'Service ' . ($i + 1)); ?></span>
+                                        <button type="button" class="repeater-remove" onclick="removeRepeaterItem(this)">×</button>
+                                    </div>
+                                    <div class="repeater-item-body">
+                                        <div class="form-row three-col">
+                                            <div class="form-group">
+                                                <label>Icon (Emoji)</label>
+                                                <input type="text" name="site_content[services][<?php echo $i; ?>][icon]" value="<?php echo esc_attr($service['icon'] ?? '🏥'); ?>" class="emoji-input" placeholder="🏥">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Service Name</label>
+                                                <input type="text" name="site_content[services][<?php echo $i; ?>][name]" value="<?php echo esc_attr($service['name'] ?? ''); ?>" placeholder="e.g., Cardiology" onchange="updateRepeaterTitle(this)">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Short Description</label>
+                                                <input type="text" name="site_content[services][<?php echo $i; ?>][desc]" value="<?php echo esc_attr($service['desc'] ?? ''); ?>" placeholder="Brief description">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <button type="button" class="btn btn-small btn-add-repeater" onclick="addService()">
+                                <span class="dashicons dashicons-plus"></span> Add Service
+                            </button>
+                        </div>
+                        
+                        <!-- Team/Doctors Section -->
+                        <div class="editor-section">
+                            <h3><span class="dashicons dashicons-groups"></span> Team / Doctors</h3>
+                            <p class="section-desc">Add your team members or doctors (up to 8 items)</p>
+                            
+                            <div class="repeater-container" id="team-repeater">
+                                <?php 
+                                $team = isset($site_content['team']) ? (is_array($site_content['team']) ? $site_content['team'] : json_decode($site_content['team'], true)) : array();
+                                if (empty($team)) {
+                                    $team = array(
+                                        array('name' => 'Dr. Sarah Johnson', 'role' => 'Chief Medical Officer', 'initial' => 'S'),
+                                        array('name' => 'Dr. Michael Chen', 'role' => 'Head of Cardiology', 'initial' => 'M'),
+                                        array('name' => 'Dr. Emily Brown', 'role' => 'Neurology Specialist', 'initial' => 'E'),
+                                        array('name' => 'Dr. David Wilson', 'role' => 'Orthopedic Surgeon', 'initial' => 'D'),
+                                    );
+                                }
+                                foreach ($team as $i => $member): 
+                                ?>
+                                <div class="repeater-item" data-index="<?php echo $i; ?>">
+                                    <div class="repeater-item-header">
+                                        <span class="repeater-drag-handle">≡</span>
+                                        <span class="repeater-item-title"><?php echo esc_html($member['name'] ?? 'Team Member ' . ($i + 1)); ?></span>
+                                        <button type="button" class="repeater-remove" onclick="removeRepeaterItem(this)">×</button>
+                                    </div>
+                                    <div class="repeater-item-body">
+                                        <div class="form-row three-col">
+                                            <div class="form-group">
+                                                <label>Full Name</label>
+                                                <input type="text" name="site_content[team][<?php echo $i; ?>][name]" value="<?php echo esc_attr($member['name'] ?? ''); ?>" placeholder="Dr. John Smith" onchange="updateRepeaterTitle(this)">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Role/Specialty</label>
+                                                <input type="text" name="site_content[team][<?php echo $i; ?>][role]" value="<?php echo esc_attr($member['role'] ?? ''); ?>" placeholder="e.g., Cardiologist">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Initial</label>
+                                                <input type="text" name="site_content[team][<?php echo $i; ?>][initial]" value="<?php echo esc_attr($member['initial'] ?? ''); ?>" placeholder="J" maxlength="2" style="width: 60px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <button type="button" class="btn btn-small btn-add-repeater" onclick="addTeamMember()">
+                                <span class="dashicons dashicons-plus"></span> Add Team Member
+                            </button>
+                        </div>
+                        
+                        <!-- Quick Features Section -->
+                        <div class="editor-section">
+                            <h3><span class="dashicons dashicons-yes-alt"></span> Quick Features</h3>
+                            <p class="section-desc">Highlight key features shown on the homepage (up to 6 items)</p>
+                            
+                            <div class="repeater-container" id="quick-features-repeater">
+                                <?php 
+                                $quick_features = isset($site_content['quick_features']) ? (is_array($site_content['quick_features']) ? $site_content['quick_features'] : json_decode($site_content['quick_features'], true)) : array();
+                                if (empty($quick_features)) {
+                                    $quick_features = array(
+                                        array('icon' => '🚑', 'name' => 'Emergency Care', 'desc' => '24/7 emergency services'),
+                                        array('icon' => '📅', 'name' => 'Appointments', 'desc' => 'Easy online booking'),
+                                        array('icon' => '💊', 'name' => 'Pharmacy', 'desc' => 'On-site pharmacy'),
+                                        array('icon' => '📱', 'name' => 'Patient Portal', 'desc' => 'Access records online'),
+                                    );
+                                }
+                                foreach ($quick_features as $i => $feature): 
+                                ?>
+                                <div class="repeater-item" data-index="<?php echo $i; ?>">
+                                    <div class="repeater-item-header">
+                                        <span class="repeater-drag-handle">≡</span>
+                                        <span class="repeater-item-title"><?php echo esc_html($feature['name'] ?? 'Feature ' . ($i + 1)); ?></span>
+                                        <button type="button" class="repeater-remove" onclick="removeRepeaterItem(this)">×</button>
+                                    </div>
+                                    <div class="repeater-item-body">
+                                        <div class="form-row three-col">
+                                            <div class="form-group">
+                                                <label>Icon (Emoji)</label>
+                                                <input type="text" name="site_content[quick_features][<?php echo $i; ?>][icon]" value="<?php echo esc_attr($feature['icon'] ?? '✅'); ?>" class="emoji-input" placeholder="✅">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Feature Name</label>
+                                                <input type="text" name="site_content[quick_features][<?php echo $i; ?>][name]" value="<?php echo esc_attr($feature['name'] ?? ''); ?>" placeholder="e.g., 24/7 Support" onchange="updateRepeaterTitle(this)">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Short Description</label>
+                                                <input type="text" name="site_content[quick_features][<?php echo $i; ?>][desc]" value="<?php echo esc_attr($feature['desc'] ?? ''); ?>" placeholder="Brief description">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <button type="button" class="btn btn-small btn-add-repeater" onclick="addQuickFeature()">
+                                <span class="dashicons dashicons-plus"></span> Add Feature
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="editor-sidebar">
@@ -331,6 +477,9 @@ $category_data = array(
                                 <li>✅ Hero Section</li>
                                 <li>✅ Statistics</li>
                                 <li>✅ CTA Section</li>
+                                <li>✅ Services/Departments</li>
+                                <li>✅ Team/Doctors</li>
+                                <li>✅ Quick Features</li>
                             </ul>
                         </div>
                     </div>
@@ -1085,6 +1234,20 @@ input:checked + .slider:before { transform: translateX(20px); }
 .add-feature-row { display: flex; gap: 10px; }
 .add-feature-row input { flex: 1; }
 
+/* Repeater Styles */
+.repeater-container { margin-bottom: 15px; }
+.repeater-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.repeater-item-header { display: flex; align-items: center; padding: 12px 15px; background: #fff; border-bottom: 1px solid #e2e8f0; cursor: pointer; }
+.repeater-drag-handle { color: #94a3b8; margin-right: 10px; cursor: move; font-size: 18px; }
+.repeater-item-title { flex: 1; font-weight: 600; font-size: 14px; color: #334155; }
+.repeater-remove { background: none; border: none; color: #dc2626; font-size: 20px; cursor: pointer; padding: 0 5px; }
+.repeater-remove:hover { color: #b91c1c; }
+.repeater-item-body { padding: 15px; }
+.repeater-item-body .form-group { margin-bottom: 12px; }
+.repeater-item-body .form-group:last-child { margin-bottom: 0; }
+.repeater-item .emoji-input { width: 60px; text-align: center; font-size: 18px; }
+.btn-add-repeater { border: 2px dashed #0891b2 !important; background: transparent !important; color: #0891b2 !important; width: 100%; justify-content: center; padding: 12px !important; }
+
 /* Modal */
 .spfm-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; }
 .spfm-modal.active { display: flex; }
@@ -1251,5 +1414,136 @@ function duplicateTemplate(id) {
             if (r.success) window.location.href = '<?php echo admin_url('admin.php?page=spfm-themes&action=edit&id='); ?>' + r.data.id;
         });
     }
+}
+
+// Repeater Functions
+function removeRepeaterItem(btn) {
+    if (confirm('Remove this item?')) {
+        btn.closest('.repeater-item').remove();
+        reindexRepeater(btn.closest('.repeater-container'));
+    }
+}
+
+function updateRepeaterTitle(input) {
+    const item = input.closest('.repeater-item');
+    const titleSpan = item.querySelector('.repeater-item-title');
+    if (input.value.trim()) {
+        titleSpan.textContent = input.value;
+    }
+}
+
+function reindexRepeater(container) {
+    const items = container.querySelectorAll('.repeater-item');
+    items.forEach((item, index) => {
+        item.dataset.index = index;
+        const inputs = item.querySelectorAll('input[name], select[name], textarea[name]');
+        inputs.forEach(input => {
+            const name = input.getAttribute('name');
+            const newName = name.replace(/\[\d+\]/, '[' + index + ']');
+            input.setAttribute('name', newName);
+        });
+    });
+}
+
+function addService() {
+    const container = document.getElementById('services-repeater');
+    const count = container.querySelectorAll('.repeater-item').length;
+    if (count >= 12) { alert('Maximum 12 services allowed'); return; }
+    
+    const item = document.createElement('div');
+    item.className = 'repeater-item';
+    item.dataset.index = count;
+    item.innerHTML = `
+        <div class="repeater-item-header">
+            <span class="repeater-drag-handle">≡</span>
+            <span class="repeater-item-title">New Service</span>
+            <button type="button" class="repeater-remove" onclick="removeRepeaterItem(this)">×</button>
+        </div>
+        <div class="repeater-item-body">
+            <div class="form-row three-col">
+                <div class="form-group">
+                    <label>Icon (Emoji)</label>
+                    <input type="text" name="site_content[services][${count}][icon]" value="🏥" class="emoji-input" placeholder="🏥">
+                </div>
+                <div class="form-group">
+                    <label>Service Name</label>
+                    <input type="text" name="site_content[services][${count}][name]" value="" placeholder="e.g., Cardiology" onchange="updateRepeaterTitle(this)">
+                </div>
+                <div class="form-group">
+                    <label>Short Description</label>
+                    <input type="text" name="site_content[services][${count}][desc]" value="" placeholder="Brief description">
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(item);
+}
+
+function addTeamMember() {
+    const container = document.getElementById('team-repeater');
+    const count = container.querySelectorAll('.repeater-item').length;
+    if (count >= 8) { alert('Maximum 8 team members allowed'); return; }
+    
+    const item = document.createElement('div');
+    item.className = 'repeater-item';
+    item.dataset.index = count;
+    item.innerHTML = `
+        <div class="repeater-item-header">
+            <span class="repeater-drag-handle">≡</span>
+            <span class="repeater-item-title">New Team Member</span>
+            <button type="button" class="repeater-remove" onclick="removeRepeaterItem(this)">×</button>
+        </div>
+        <div class="repeater-item-body">
+            <div class="form-row three-col">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="site_content[team][${count}][name]" value="" placeholder="Dr. John Smith" onchange="updateRepeaterTitle(this)">
+                </div>
+                <div class="form-group">
+                    <label>Role/Specialty</label>
+                    <input type="text" name="site_content[team][${count}][role]" value="" placeholder="e.g., Cardiologist">
+                </div>
+                <div class="form-group">
+                    <label>Initial</label>
+                    <input type="text" name="site_content[team][${count}][initial]" value="" placeholder="J" maxlength="2" style="width: 60px;">
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(item);
+}
+
+function addQuickFeature() {
+    const container = document.getElementById('quick-features-repeater');
+    const count = container.querySelectorAll('.repeater-item').length;
+    if (count >= 6) { alert('Maximum 6 features allowed'); return; }
+    
+    const item = document.createElement('div');
+    item.className = 'repeater-item';
+    item.dataset.index = count;
+    item.innerHTML = `
+        <div class="repeater-item-header">
+            <span class="repeater-drag-handle">≡</span>
+            <span class="repeater-item-title">New Feature</span>
+            <button type="button" class="repeater-remove" onclick="removeRepeaterItem(this)">×</button>
+        </div>
+        <div class="repeater-item-body">
+            <div class="form-row three-col">
+                <div class="form-group">
+                    <label>Icon (Emoji)</label>
+                    <input type="text" name="site_content[quick_features][${count}][icon]" value="✅" class="emoji-input" placeholder="✅">
+                </div>
+                <div class="form-group">
+                    <label>Feature Name</label>
+                    <input type="text" name="site_content[quick_features][${count}][name]" value="" placeholder="e.g., 24/7 Support" onchange="updateRepeaterTitle(this)">
+                </div>
+                <div class="form-group">
+                    <label>Short Description</label>
+                    <input type="text" name="site_content[quick_features][${count}][desc]" value="" placeholder="Brief description">
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(item);
 }
 </script>

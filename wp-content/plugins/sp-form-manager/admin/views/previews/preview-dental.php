@@ -32,6 +32,31 @@ $stat4Label = get_site_content($site_content, 'stat4_label', 'Satisfaction Rate'
 $ctaHeadline = get_site_content($site_content, 'cta_headline', 'Ready for Your Best Smile?');
 $ctaDescription = get_site_content($site_content, 'cta_description', 'Schedule your free consultation today and take the first step towards the smile you\'ve always wanted.');
 $ctaButton = get_site_content($site_content, 'cta_button', 'Book Free Consultation');
+
+// Get repeater data with defaults
+$services = isset($site_content['services']) && is_array($site_content['services']) ? $site_content['services'] : array(
+    array('icon' => '✨', 'name' => 'Teeth Whitening', 'desc' => 'Professional whitening for a brighter, more confident smile'),
+    array('icon' => '📐', 'name' => 'Invisalign', 'desc' => 'Clear aligners for straighter teeth without metal braces'),
+    array('icon' => '🔧', 'name' => 'Dental Implants', 'desc' => 'Permanent tooth replacement that looks and feels natural'),
+    array('icon' => '👑', 'name' => 'Crowns & Veneers', 'desc' => 'Custom restorations for a perfect smile'),
+    array('icon' => '🛡️', 'name' => 'Preventive Care', 'desc' => 'Regular cleanings and exams to maintain oral health'),
+    array('icon' => '👨‍👩‍👧', 'name' => 'Family Dentistry', 'desc' => 'Gentle care for patients of all ages'),
+);
+
+$team = isset($site_content['team']) && is_array($site_content['team']) ? $site_content['team'] : array(
+    array('name' => 'Dr. Amanda White', 'role' => 'Lead Dentist', 'initial' => 'A'),
+    array('name' => 'Dr. James Lee', 'role' => 'Cosmetic Specialist', 'initial' => 'J'),
+    array('name' => 'Dr. Maria Garcia', 'role' => 'Orthodontist', 'initial' => 'M'),
+);
+
+$quick_features = isset($site_content['quick_features']) && is_array($site_content['quick_features']) ? $site_content['quick_features'] : array(
+    array('icon' => '✨', 'name' => 'Teeth Whitening', 'desc' => ''),
+    array('icon' => '📐', 'name' => 'Invisalign', 'desc' => ''),
+    array('icon' => '🔧', 'name' => 'Dental Implants', 'desc' => ''),
+    array('icon' => '👑', 'name' => 'Crowns & Veneers', 'desc' => ''),
+    array('icon' => '🦷', 'name' => 'Root Canal', 'desc' => ''),
+    array('icon' => '😁', 'name' => 'Cosmetic Dentistry', 'desc' => ''),
+);
 ?>
 
 <!-- Header -->
@@ -78,11 +103,9 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Book Free Consultati
 <!-- Services Pills -->
 <section style="background: #fff; padding: 40px 30px;">
     <div class="container" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-        <?php 
-        $services = array('✨ Teeth Whitening', '📐 Invisalign', '🔧 Dental Implants', '👑 Crowns & Veneers', '🦷 Root Canal', '😁 Cosmetic Dentistry');
-        foreach ($services as $service): ?>
+        <?php foreach (array_slice($quick_features, 0, 6) as $feature): ?>
             <span style="background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-size: 14px;">
-                <?php echo $service; ?>
+                <?php echo esc_html($feature['icon'] ?? '✨'); ?> <?php echo esc_html($feature['name'] ?? 'Service'); ?>
             </span>
         <?php endforeach; ?>
     </div>
@@ -114,20 +137,11 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Book Free Consultati
     </div>
     <div class="container">
         <div class="cards-grid">
-            <?php 
-            $services = array(
-                array('icon' => '✨', 'name' => 'Teeth Whitening', 'desc' => 'Professional whitening for a brighter, more confident smile'),
-                array('icon' => '📐', 'name' => 'Invisalign', 'desc' => 'Clear aligners for straighter teeth without metal braces'),
-                array('icon' => '🔧', 'name' => 'Dental Implants', 'desc' => 'Permanent tooth replacement that looks and feels natural'),
-                array('icon' => '👑', 'name' => 'Crowns & Veneers', 'desc' => 'Custom restorations for a perfect smile'),
-                array('icon' => '🛡️', 'name' => 'Preventive Care', 'desc' => 'Regular cleanings and exams to maintain oral health'),
-                array('icon' => '👨‍👩‍👧', 'name' => 'Family Dentistry', 'desc' => 'Gentle care for patients of all ages'),
-            );
-            foreach ($services as $svc): ?>
+            <?php foreach ($services as $svc): ?>
                 <div class="card">
-                    <div class="card-icon"><?php echo $svc['icon']; ?></div>
-                    <h3><?php echo $svc['name']; ?></h3>
-                    <p><?php echo $svc['desc']; ?></p>
+                    <div class="card-icon"><?php echo esc_html($svc['icon'] ?? '🦷'); ?></div>
+                    <h3><?php echo esc_html($svc['name'] ?? 'Service'); ?></h3>
+                    <p><?php echo esc_html($svc['desc'] ?? ''); ?></p>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -163,21 +177,15 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Book Free Consultati
         <p>Experienced, gentle, and dedicated to your smile</p>
     </div>
     <div class="container">
-        <div class="team-grid" style="grid-template-columns: repeat(3, 1fr);">
-            <?php 
-            $team = array(
-                array('name' => 'Dr. Amanda White', 'role' => 'Lead Dentist', 'initial' => 'A'),
-                array('name' => 'Dr. James Lee', 'role' => 'Cosmetic Specialist', 'initial' => 'J'),
-                array('name' => 'Dr. Maria Garcia', 'role' => 'Orthodontist', 'initial' => 'M'),
-            );
-            foreach ($team as $member): ?>
+        <div class="team-grid" style="grid-template-columns: repeat(<?php echo min(count($team), 4); ?>, 1fr);">
+            <?php foreach ($team as $member): ?>
                 <div class="team-card">
                     <div class="team-photo">
-                        <div class="team-avatar"><?php echo $member['initial']; ?></div>
+                        <div class="team-avatar"><?php echo esc_html($member['initial'] ?? substr($member['name'] ?? 'D', 0, 1)); ?></div>
                     </div>
                     <div class="team-info">
-                        <h3><?php echo $member['name']; ?></h3>
-                        <div class="role"><?php echo $member['role']; ?></div>
+                        <h3><?php echo esc_html($member['name'] ?? 'Doctor'); ?></h3>
+                        <div class="role"><?php echo esc_html($member['role'] ?? 'Dentist'); ?></div>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -215,11 +223,9 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Book Free Consultati
         <div>
             <h4>Our Services</h4>
             <ul>
-                <li><a href="#">Teeth Whitening</a></li>
-                <li><a href="#">Invisalign</a></li>
-                <li><a href="#">Dental Implants</a></li>
-                <li><a href="#">Cosmetic Dentistry</a></li>
-                <li><a href="#">Emergency Care</a></li>
+                <?php foreach (array_slice($services, 0, 5) as $service): ?>
+                    <li><a href="#"><?php echo esc_html($service['name'] ?? 'Service'); ?></a></li>
+                <?php endforeach; ?>
             </ul>
         </div>
         <div>
@@ -243,6 +249,6 @@ $ctaButton = get_site_content($site_content, 'cta_button', 'Book Free Consultati
         </div>
     </div>
     <div class="footer-bottom">
-        © <?php echo date('Y'); ?> <?php echo esc_html($businessName); ?>. Creating Beautiful Smiles.
+        © <?php echo date('Y'); ?> <?php echo esc_html($businessName); ?>. <?php echo esc_html($tagline); ?>.
     </div>
 </footer>
