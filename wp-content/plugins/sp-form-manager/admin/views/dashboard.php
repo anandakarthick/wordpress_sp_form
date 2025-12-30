@@ -1,245 +1,242 @@
 <?php
+/**
+ * Admin Dashboard View
+ * Hospital Website Template System Dashboard
+ */
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
-$forms_handler = SPFM_Forms::get_instance();
-$themes_handler = SPFM_Themes::get_instance();
-$customers_handler = SPFM_Customers::get_instance();
+// Get statistics
+global $wpdb;
 
-// Get stats
-$total_forms = count($forms_handler->get_all(array('per_page' => 1000)));
-$total_templates = count($themes_handler->get_templates());
-$total_customers = $customers_handler->get_total();
-$submission_stats = $forms_handler->get_submission_stats();
+$themes_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}spfm_themes WHERE status = 1");
+$templates_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}spfm_themes WHERE is_template = 1 AND status = 1");
+$custom_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}spfm_themes WHERE is_template = 0 AND status = 1");
+$forms_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}spfm_forms WHERE status = 1");
+$customers_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}spfm_customers WHERE status = 1");
+$submissions_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}spfm_form_submissions");
+$new_submissions = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}spfm_form_submissions WHERE status = 'new'");
 
-// Get recent submissions
-$recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
+// Recent submissions
+$recent_submissions = $wpdb->get_results("
+    SELECT s.*, f.name as form_name, t.name as theme_name 
+    FROM {$wpdb->prefix}spfm_form_submissions s 
+    LEFT JOIN {$wpdb->prefix}spfm_forms f ON s.form_id = f.id 
+    LEFT JOIN {$wpdb->prefix}spfm_themes t ON s.selected_theme_id = t.id 
+    ORDER BY s.created_at DESC 
+    LIMIT 5
+");
 ?>
 
-<div class="wrap spfm-admin-wrap">
-    <h1 class="wp-heading-inline">
-        <span class="dashicons dashicons-layout"></span> SP Form Manager
-    </h1>
+<div class="spfm-dashboard">
+    <!-- Welcome Header -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1>🏥 Hospital Website Template System</h1>
+            <p>Create, customize, and share professional hospital website templates with your clients</p>
+        </div>
+        <div class="header-actions">
+            <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=new'); ?>" class="btn btn-white">
+                <span class="dashicons dashicons-plus-alt"></span> New Order Form
+            </a>
+            <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="btn btn-outline">
+                <span class="dashicons dashicons-layout"></span> View Templates
+            </a>
+        </div>
+    </div>
     
-    <div class="dashboard-container">
-        <!-- Welcome Card -->
-        <div class="welcome-card">
-            <div class="welcome-content">
-                <h2>Welcome to SP Form Manager</h2>
-                <p>Create website order forms, share with customers, and let them choose their perfect template.</p>
-                <div class="welcome-actions">
-                    <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="button button-primary button-hero">
-                        <span class="dashicons dashicons-plus-alt"></span> Create Order Form
-                    </a>
-                    <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="button button-hero">
-                        <span class="dashicons dashicons-admin-appearance"></span> View Templates
-                    </a>
-                </div>
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card stat-templates">
+            <div class="stat-icon">
+                <span class="dashicons dashicons-layout"></span>
             </div>
-            <div class="welcome-illustration">
-                <div class="illustration-mockup">
-                    <div class="mockup-browser">
-                        <div class="browser-dots">
-                            <span></span><span></span><span></span>
+            <div class="stat-content">
+                <div class="stat-number"><?php echo intval($themes_count); ?></div>
+                <div class="stat-label">Total Templates</div>
+                <div class="stat-detail"><?php echo $templates_count; ?> pre-built, <?php echo $custom_count; ?> custom</div>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-forms">
+            <div class="stat-icon">
+                <span class="dashicons dashicons-feedback"></span>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number"><?php echo intval($forms_count); ?></div>
+                <div class="stat-label">Active Forms</div>
+                <div class="stat-detail">Order forms ready to share</div>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-submissions">
+            <div class="stat-icon">
+                <span class="dashicons dashicons-portfolio"></span>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number"><?php echo intval($submissions_count); ?></div>
+                <div class="stat-label">Total Orders</div>
+                <?php if ($new_submissions > 0): ?>
+                    <div class="stat-detail stat-highlight"><?php echo $new_submissions; ?> new orders pending</div>
+                <?php else: ?>
+                    <div class="stat-detail">Website orders received</div>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-customers">
+            <div class="stat-icon">
+                <span class="dashicons dashicons-groups"></span>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number"><?php echo intval($customers_count); ?></div>
+                <div class="stat-label">Customers</div>
+                <div class="stat-detail">Registered clients</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions + Recent Activity -->
+    <div class="dashboard-grid">
+        <!-- Quick Actions -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3><span class="dashicons dashicons-admin-tools"></span> Quick Actions</h3>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions">
+                    <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="action-btn">
+                        <div class="action-icon" style="background: linear-gradient(135deg, #0891b2, #0e7490);">
+                            <span class="dashicons dashicons-layout"></span>
                         </div>
-                        <div class="browser-content">
-                            <div class="content-header"></div>
-                            <div class="content-body">
-                                <div class="content-card"></div>
-                                <div class="content-card"></div>
-                                <div class="content-card"></div>
-                            </div>
+                        <div class="action-text">
+                            <strong>Hospital Templates</strong>
+                            <span>Browse & customize templates</span>
                         </div>
-                    </div>
+                    </a>
+                    
+                    <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=new'); ?>" class="action-btn">
+                        <div class="action-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <span class="dashicons dashicons-plus-alt"></span>
+                        </div>
+                        <div class="action-text">
+                            <strong>Create Order Form</strong>
+                            <span>Set up new form for clients</span>
+                        </div>
+                    </a>
+                    
+                    <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=new'); ?>" class="action-btn">
+                        <div class="action-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                            <span class="dashicons dashicons-businessman"></span>
+                        </div>
+                        <div class="action-text">
+                            <strong>Add Customer</strong>
+                            <span>Register new client</span>
+                        </div>
+                    </a>
+                    
+                    <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="action-btn">
+                        <div class="action-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <span class="dashicons dashicons-clipboard"></span>
+                        </div>
+                        <div class="action-text">
+                            <strong>View Submissions</strong>
+                            <span>Review website orders</span>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
         
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-card-inner">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                        <span class="dashicons dashicons-media-document"></span>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-value"><?php echo $total_forms; ?></span>
-                        <span class="stat-label">Order Forms</span>
-                    </div>
-                </div>
-                <a href="<?php echo admin_url('admin.php?page=spfm-forms'); ?>" class="stat-link">
-                    View All <span class="dashicons dashicons-arrow-right-alt2"></span>
-                </a>
+        <!-- Recent Submissions -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3><span class="dashicons dashicons-clock"></span> Recent Website Orders</h3>
+                <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="view-all">View All →</a>
             </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-inner">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                        <span class="dashicons dashicons-admin-appearance"></span>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-value"><?php echo $total_templates; ?></span>
-                        <span class="stat-label">Website Templates</span>
-                    </div>
-                </div>
-                <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="stat-link">
-                    View All <span class="dashicons dashicons-arrow-right-alt2"></span>
-                </a>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-inner">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-                        <span class="dashicons dashicons-text-page"></span>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-value"><?php echo $submission_stats['total']; ?></span>
-                        <span class="stat-label">Total Submissions</span>
-                    </div>
-                </div>
-                <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="stat-link">
-                    View All <span class="dashicons dashicons-arrow-right-alt2"></span>
-                </a>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-card-inner">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
-                        <span class="dashicons dashicons-groups"></span>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-value"><?php echo $total_customers; ?></span>
-                        <span class="stat-label">Customers</span>
-                    </div>
-                </div>
-                <a href="<?php echo admin_url('admin.php?page=spfm-customers'); ?>" class="stat-link">
-                    View All <span class="dashicons dashicons-arrow-right-alt2"></span>
-                </a>
-            </div>
-        </div>
-        
-        <!-- Two Column Layout -->
-        <div class="dashboard-columns">
-            <!-- Recent Submissions -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h3><span class="dashicons dashicons-text-page"></span> Recent Submissions</h3>
-                    <a href="<?php echo admin_url('admin.php?page=spfm-submissions'); ?>" class="view-all">View All</a>
-                </div>
-                <div class="card-body">
-                    <?php if (empty($recent_submissions)): ?>
-                        <div class="empty-state-mini">
-                            <span class="dashicons dashicons-text-page"></span>
-                            <p>No submissions yet</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="submissions-list">
-                            <?php foreach ($recent_submissions as $sub): 
-                                $customer_info = json_decode($sub->customer_info, true) ?: array();
-                            ?>
-                                <div class="submission-item">
-                                    <div class="submission-icon">
-                                        <span class="template-colors">
-                                            <span style="background: <?php echo esc_attr($sub->primary_color); ?>;"></span>
-                                            <span style="background: <?php echo esc_attr($sub->secondary_color); ?>;"></span>
-                                        </span>
-                                    </div>
-                                    <div class="submission-info">
-                                        <strong><?php echo esc_html($customer_info['name'] ?? 'Unknown'); ?></strong>
-                                        <small><?php echo esc_html($sub->theme_name); ?></small>
-                                    </div>
-                                    <div class="submission-meta">
-                                        <span class="status-badge status-<?php echo $sub->status; ?>"><?php echo ucfirst($sub->status); ?></span>
-                                        <small><?php echo human_time_diff(strtotime($sub->created_at), current_time('timestamp')); ?> ago</small>
-                                    </div>
-                                    <a href="<?php echo admin_url('admin.php?page=spfm-submissions&action=view&id=' . $sub->id); ?>" class="button button-small">
-                                        View
-                                    </a>
+            <div class="card-body">
+                <?php if (!empty($recent_submissions)): ?>
+                    <div class="submissions-list">
+                        <?php foreach ($recent_submissions as $sub): 
+                            $customer_info = json_decode($sub->customer_info, true);
+                            $status_class = 'status-' . $sub->status;
+                        ?>
+                            <div class="submission-item">
+                                <div class="submission-avatar">
+                                    <?php echo strtoupper(substr($customer_info['name'] ?? 'U', 0, 1)); ?>
                                 </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            
-            <!-- Quick Actions -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h3><span class="dashicons dashicons-admin-tools"></span> Quick Actions</h3>
-                </div>
-                <div class="card-body">
-                    <div class="quick-actions">
-                        <a href="<?php echo admin_url('admin.php?page=spfm-forms&action=add'); ?>" class="action-btn">
-                            <span class="action-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                                <span class="dashicons dashicons-plus-alt"></span>
-                            </span>
-                            <span class="action-text">
-                                <strong>New Order Form</strong>
-                                <small>Create a new website order form</small>
-                            </span>
-                        </a>
-                        
-                        <a href="<?php echo admin_url('admin.php?page=spfm-customers&action=add'); ?>" class="action-btn">
-                            <span class="action-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-                                <span class="dashicons dashicons-admin-users"></span>
-                            </span>
-                            <span class="action-text">
-                                <strong>Add Customer</strong>
-                                <small>Register a new customer</small>
-                            </span>
-                        </a>
-                        
-                        <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="action-btn">
-                            <span class="action-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                                <span class="dashicons dashicons-admin-appearance"></span>
-                            </span>
-                            <span class="action-text">
-                                <strong>Browse Templates</strong>
-                                <small>View available website templates</small>
-                            </span>
-                        </a>
-                        
-                        <a href="<?php echo admin_url('admin.php?page=spfm-settings'); ?>" class="action-btn">
-                            <span class="action-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
-                                <span class="dashicons dashicons-admin-settings"></span>
-                            </span>
-                            <span class="action-text">
-                                <strong>Settings</strong>
-                                <small>Configure email & notifications</small>
-                            </span>
-                        </a>
+                                <div class="submission-info">
+                                    <strong><?php echo esc_html($customer_info['name'] ?? 'Unknown'); ?></strong>
+                                    <span class="submission-meta">
+                                        <?php echo esc_html($sub->theme_name); ?> • 
+                                        <?php echo human_time_diff(strtotime($sub->created_at)); ?> ago
+                                    </span>
+                                </div>
+                                <span class="status-badge <?php echo $status_class; ?>">
+                                    <?php echo ucfirst($sub->status); ?>
+                                </span>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
-                </div>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <span class="dashicons dashicons-portfolio"></span>
+                        <p>No website orders yet</p>
+                        <small>Orders will appear here when customers submit</small>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
-        
-        <!-- How It Works -->
-        <div class="how-it-works">
-            <h3><span class="dashicons dashicons-info"></span> How It Works</h3>
-            <div class="steps-grid">
-                <div class="step-item">
-                    <div class="step-number">1</div>
-                    <h4>Create Order Form</h4>
-                    <p>Select which website templates customers can choose from</p>
+    </div>
+    
+    <!-- Template Categories -->
+    <div class="dashboard-card full-width">
+        <div class="card-header">
+            <h3><span class="dashicons dashicons-category"></span> Available Template Categories</h3>
+        </div>
+        <div class="card-body">
+            <div class="categories-grid">
+                <div class="category-item">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #0891b2, #0e7490);">🏥</div>
+                    <h4>General Hospital</h4>
+                    <p>Complete hospital websites with departments, doctors & appointments</p>
                 </div>
-                <div class="step-arrow">→</div>
-                <div class="step-item">
-                    <div class="step-number">2</div>
-                    <h4>Share with Customer</h4>
-                    <p>Send the form link via email, WhatsApp, or copy the link</p>
+                <div class="category-item">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">🦷</div>
+                    <h4>Dental Clinic</h4>
+                    <p>Modern dental clinic with smile gallery & treatment info</p>
                 </div>
-                <div class="step-arrow">→</div>
-                <div class="step-item">
-                    <div class="step-number">3</div>
-                    <h4>Customer Fills Content</h4>
-                    <p>Customer selects template, customizes colors, fills page content</p>
+                <div class="category-item">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">👁️</div>
+                    <h4>Eye Care Center</h4>
+                    <p>Eye care & vision center with LASIK info & optical shop</p>
                 </div>
-                <div class="step-arrow">→</div>
-                <div class="step-item">
-                    <div class="step-number">4</div>
-                    <h4>Review Submission</h4>
-                    <p>View complete submission with preview and customer data</p>
+                <div class="category-item">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">👶</div>
+                    <h4>Children's Hospital</h4>
+                    <p>Child-friendly pediatric hospital design</p>
+                </div>
+                <div class="category-item">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #dc2626, #b91c1c);">❤️</div>
+                    <h4>Cardiology Center</h4>
+                    <p>Specialized heart & cardiovascular care</p>
+                </div>
+                <div class="category-item">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #10b981, #059669);">🧠</div>
+                    <h4>Mental Health</h4>
+                    <p>Calm & supportive mental wellness clinic</p>
+                </div>
+                <div class="category-item">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #2563eb, #1d4ed8);">🦴</div>
+                    <h4>Orthopedic Center</h4>
+                    <p>Bone, joint & spine care specialists</p>
+                </div>
+                <div class="category-item">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #0d9488, #0f766e);">🔬</div>
+                    <h4>Diagnostic Lab</h4>
+                    <p>Medical testing & pathology services</p>
                 </div>
             </div>
         </div>
@@ -247,98 +244,68 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
 </div>
 
 <style>
-.dashboard-container {
-    margin-top: 20px;
+.spfm-dashboard {
+    padding: 20px;
+    max-width: 1400px;
 }
 
-/* Welcome Card */
-.welcome-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 15px;
+/* Header */
+.dashboard-header {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    border-radius: 20px;
     padding: 40px;
     color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
-    overflow: hidden;
 }
-.welcome-content h2 {
+.header-content h1 {
     margin: 0 0 10px 0;
-    font-size: 28px;
-    color: #fff;
+    font-size: 32px;
+    font-weight: 700;
 }
-.welcome-content p {
-    margin: 0 0 25px 0;
+.header-content p {
+    margin: 0;
     opacity: 0.9;
     font-size: 16px;
-    max-width: 500px;
 }
-.welcome-actions {
+.header-actions {
     display: flex;
-    gap: 15px;
+    gap: 12px;
 }
-.welcome-actions .button {
-    display: flex;
+.btn {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-size: 14px;
 }
-.welcome-actions .button-primary {
+.btn-white {
     background: #fff;
-    color: #667eea;
+    color: #0891b2;
+}
+.btn-white:hover {
+    background: #f0fdfa;
+    color: #0891b2;
+    transform: translateY(-2px);
+}
+.btn-outline {
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.5);
+}
+.btn-outline:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
     border-color: #fff;
 }
-.welcome-actions .button:not(.button-primary) {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.3);
-    color: #fff;
-}
-.welcome-illustration {
-    flex-shrink: 0;
-}
-.illustration-mockup {
-    transform: rotate(-5deg);
-}
-.mockup-browser {
-    width: 300px;
-    background: #fff;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-}
-.browser-dots {
-    background: #f0f0f0;
-    padding: 10px 15px;
-    display: flex;
-    gap: 6px;
-}
-.browser-dots span {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #ddd;
-}
-.browser-content {
-    padding: 15px;
-}
-.content-header {
-    height: 30px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 6px;
-    margin-bottom: 15px;
-}
-.content-body {
-    display: flex;
-    gap: 10px;
-}
-.content-card {
-    flex: 1;
-    height: 50px;
-    background: #e9ecef;
-    border-radius: 6px;
-}
 
-/* Stats Grid - FIXED ALIGNMENT */
+/* Stats Grid */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -347,193 +314,130 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
 }
 .stat-card {
     background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    padding: 25px;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 140px;
-}
-.stat-card-inner {
-    display: flex;
+    gap: 20px;
     align-items: flex-start;
-    gap: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: all 0.3s;
+}
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 .stat-icon {
-    width: 50px;
-    height: 50px;
-    min-width: 50px;
-    border-radius: 12px;
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 .stat-icon .dashicons {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
     color: #fff;
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
 }
-.stat-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
-    flex: 1;
-}
-.stat-value {
-    display: block;
-    font-size: 32px;
+.stat-templates .stat-icon { background: linear-gradient(135deg, #0891b2, #0e7490); }
+.stat-forms .stat-icon { background: linear-gradient(135deg, #10b981, #059669); }
+.stat-submissions .stat-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.stat-customers .stat-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+.stat-content { flex: 1; }
+.stat-number {
+    font-size: 36px;
     font-weight: 700;
-    color: #333;
-    line-height: 1.2;
-    margin-bottom: 4px;
+    color: #1e293b;
+    line-height: 1;
+    margin-bottom: 5px;
 }
 .stat-label {
-    display: block;
     font-size: 14px;
-    color: #666;
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 5px;
 }
-.stat-link {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+.stat-detail {
     font-size: 12px;
-    color: #667eea;
-    text-decoration: none;
-    margin-top: 15px;
-    padding-top: 12px;
-    border-top: 1px solid #f0f0f0;
+    color: #94a3b8;
 }
-.stat-link:hover {
-    color: #764ba2;
-}
-.stat-link .dashicons {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
+.stat-highlight {
+    color: #f59e0b;
+    font-weight: 600;
 }
 
-/* Dashboard Columns */
-.dashboard-columns {
+/* Dashboard Grid */
+.dashboard-grid {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 25px;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 .dashboard-card {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+.dashboard-card.full-width {
+    grid-column: 1 / -1;
 }
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #eee;
+    padding: 20px 25px;
+    border-bottom: 1px solid #f1f5f9;
 }
 .card-header h3 {
     margin: 0;
     font-size: 16px;
+    font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    color: #1e293b;
 }
 .card-header .dashicons {
-    color: #667eea;
+    color: #0891b2;
 }
 .view-all {
     font-size: 13px;
-    color: #667eea;
+    color: #0891b2;
     text-decoration: none;
+    font-weight: 600;
 }
 .card-body {
-    padding: 20px;
+    padding: 25px;
 }
-
-/* Submissions List */
-.submissions-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-.submission-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 10px;
-}
-.template-colors {
-    display: flex;
-    gap: 3px;
-}
-.template-colors span {
-    width: 15px;
-    height: 30px;
-    border-radius: 4px;
-}
-.submission-info {
-    flex: 1;
-}
-.submission-info strong {
-    display: block;
-}
-.submission-info small {
-    color: #666;
-}
-.submission-meta {
-    text-align: right;
-}
-.submission-meta small {
-    display: block;
-    color: #999;
-    margin-top: 5px;
-}
-.status-badge {
-    font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 15px;
-}
-.status-new { background: #cce5ff; color: #004085; }
-.status-in_progress { background: #fff3cd; color: #856404; }
-.status-completed { background: #d4edda; color: #155724; }
-.status-cancelled { background: #f8d7da; color: #721c24; }
 
 /* Quick Actions */
 .quick-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
 }
 .action-btn {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 10px;
+    padding: 18px;
+    background: #f8fafc;
+    border-radius: 12px;
     text-decoration: none;
-    color: inherit;
     transition: all 0.3s;
 }
 .action-btn:hover {
-    background: #f0f0f0;
+    background: #f1f5f9;
     transform: translateX(5px);
 }
 .action-icon {
-    width: 45px;
-    height: 45px;
-    border-radius: 10px;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -541,117 +445,143 @@ $recent_submissions = $forms_handler->get_submissions(array('per_page' => 5));
 }
 .action-icon .dashicons {
     color: #fff;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
 }
 .action-text strong {
     display: block;
-    margin-bottom: 2px;
+    color: #1e293b;
+    margin-bottom: 3px;
+    font-size: 14px;
 }
-.action-text small {
-    color: #666;
-}
-
-/* Empty State */
-.empty-state-mini {
-    text-align: center;
-    padding: 30px;
-    color: #999;
-}
-.empty-state-mini .dashicons {
-    font-size: 40px;
-    width: 40px;
-    height: 40px;
-    margin-bottom: 10px;
+.action-text span {
+    font-size: 12px;
+    color: #64748b;
 }
 
-/* How It Works */
-.how-it-works {
-    background: #fff;
+/* Submissions List */
+.submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.submission-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8fafc;
     border-radius: 12px;
-    padding: 30px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
 }
-.how-it-works h3 {
-    margin: 0 0 25px 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.how-it-works h3 .dashicons {
-    color: #667eea;
-}
-.steps-grid {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.step-item {
-    flex: 1;
-    text-align: center;
-    padding: 0 20px;
-}
-.step-number {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #fff;
+.submission-avatar {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #0891b2, #0e7490);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    color: #fff;
     font-weight: 700;
-    margin: 0 auto 15px;
-}
-.step-item h4 {
-    margin: 0 0 8px 0;
-    font-size: 16px;
-}
-.step-item p {
-    margin: 0;
-    font-size: 13px;
-    color: #666;
-}
-.step-arrow {
-    font-size: 24px;
-    color: #ddd;
+    font-size: 18px;
     flex-shrink: 0;
 }
+.submission-info {
+    flex: 1;
+}
+.submission-info strong {
+    display: block;
+    color: #1e293b;
+    font-size: 14px;
+}
+.submission-meta {
+    font-size: 12px;
+    color: #64748b;
+}
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.status-new { background: #fef3c7; color: #d97706; }
+.status-in_progress { background: #dbeafe; color: #2563eb; }
+.status-completed { background: #dcfce7; color: #16a34a; }
+.status-cancelled { background: #fee2e2; color: #dc2626; }
 
-@media (max-width: 1200px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .dashboard-columns {
-        grid-template-columns: 1fr;
-    }
-    .welcome-card {
-        flex-direction: column;
-        text-align: center;
-    }
-    .welcome-illustration {
-        display: none;
-    }
-    .steps-grid {
-        flex-wrap: wrap;
-        gap: 20px;
-    }
-    .step-arrow {
-        display: none;
-    }
-    .step-item {
-        flex-basis: calc(50% - 20px);
-    }
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+}
+.empty-state .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 15px;
+    color: #cbd5e1;
+}
+.empty-state p {
+    margin: 0 0 5px 0;
+    font-weight: 600;
+    color: #64748b;
 }
 
-@media (max-width: 600px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
+/* Categories Grid */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+.category-item {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    transition: all 0.3s;
+}
+.category-item:hover {
+    background: #f1f5f9;
+    transform: translateY(-3px);
+}
+.category-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 28px;
+}
+.category-item h4 {
+    margin: 0 0 8px 0;
+    font-size: 15px;
+    color: #1e293b;
+}
+.category-item p {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .categories-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 25px;
     }
-    .step-item {
-        flex-basis: 100%;
-    }
+    .stats-grid { grid-template-columns: 1fr; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .quick-actions { grid-template-columns: 1fr; }
+    .categories-grid { grid-template-columns: 1fr; }
 }
 </style>

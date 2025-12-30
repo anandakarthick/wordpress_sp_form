@@ -812,8 +812,25 @@ class SPFM_Ajax_Handler {
     
     public function recreate_tables() {
         $this->verify_nonce();
+        
+        // Force recreation of hospital templates by deleting old ones first
+        global $wpdb;
+        $themes_table = $wpdb->prefix . 'spfm_themes';
+        $pages_table = $wpdb->prefix . 'spfm_theme_pages';
+        $sections_table = $wpdb->prefix . 'spfm_page_sections';
+        
+        // Delete old template data
+        $wpdb->query("DELETE FROM $sections_table WHERE page_id IN (SELECT id FROM $pages_table WHERE theme_id IN (SELECT id FROM $themes_table WHERE is_template = 1))");
+        $wpdb->query("DELETE FROM $pages_table WHERE theme_id IN (SELECT id FROM $themes_table WHERE is_template = 1)");
+        $wpdb->query("DELETE FROM $themes_table WHERE is_template = 1");
+        
+        // Update DB version to force table recreation
+        delete_option('spfm_db_version');
+        
+        // Recreate tables and templates
         SPFM_Database::create_tables();
-        wp_send_json_success(array('message' => 'Database tables recreated.'));
+        
+        wp_send_json_success(array('message' => 'Database tables and hospital templates recreated successfully!'));
     }
     
     // ==================== USERS ====================

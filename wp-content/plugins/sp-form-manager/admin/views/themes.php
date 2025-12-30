@@ -1,543 +1,507 @@
 <?php
+/**
+ * Admin Templates/Themes View
+ * Hospital Website Templates Management
+ */
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
 $themes_handler = SPFM_Themes::get_instance();
-
-$action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'list';
-$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-
-// Handle media uploads
-wp_enqueue_media();
-
-$theme = null;
-if (($action === 'edit' || $action === 'view') && $id) {
-    $theme = $themes_handler->get_theme_complete($id);
-}
-
-$templates = $themes_handler->get_templates();
+$themes = $themes_handler->get_all();
 $categories = $themes_handler->get_categories();
 $fonts = $themes_handler->get_fonts();
 
-$category_filter = isset($_GET['category']) ? sanitize_text_field($_GET['category']) : '';
+$edit_theme = null;
+if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
+    $edit_theme = $themes_handler->get_theme_complete(intval($_GET['id']));
+}
 ?>
 
-<div class="wrap spfm-admin-wrap">
-    <h1 class="wp-heading-inline">
-        <span class="dashicons dashicons-admin-appearance"></span> Website Templates
-    </h1>
-    
-    <?php if ($action === 'list'): ?>
-        <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=add'); ?>" class="page-title-action">Create Custom Template</a>
-        
-        <p class="description">Pre-built website templates that customers can choose from. Click on any template to edit its content and settings.</p>
-        
-        <!-- Category Filter -->
-        <div class="category-filter">
-            <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" 
-               class="filter-btn <?php echo empty($category_filter) ? 'active' : ''; ?>">All</a>
-            <?php foreach ($categories as $key => $label): ?>
-                <a href="<?php echo admin_url('admin.php?page=spfm-themes&category=' . $key); ?>" 
-                   class="filter-btn <?php echo $category_filter === $key ? 'active' : ''; ?>">
-                    <?php echo esc_html($label); ?>
-                </a>
-            <?php endforeach; ?>
+<div class="spfm-wrap">
+    <?php if ($edit_theme): ?>
+    <!-- Template Editor -->
+    <div class="spfm-template-editor">
+        <div class="editor-header">
+            <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="back-link">
+                <span class="dashicons dashicons-arrow-left-alt"></span> Back to Templates
+            </a>
+            <h1>Edit Template: <?php echo esc_html($edit_theme->name); ?></h1>
         </div>
         
-        <!-- Templates Grid -->
-        <div class="templates-grid">
-            <?php 
-            foreach ($templates as $t): 
-                if ($category_filter && $t->category !== $category_filter) continue;
-            ?>
-                <div class="template-card">
-                    <div class="template-preview" style="background: linear-gradient(135deg, <?php echo esc_attr($t->primary_color); ?> 0%, <?php echo esc_attr($t->secondary_color); ?> 100%);">
-                        <?php if ($t->preview_image): ?>
-                            <img src="<?php echo esc_url($t->preview_image); ?>" alt="<?php echo esc_attr($t->name); ?>">
-                        <?php else: ?>
-                            <div class="template-mockup">
-                                <div class="mockup-header">
-                                    <div class="mockup-nav">
-                                        <span class="mockup-logo"></span>
-                                        <span class="mockup-links"></span>
+        <form id="theme-edit-form" class="editor-form">
+            <input type="hidden" name="id" value="<?php echo $edit_theme->id; ?>">
+            
+            <div class="editor-layout">
+                <div class="editor-main">
+                    <!-- Basic Information -->
+                    <div class="editor-section">
+                        <h3><span class="dashicons dashicons-info"></span> Basic Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Template Name <span class="required">*</span></label>
+                                <input type="text" name="name" value="<?php echo esc_attr($edit_theme->name); ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select name="category">
+                                    <?php foreach ($categories as $key => $label): ?>
+                                        <option value="<?php echo esc_attr($key); ?>" <?php selected($edit_theme->category, $key); ?>>
+                                            <?php echo esc_html($label); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="description" rows="3"><?php echo esc_textarea($edit_theme->description); ?></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Preview Image -->
+                    <div class="editor-section">
+                        <h3><span class="dashicons dashicons-format-image"></span> Preview Image</h3>
+                        <div class="image-upload-area">
+                            <div class="image-preview" id="preview-container">
+                                <?php if ($edit_theme->preview_image): ?>
+                                    <img src="<?php echo esc_url($edit_theme->preview_image); ?>" alt="Preview">
+                                    <button type="button" class="remove-image" onclick="removePreviewImage()">×</button>
+                                <?php else: ?>
+                                    <div class="no-image">
+                                        <span class="dashicons dashicons-format-image"></span>
+                                        <p>No preview image</p>
                                     </div>
+                                <?php endif; ?>
+                            </div>
+                            <input type="hidden" name="preview_image" id="preview_image" value="<?php echo esc_url($edit_theme->preview_image); ?>">
+                            <button type="button" class="btn btn-secondary" id="upload-preview-btn">
+                                <span class="dashicons dashicons-upload"></span> Upload Image
+                            </button>
+                            <p class="hint">Recommended size: 800x600px</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Color Scheme -->
+                    <div class="editor-section">
+                        <h3><span class="dashicons dashicons-art"></span> Color Scheme</h3>
+                        <div class="color-grid">
+                            <div class="color-item">
+                                <label>Primary Color</label>
+                                <div class="color-input-group">
+                                    <input type="color" name="primary_color" value="<?php echo esc_attr($edit_theme->primary_color); ?>">
+                                    <input type="text" class="color-hex" value="<?php echo esc_attr($edit_theme->primary_color); ?>">
                                 </div>
-                                <div class="mockup-hero">
-                                    <div class="mockup-hero-text"></div>
-                                    <div class="mockup-hero-btn"></div>
+                            </div>
+                            <div class="color-item">
+                                <label>Secondary Color</label>
+                                <div class="color-input-group">
+                                    <input type="color" name="secondary_color" value="<?php echo esc_attr($edit_theme->secondary_color); ?>">
+                                    <input type="text" class="color-hex" value="<?php echo esc_attr($edit_theme->secondary_color); ?>">
                                 </div>
+                            </div>
+                            <div class="color-item">
+                                <label>Accent Color</label>
+                                <div class="color-input-group">
+                                    <input type="color" name="accent_color" value="<?php echo esc_attr($edit_theme->accent_color); ?>">
+                                    <input type="text" class="color-hex" value="<?php echo esc_attr($edit_theme->accent_color); ?>">
+                                </div>
+                            </div>
+                            <div class="color-item">
+                                <label>Background</label>
+                                <div class="color-input-group">
+                                    <input type="color" name="background_color" value="<?php echo esc_attr($edit_theme->background_color); ?>">
+                                    <input type="text" class="color-hex" value="<?php echo esc_attr($edit_theme->background_color); ?>">
+                                </div>
+                            </div>
+                            <div class="color-item">
+                                <label>Text Color</label>
+                                <div class="color-input-group">
+                                    <input type="color" name="text_color" value="<?php echo esc_attr($edit_theme->text_color); ?>">
+                                    <input type="text" class="color-hex" value="<?php echo esc_attr($edit_theme->text_color); ?>">
+                                </div>
+                            </div>
+                            <div class="color-item">
+                                <label>Header Background</label>
+                                <div class="color-input-group">
+                                    <input type="color" name="header_bg_color" value="<?php echo esc_attr($edit_theme->header_bg_color); ?>">
+                                    <input type="text" class="color-hex" value="<?php echo esc_attr($edit_theme->header_bg_color); ?>">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Typography -->
+                    <div class="editor-section">
+                        <h3><span class="dashicons dashicons-editor-textcolor"></span> Typography</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Body Font</label>
+                                <select name="font_family">
+                                    <?php foreach ($fonts as $key => $label): ?>
+                                        <option value="<?php echo esc_attr($key); ?>" <?php selected($edit_theme->font_family, $key); ?>>
+                                            <?php echo esc_html($label); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Heading Font</label>
+                                <select name="heading_font">
+                                    <?php foreach ($fonts as $key => $label): ?>
+                                        <option value="<?php echo esc_attr($key); ?>" <?php selected($edit_theme->heading_font, $key); ?>>
+                                            <?php echo esc_html($label); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Template Pages -->
+                    <div class="editor-section">
+                        <h3><span class="dashicons dashicons-admin-page"></span> Template Pages</h3>
+                        <div class="pages-accordion">
+                            <?php if (!empty($edit_theme->pages)): ?>
+                                <?php foreach ($edit_theme->pages as $page): ?>
+                                    <div class="page-item">
+                                        <div class="page-header" onclick="togglePageAccordion(this)">
+                                            <span class="dashicons <?php echo esc_attr($page->page_icon); ?>"></span>
+                                            <strong><?php echo esc_html($page->page_name); ?></strong>
+                                            <?php if ($page->is_required): ?>
+                                                <span class="required-badge">Required</span>
+                                            <?php endif; ?>
+                                            <span class="toggle-icon dashicons dashicons-arrow-down-alt2"></span>
+                                        </div>
+                                        <div class="page-content">
+                                            <p class="page-description"><?php echo esc_html($page->page_description); ?></p>
+                                            <?php if (!empty($page->sections)): ?>
+                                                <div class="sections-list">
+                                                    <h5>Sections:</h5>
+                                                    <?php foreach ($page->sections as $section): ?>
+                                                        <div class="section-item">
+                                                            <span class="section-name"><?php echo esc_html($section->section_name); ?></span>
+                                                            <span class="section-type"><?php echo esc_html($section->section_type); ?></span>
+                                                            <?php if (!empty($section->fields)): ?>
+                                                                <div class="section-fields">
+                                                                    <?php foreach ($section->fields as $field): ?>
+                                                                        <span class="field-tag"><?php echo esc_html($field['label']); ?></span>
+                                                                    <?php endforeach; ?>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p class="no-pages">No pages configured for this template.</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <!-- Features -->
+                    <div class="editor-section">
+                        <h3><span class="dashicons dashicons-star-filled"></span> Features</h3>
+                        <div class="features-editor" id="features-editor">
+                            <?php 
+                            $features = json_decode($edit_theme->features, true) ?: array();
+                            foreach ($features as $feature): 
+                            ?>
+                                <div class="feature-tag">
+                                    <input type="hidden" name="features[]" value="<?php echo esc_attr($feature); ?>">
+                                    <span><?php echo esc_html($feature); ?></span>
+                                    <button type="button" class="remove-feature" onclick="removeFeature(this)">×</button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="add-feature-row">
+                            <input type="text" id="new-feature" placeholder="Add a feature...">
+                            <button type="button" class="btn btn-small" onclick="addFeature()">Add</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="editor-sidebar">
+                    <div class="sidebar-card">
+                        <h4>Publish</h4>
+                        <div class="status-toggle">
+                            <label class="switch">
+                                <input type="checkbox" name="status" value="1" <?php checked($edit_theme->status, 1); ?>>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Active</span>
+                        </div>
+                        <div class="publish-info">
+                            <p><strong>Type:</strong> <?php echo $edit_theme->is_template ? 'Pre-built Template' : 'Custom Template'; ?></p>
+                            <p><strong>Category:</strong> <?php echo esc_html($categories[$edit_theme->category] ?? ucfirst($edit_theme->category)); ?></p>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span class="dashicons dashicons-saved"></span> Save Changes
+                        </button>
+                    </div>
+                    
+                    <div class="sidebar-card">
+                        <h4>Live Preview</h4>
+                        <div class="preview-mockup">
+                            <div class="mockup-screen" style="--primary: <?php echo esc_attr($edit_theme->primary_color); ?>; --secondary: <?php echo esc_attr($edit_theme->secondary_color); ?>;">
+                                <div class="mockup-header"></div>
+                                <div class="mockup-hero" style="background: linear-gradient(135deg, <?php echo esc_attr($edit_theme->primary_color); ?>, <?php echo esc_attr($edit_theme->secondary_color); ?>);"></div>
                                 <div class="mockup-content">
                                     <div class="mockup-card"></div>
                                     <div class="mockup-card"></div>
                                     <div class="mockup-card"></div>
                                 </div>
-                                <div class="mockup-footer"></div>
+                                <div class="mockup-footer" style="background: <?php echo esc_attr($edit_theme->footer_bg_color); ?>;"></div>
                             </div>
-                        <?php endif; ?>
-                        <div class="template-overlay">
-                            <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=edit&id=' . $t->id); ?>" class="overlay-btn">
-                                <span class="dashicons dashicons-edit"></span> Edit Template
-                            </a>
-                            <button class="overlay-btn preview-btn" data-id="<?php echo $t->id; ?>">
-                                <span class="dashicons dashicons-visibility"></span> Preview
-                            </button>
-                        </div>
-                    </div>
-                    <div class="template-info">
-                        <div class="template-header">
-                            <h3><?php echo esc_html($t->name); ?></h3>
-                            <span class="category-badge"><?php echo esc_html($categories[$t->category] ?? ucfirst($t->category)); ?></span>
-                        </div>
-                        <p class="template-description"><?php echo esc_html($t->description); ?></p>
-                        <div class="template-meta">
-                            <span class="meta-item">
-                                <span class="dashicons dashicons-admin-page"></span>
-                                <?php 
-                                $page_count = count($themes_handler->get_theme_pages($t->id));
-                                echo $page_count . ' Pages';
-                                ?>
-                            </span>
-                            <div class="color-dots">
-                                <span style="background: <?php echo esc_attr($t->primary_color); ?>;" title="Primary"></span>
-                                <span style="background: <?php echo esc_attr($t->secondary_color); ?>;" title="Secondary"></span>
-                                <span style="background: <?php echo esc_attr($t->accent_color); ?>;" title="Accent"></span>
-                            </div>
-                        </div>
-                        <div class="template-features">
-                            <?php 
-                            $features = json_decode($t->features, true) ?: array();
-                            foreach (array_slice($features, 0, 3) as $feature): 
-                            ?>
-                                <span class="feature-tag"><?php echo esc_html($feature); ?></span>
-                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?>
+            </div>
+        </form>
+    </div>
+    
+    <?php else: ?>
+    <!-- Templates Grid View -->
+    <div class="spfm-header">
+        <div class="header-left">
+            <h1><span class="dashicons dashicons-layout"></span> Hospital Website Templates</h1>
+            <p>Pre-built medical website templates ready for customization</p>
         </div>
-        
-    <?php elseif ($action === 'edit' && $theme): ?>
-        <!-- Edit Template -->
-        <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="page-title-action">← Back to Templates</a>
-        
-        <div class="template-editor">
-            <form id="template-form" enctype="multipart/form-data">
-                <input type="hidden" name="id" value="<?php echo $theme->id; ?>">
+        <div class="header-right">
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <span class="dashicons dashicons-plus-alt"></span> Create Custom Template
+            </button>
+        </div>
+    </div>
+    
+    <!-- Category Filter -->
+    <div class="category-filter">
+        <button class="filter-btn active" data-category="all">All Templates</button>
+        <?php 
+        $used_categories = array();
+        foreach ($themes as $theme) {
+            $used_categories[$theme->category] = true;
+        }
+        foreach ($categories as $key => $label): 
+            if (isset($used_categories[$key])):
+        ?>
+            <button class="filter-btn" data-category="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></button>
+        <?php 
+            endif;
+        endforeach; 
+        ?>
+    </div>
+    
+    <!-- Templates Grid -->
+    <div class="templates-grid">
+        <?php foreach ($themes as $theme): 
+            $features = json_decode($theme->features, true) ?: array();
+            $theme_complete = $themes_handler->get_theme_complete($theme->id);
+            $page_count = $theme_complete ? count($theme_complete->pages) : 0;
+        ?>
+            <div class="template-card" data-category="<?php echo esc_attr($theme->category); ?>">
+                <div class="template-preview" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?> 0%, <?php echo esc_attr($theme->secondary_color); ?> 100%);">
+                    <?php if ($theme->preview_image): ?>
+                        <img src="<?php echo esc_url($theme->preview_image); ?>" alt="<?php echo esc_attr($theme->name); ?>">
+                    <?php else: ?>
+                        <div class="template-mockup">
+                            <div class="mockup-nav">
+                                <span class="mockup-logo"><?php echo esc_html(substr($theme->name, 0, 12)); ?></span>
+                                <div class="mockup-menu">
+                                    <span>Home</span>
+                                    <span>About</span>
+                                    <span>Services</span>
+                                </div>
+                            </div>
+                            <div class="mockup-hero" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?>, <?php echo esc_attr($theme->secondary_color); ?>);">
+                                <div class="hero-text">Your Health, Our Priority</div>
+                                <div class="hero-btn" style="background: <?php echo esc_attr($theme->accent_color); ?>;">Book Now</div>
+                            </div>
+                            <div class="mockup-cards">
+                                <div class="m-card"></div>
+                                <div class="m-card"></div>
+                                <div class="m-card"></div>
+                            </div>
+                            <div class="mockup-footer" style="background: <?php echo esc_attr($theme->footer_bg_color); ?>;"></div>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="template-overlay">
+                        <a href="<?php echo admin_url('admin.php?page=spfm-themes&action=edit&id=' . $theme->id); ?>" class="overlay-btn btn-edit">
+                            <span class="dashicons dashicons-edit"></span> Edit Template
+                        </a>
+                        <button class="overlay-btn btn-preview" onclick="previewTemplate(<?php echo $theme->id; ?>)">
+                            <span class="dashicons dashicons-visibility"></span> Preview
+                        </button>
+                        <button class="overlay-btn btn-duplicate" onclick="duplicateTemplate(<?php echo $theme->id; ?>)">
+                            <span class="dashicons dashicons-admin-page"></span> Duplicate
+                        </button>
+                    </div>
+                    
+                    <?php if ($theme->is_template): ?>
+                        <span class="template-badge">Pre-built</span>
+                    <?php endif; ?>
+                </div>
                 
-                <div class="editor-layout">
-                    <!-- Main Editor -->
-                    <div class="editor-main">
-                        <!-- Basic Info -->
-                        <div class="editor-section">
-                            <h3><span class="dashicons dashicons-info"></span> Basic Information</h3>
-                            
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label for="name">Template Name *</label>
-                                    <input type="text" name="name" id="name" required 
-                                           value="<?php echo esc_attr($theme->name); ?>">
-                                </div>
-                                <div class="form-field">
-                                    <label for="category">Category</label>
-                                    <select name="category" id="category">
-                                        <?php foreach ($categories as $key => $label): ?>
-                                            <option value="<?php echo $key; ?>" <?php selected($theme->category, $key); ?>>
-                                                <?php echo esc_html($label); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-field">
-                                <label for="description">Description</label>
-                                <textarea name="description" id="description" rows="3"><?php echo esc_textarea($theme->description); ?></textarea>
-                            </div>
-                        </div>
-                        
-                        <!-- Preview Image -->
-                        <div class="editor-section">
-                            <h3><span class="dashicons dashicons-format-image"></span> Template Preview Image</h3>
-                            
-                            <div class="image-upload-field">
-                                <div class="image-preview" id="preview-image-container">
-                                    <?php if ($theme->preview_image): ?>
-                                        <img src="<?php echo esc_url($theme->preview_image); ?>" alt="Preview">
-                                        <button type="button" class="remove-image" data-field="preview_image">&times;</button>
-                                    <?php else: ?>
-                                        <div class="no-image">
-                                            <span class="dashicons dashicons-format-image"></span>
-                                            <span>No preview image</span>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                <input type="hidden" name="preview_image" id="preview_image" value="<?php echo esc_attr($theme->preview_image); ?>">
-                                <button type="button" class="button upload-image-btn" data-field="preview_image" data-container="preview-image-container">
-                                    <span class="dashicons dashicons-upload"></span> Upload Preview Image
-                                </button>
-                                <p class="field-hint">Recommended size: 800x600px. This image will be shown in the template selection.</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Colors -->
-                        <div class="editor-section">
-                            <h3><span class="dashicons dashicons-art"></span> Color Scheme</h3>
-                            
-                            <div class="color-grid">
-                                <div class="color-field">
-                                    <label for="primary_color">Primary Color</label>
-                                    <div class="color-input-wrap">
-                                        <input type="color" name="primary_color" id="primary_color" 
-                                               value="<?php echo esc_attr($theme->primary_color); ?>">
-                                        <input type="text" class="color-text" value="<?php echo esc_attr($theme->primary_color); ?>">
-                                    </div>
-                                </div>
-                                <div class="color-field">
-                                    <label for="secondary_color">Secondary Color</label>
-                                    <div class="color-input-wrap">
-                                        <input type="color" name="secondary_color" id="secondary_color" 
-                                               value="<?php echo esc_attr($theme->secondary_color); ?>">
-                                        <input type="text" class="color-text" value="<?php echo esc_attr($theme->secondary_color); ?>">
-                                    </div>
-                                </div>
-                                <div class="color-field">
-                                    <label for="accent_color">Accent Color</label>
-                                    <div class="color-input-wrap">
-                                        <input type="color" name="accent_color" id="accent_color" 
-                                               value="<?php echo esc_attr($theme->accent_color); ?>">
-                                        <input type="text" class="color-text" value="<?php echo esc_attr($theme->accent_color); ?>">
-                                    </div>
-                                </div>
-                                <div class="color-field">
-                                    <label for="background_color">Background</label>
-                                    <div class="color-input-wrap">
-                                        <input type="color" name="background_color" id="background_color" 
-                                               value="<?php echo esc_attr($theme->background_color); ?>">
-                                        <input type="text" class="color-text" value="<?php echo esc_attr($theme->background_color); ?>">
-                                    </div>
-                                </div>
-                                <div class="color-field">
-                                    <label for="text_color">Text Color</label>
-                                    <div class="color-input-wrap">
-                                        <input type="color" name="text_color" id="text_color" 
-                                               value="<?php echo esc_attr($theme->text_color); ?>">
-                                        <input type="text" class="color-text" value="<?php echo esc_attr($theme->text_color); ?>">
-                                    </div>
-                                </div>
-                                <div class="color-field">
-                                    <label for="header_bg_color">Header Background</label>
-                                    <div class="color-input-wrap">
-                                        <input type="color" name="header_bg_color" id="header_bg_color" 
-                                               value="<?php echo esc_attr($theme->header_bg_color); ?>">
-                                        <input type="text" class="color-text" value="<?php echo esc_attr($theme->header_bg_color); ?>">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Typography -->
-                        <div class="editor-section">
-                            <h3><span class="dashicons dashicons-editor-textcolor"></span> Typography</h3>
-                            
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label for="font_family">Body Font</label>
-                                    <select name="font_family" id="font_family">
-                                        <?php foreach ($fonts as $font): ?>
-                                            <option value="<?php echo $font; ?>" <?php selected($theme->font_family, $font); ?>>
-                                                <?php echo $font; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="form-field">
-                                    <label for="heading_font">Heading Font</label>
-                                    <select name="heading_font" id="heading_font">
-                                        <?php foreach ($fonts as $font): ?>
-                                            <option value="<?php echo $font; ?>" <?php selected($theme->heading_font, $font); ?>>
-                                                <?php echo $font; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Pages -->
-                        <div class="editor-section">
-                            <h3><span class="dashicons dashicons-admin-page"></span> Template Pages</h3>
-                            
-                            <div class="pages-list">
-                                <?php foreach ($theme->pages as $page_index => $page): ?>
-                                    <div class="page-item" data-page-id="<?php echo $page->id; ?>">
-                                        <div class="page-header" onclick="togglePageContent(this)">
-                                            <span class="dashicons <?php echo esc_attr($page->page_icon); ?>"></span>
-                                            <h4><?php echo esc_html($page->page_name); ?></h4>
-                                            <?php if ($page->is_required): ?>
-                                                <span class="required-badge">Required</span>
-                                            <?php endif; ?>
-                                            <span class="toggle-icon dashicons dashicons-arrow-down"></span>
-                                        </div>
-                                        <div class="page-content" style="display: none;">
-                                            <p class="page-description"><?php echo esc_html($page->page_description); ?></p>
-                                            
-                                            <?php foreach ($page->sections as $sec_index => $section): ?>
-                                                <div class="section-item">
-                                                    <h5><?php echo esc_html($section->section_name); ?></h5>
-                                                    <div class="section-fields">
-                                                        <?php 
-                                                        if (!empty($section->fields)):
-                                                            foreach ($section->fields as $field): 
-                                                                if ($field['type'] === 'repeater') continue;
-                                                        ?>
-                                                            <div class="field-item">
-                                                                <span class="field-label"><?php echo esc_html($field['label']); ?></span>
-                                                                <span class="field-type"><?php echo esc_html($field['type']); ?></span>
-                                                            </div>
-                                                        <?php 
-                                                            endforeach;
-                                                        endif;
-                                                        ?>
-                                                    </div>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                            
-                            <div class="info-box">
-                                <span class="dashicons dashicons-info"></span>
-                                <div>
-                                    Page structure is pre-configured for this template type. Customers will fill in the content for each section when they use this template.
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Features -->
-                        <div class="editor-section">
-                            <h3><span class="dashicons dashicons-star-filled"></span> Features</h3>
-                            
-                            <div class="features-editor" id="features-editor">
-                                <?php 
-                                $features = json_decode($theme->features, true) ?: array();
-                                foreach ($features as $index => $feature): 
-                                ?>
-                                    <div class="feature-item">
-                                        <input type="text" name="features[]" value="<?php echo esc_attr($feature); ?>" placeholder="Feature name">
-                                        <button type="button" class="remove-feature" onclick="removeFeature(this)">&times;</button>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                            <button type="button" class="button add-feature-btn" onclick="addFeature()">
-                                <span class="dashicons dashicons-plus-alt"></span> Add Feature
-                            </button>
-                        </div>
+                <div class="template-info">
+                    <div class="template-meta">
+                        <span class="template-category" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?>, <?php echo esc_attr($theme->accent_color); ?>);">
+                            <?php echo esc_html($categories[$theme->category] ?? ucfirst($theme->category)); ?>
+                        </span>
+                        <span class="template-pages"><?php echo $page_count; ?> Pages</span>
+                    </div>
+                    <h3><?php echo esc_html($theme->name); ?></h3>
+                    <p><?php echo esc_html(wp_trim_words($theme->description, 15)); ?></p>
+                    
+                    <div class="template-colors">
+                        <span class="color-dot" style="background: <?php echo esc_attr($theme->primary_color); ?>;" title="Primary"></span>
+                        <span class="color-dot" style="background: <?php echo esc_attr($theme->secondary_color); ?>;" title="Secondary"></span>
+                        <span class="color-dot" style="background: <?php echo esc_attr($theme->accent_color); ?>;" title="Accent"></span>
+                        <span class="color-dot" style="background: <?php echo esc_attr($theme->background_color); ?>; border: 1px solid #ddd;" title="Background"></span>
                     </div>
                     
-                    <!-- Sidebar -->
-                    <div class="editor-sidebar">
-                        <div class="sidebar-card">
-                            <h4>Publish</h4>
-                            <div class="publish-info">
-                                <div class="info-row">
-                                    <span>Status:</span>
-                                    <span class="status-badge <?php echo $theme->status ? 'active' : 'inactive'; ?>">
-                                        <?php echo $theme->status ? 'Active' : 'Inactive'; ?>
-                                    </span>
-                                </div>
-                                <div class="info-row">
-                                    <span>Type:</span>
-                                    <span><?php echo $theme->is_template ? 'Pre-built Template' : 'Custom Theme'; ?></span>
-                                </div>
-                            </div>
-                            <div class="status-toggle">
-                                <label>
-                                    <input type="checkbox" name="status" value="1" <?php checked($theme->status, 1); ?>>
-                                    Active (visible to customers)
-                                </label>
-                            </div>
-                            <button type="submit" class="button button-primary button-large">
-                                <span class="dashicons dashicons-saved"></span> Save Changes
-                            </button>
-                        </div>
-                        
-                        <div class="sidebar-card">
-                            <h4>Live Preview</h4>
-                            <div class="preview-box" style="background: linear-gradient(135deg, <?php echo esc_attr($theme->primary_color); ?>, <?php echo esc_attr($theme->secondary_color); ?>);">
-                                <div class="preview-mockup">
-                                    <div class="pm-header" style="background: <?php echo esc_attr($theme->header_bg_color); ?>;"></div>
-                                    <div class="pm-hero"></div>
-                                    <div class="pm-content" style="background: <?php echo esc_attr($theme->background_color); ?>;">
-                                        <div class="pm-card"></div>
-                                        <div class="pm-card"></div>
-                                        <div class="pm-card"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="preview-fonts" style="font-family: '<?php echo esc_attr($theme->font_family); ?>';">
-                                Body: <?php echo esc_html($theme->font_family); ?>
-                            </p>
-                            <p class="preview-fonts" style="font-family: '<?php echo esc_attr($theme->heading_font); ?>'; font-weight: 700;">
-                                Heading: <?php echo esc_html($theme->heading_font); ?>
-                            </p>
-                        </div>
+                    <?php if (!empty($features)): ?>
+                    <div class="template-features">
+                        <?php foreach (array_slice($features, 0, 3) as $feature): ?>
+                            <span class="feature-tag"><?php echo esc_html($feature); ?></span>
+                        <?php endforeach; ?>
+                        <?php if (count($features) > 3): ?>
+                            <span class="feature-more">+<?php echo count($features) - 3; ?> more</span>
+                        <?php endif; ?>
                     </div>
+                    <?php endif; ?>
                 </div>
-            </form>
-        </div>
-        
-    <?php elseif ($action === 'add'): ?>
-        <!-- Add New Template -->
-        <a href="<?php echo admin_url('admin.php?page=spfm-themes'); ?>" class="page-title-action">← Back to Templates</a>
-        
-        <div class="template-editor">
-            <form id="template-form">
-                <div class="editor-layout">
-                    <div class="editor-main">
-                        <div class="editor-section">
-                            <h3><span class="dashicons dashicons-info"></span> Basic Information</h3>
-                            
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label for="name">Template Name *</label>
-                                    <input type="text" name="name" id="name" required placeholder="My Custom Template">
-                                </div>
-                                <div class="form-field">
-                                    <label for="category">Category</label>
-                                    <select name="category" id="category">
-                                        <?php foreach ($categories as $key => $label): ?>
-                                            <option value="<?php echo $key; ?>"><?php echo esc_html($label); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-field">
-                                <label for="description">Description</label>
-                                <textarea name="description" id="description" rows="3" placeholder="Describe your template..."></textarea>
-                            </div>
-                            
-                            <div class="form-field">
-                                <label>Base Template</label>
-                                <p class="field-hint">Select an existing template to duplicate its page structure:</p>
-                                <select name="duplicate_from" id="duplicate_from">
-                                    <option value="">-- Create from scratch --</option>
-                                    <?php foreach ($templates as $t): ?>
-                                        <option value="<?php echo $t->id; ?>"><?php echo esc_html($t->name); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="editor-section">
-                            <h3><span class="dashicons dashicons-art"></span> Color Scheme</h3>
-                            
-                            <div class="color-grid">
-                                <div class="color-field">
-                                    <label for="primary_color">Primary</label>
-                                    <div class="color-input-wrap">
-                                        <input type="color" name="primary_color" id="primary_color" value="#667eea">
-                                        <input type="text" class="color-text" value="#667eea">
-                                    </div>
-                                </div>
-                                <div class="color-field">
-                                    <label for="secondary_color">Secondary</label>
-                                    <div class="color-input-wrap">
-                                        <input type="color" name="secondary_color" id="secondary_color" value="#764ba2">
-                                        <input type="text" class="color-text" value="#764ba2">
-                                    </div>
-                                </div>
-                                <div class="color-field">
-                                    <label for="accent_color">Accent</label>
-                                    <div class="color-input-wrap">
-                                        <input type="color" name="accent_color" id="accent_color" value="#28a745">
-                                        <input type="text" class="color-text" value="#28a745">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="editor-sidebar">
-                        <div class="sidebar-card">
-                            <h4>Create Template</h4>
-                            <button type="submit" class="button button-primary button-large">
-                                <span class="dashicons dashicons-plus-alt"></span> Create Template
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
     <?php endif; ?>
 </div>
 
-<!-- Preview Modal -->
-<div id="template-preview-modal" class="spfm-modal" style="display:none;">
-    <div class="modal-content modal-large">
+<!-- Create Template Modal -->
+<div class="spfm-modal" id="create-modal">
+    <div class="modal-content modal-lg">
         <div class="modal-header">
-            <h3 id="preview-modal-title">Template Preview</h3>
-            <button class="close-modal" onclick="closePreviewModal()">&times;</button>
+            <h2><span class="dashicons dashicons-plus-alt"></span> Create Custom Template</h2>
+            <button class="modal-close" onclick="closeModal('create-modal')">&times;</button>
         </div>
-        <div class="modal-body" id="preview-modal-body">
+        <form id="create-template-form">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Template Name <span class="required">*</span></label>
+                        <input type="text" name="name" required placeholder="e.g., My Hospital Template">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select name="category">
+                            <?php foreach ($categories as $key => $label): ?>
+                                <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="2" placeholder="Brief description of the template"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Base Template (Copy structure from)</label>
+                    <select name="duplicate_from">
+                        <option value="">-- Start from scratch --</option>
+                        <?php foreach ($themes as $theme): ?>
+                            <option value="<?php echo $theme->id; ?>"><?php echo esc_html($theme->name); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p class="hint">Select a template to copy its pages and sections structure.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('create-modal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Template</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="spfm-modal" id="preview-modal">
+    <div class="modal-content modal-xl">
+        <div class="modal-header">
+            <h2><span class="dashicons dashicons-visibility"></span> Template Preview</h2>
+            <button class="modal-close" onclick="closeModal('preview-modal')">&times;</button>
+        </div>
+        <div class="modal-body" id="preview-content">
             <div class="loading">Loading preview...</div>
         </div>
     </div>
 </div>
 
 <style>
+/* Templates Grid Styles */
+.spfm-wrap { padding: 20px; max-width: 1600px; }
+
+.spfm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    padding: 30px;
+    border-radius: 16px;
+    color: #fff;
+}
+.spfm-header h1 { margin: 0 0 5px 0; font-size: 28px; display: flex; align-items: center; gap: 10px; }
+.spfm-header p { margin: 0; opacity: 0.9; }
+.spfm-header .btn-primary { background: #fff; color: #0891b2; }
+.spfm-header .btn-primary:hover { background: #f0fdfa; }
+
 /* Category Filter */
 .category-filter {
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
-    margin: 20px 0;
-    padding: 15px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+    flex-wrap: wrap;
 }
 .filter-btn {
-    padding: 8px 16px;
-    background: #f0f0f0;
-    border-radius: 20px;
-    text-decoration: none;
-    color: #666;
-    font-size: 13px;
+    padding: 10px 20px;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
     transition: all 0.3s;
 }
-.filter-btn:hover {
-    background: #e0e0e0;
-    color: #333;
-}
-.filter-btn.active {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #fff;
-}
+.filter-btn:hover { border-color: #0891b2; color: #0891b2; }
+.filter-btn.active { background: #0891b2; color: #fff; border-color: #0891b2; }
 
 /* Templates Grid */
 .templates-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 25px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 30px;
 }
+
 .template-card {
     background: #fff;
-    border-radius: 15px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     transition: all 0.3s;
 }
 .template-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0,0,0,0.15);
 }
+.template-card.hidden { display: none; }
+
 .template-preview {
+    height: 240px;
     position: relative;
-    height: 220px;
     overflow: hidden;
 }
 .template-preview img {
@@ -545,282 +509,205 @@ $category_filter = isset($_GET['category']) ? sanitize_text_field($_GET['categor
     height: 100%;
     object-fit: cover;
 }
+
+/* Mockup Styles */
 .template-mockup {
-    padding: 15px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-.mockup-header {
-    background: rgba(255,255,255,0.95);
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin-bottom: 10px;
+    width: 90%;
+    height: 220px;
+    margin: 10px auto;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
 }
 .mockup-nav {
+    height: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 9px;
 }
-.mockup-logo {
-    width: 60px;
-    height: 8px;
-    background: #333;
-    border-radius: 4px;
-}
-.mockup-links {
-    width: 100px;
-    height: 6px;
-    background: #ddd;
-    border-radius: 3px;
-}
+.mockup-logo { font-weight: 700; color: #0891b2; }
+.mockup-menu { display: flex; gap: 10px; color: #64748b; }
 .mockup-hero {
-    background: rgba(255,255,255,0.2);
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    margin-bottom: 10px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
 }
-.mockup-hero-text {
-    width: 80%;
-    height: 12px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 6px;
-    margin: 0 auto 10px;
-}
-.mockup-hero-btn {
-    width: 80px;
-    height: 24px;
-    background: rgba(255,255,255,0.95);
-    border-radius: 12px;
-    margin: 0 auto;
-}
-.mockup-content {
+.hero-text { font-size: 11px; font-weight: 700; margin-bottom: 8px; }
+.hero-btn { font-size: 8px; padding: 4px 12px; border-radius: 12px; }
+.mockup-cards {
     display: flex;
     gap: 8px;
-    flex: 1;
+    padding: 12px;
 }
-.mockup-card {
-    flex: 1;
-    background: rgba(255,255,255,0.9);
-    border-radius: 6px;
-}
-.mockup-footer {
-    height: 20px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 6px;
-    margin-top: 10px;
-}
+.m-card { flex: 1; height: 50px; background: #f1f5f9; border-radius: 6px; }
+.mockup-footer { height: 25px; margin-top: auto; }
+
 .template-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: rgba(0,0,0,0.7);
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     gap: 10px;
     opacity: 0;
     transition: opacity 0.3s;
 }
-.template-card:hover .template-overlay {
-    opacity: 1;
-}
+.template-card:hover .template-overlay { opacity: 1; }
+
 .overlay-btn {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: #fff;
+    border-radius: 8px;
     border: none;
-    border-radius: 25px;
-    color: #333;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s;
+    font-weight: 500;
+    min-width: 150px;
+    justify-content: center;
+    text-decoration: none;
 }
-.overlay-btn:hover {
-    transform: scale(1.05);
-    background: #f0f0f0;
-}
-.template-info {
-    padding: 20px;
-}
-.template-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-}
-.template-header h3 {
-    margin: 0;
-    font-size: 18px;
-}
-.category-badge {
-    font-size: 11px;
-    background: #e9ecef;
-    padding: 3px 10px;
+.btn-edit { background: #fff; color: #333; }
+.btn-preview { background: #0891b2; color: #fff; }
+.btn-duplicate { background: transparent; color: #fff; border: 2px solid #fff !important; }
+
+.template-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(255,255,255,0.95);
+    padding: 4px 12px;
     border-radius: 15px;
-    color: #666;
+    font-size: 11px;
+    font-weight: 600;
+    color: #0891b2;
 }
-.template-description {
-    color: #666;
-    font-size: 13px;
-    margin: 0 0 15px;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
+
+.template-info { padding: 25px; }
 .template-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 12px;
+}
+.template-category {
+    font-size: 11px;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-weight: 600;
+}
+.template-pages { font-size: 13px; color: #64748b; }
+.template-info h3 { margin: 0 0 8px 0; font-size: 18px; }
+.template-info p { margin: 0 0 15px 0; color: #64748b; font-size: 14px; line-height: 1.5; }
+
+.template-colors {
+    display: flex;
+    gap: 8px;
     margin-bottom: 15px;
 }
-.meta-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    color: #888;
-}
-.color-dots {
-    display: flex;
-    gap: 5px;
-}
-.color-dots span {
-    width: 18px;
-    height: 18px;
+.color-dot {
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+
 .template-features {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 6px;
 }
 .feature-tag {
     font-size: 11px;
-    background: #f0f0f0;
-    padding: 3px 10px;
-    border-radius: 10px;
-    color: #666;
+    background: #f1f5f9;
+    padding: 4px 10px;
+    border-radius: 12px;
+    color: #475569;
+}
+.feature-more {
+    font-size: 11px;
+    color: #0891b2;
+    font-weight: 600;
 }
 
-/* Template Editor */
-.template-editor {
-    margin-top: 20px;
+/* Editor Styles */
+.spfm-template-editor { max-width: 1400px; }
+.editor-header {
+    margin-bottom: 30px;
 }
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #64748b;
+    text-decoration: none;
+    margin-bottom: 15px;
+}
+.back-link:hover { color: #0891b2; }
+.editor-header h1 { margin: 0; font-size: 28px; }
+
 .editor-layout {
     display: grid;
     grid-template-columns: 1fr 320px;
-    gap: 25px;
+    gap: 30px;
 }
+
 .editor-section {
     background: #fff;
     border-radius: 12px;
     padding: 25px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 .editor-section h3 {
     margin: 0 0 20px 0;
+    font-size: 16px;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
+    color: #1e293b;
 }
-.editor-section h3 .dashicons {
-    color: #667eea;
-}
+.editor-section h3 .dashicons { color: #0891b2; }
+
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
-.form-field {
-    margin-bottom: 20px;
-}
-.form-field label {
+.form-group { margin-bottom: 20px; }
+.form-group label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 14px;
+    color: #334155;
 }
-.form-field input,
-.form-field select,
-.form-field textarea {
+.form-group input,
+.form-group select,
+.form-group textarea {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
+    padding: 12px 15px;
+    border: 2px solid #e2e8f0;
     border-radius: 8px;
+    font-size: 14px;
 }
-.form-field input:focus,
-.form-field select:focus,
-.form-field textarea:focus {
-    border-color: #667eea;
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #0891b2;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
 }
-.field-hint {
-    font-size: 12px;
-    color: #999;
-    margin-top: 5px;
-}
-
-/* Image Upload */
-.image-upload-field {
-    margin-bottom: 20px;
-}
-.image-preview {
-    width: 100%;
-    height: 200px;
-    border: 2px dashed #ddd;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 15px;
-    position: relative;
-    overflow: hidden;
-    background: #f8f9fa;
-}
-.image-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.image-preview .no-image {
-    text-align: center;
-    color: #999;
-}
-.image-preview .no-image .dashicons {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    display: block;
-    margin-bottom: 10px;
-}
-.remove-image {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 30px;
-    height: 30px;
-    background: #dc3545;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-}
+.hint { font-size: 12px; color: #94a3b8; margin-top: 5px; }
 
 /* Color Grid */
 .color-grid {
@@ -828,137 +715,154 @@ $category_filter = isset($_GET['category']) ? sanitize_text_field($_GET['categor
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
-.color-field label {
+.color-item label {
     display: block;
     margin-bottom: 8px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
 }
-.color-input-wrap {
+.color-input-group {
     display: flex;
-    align-items: center;
     gap: 10px;
+    align-items: center;
 }
-.color-input-wrap input[type="color"] {
+.color-input-group input[type="color"] {
     width: 50px;
     height: 40px;
     padding: 0;
-    border: 2px solid #ddd;
+    border: none;
     border-radius: 8px;
     cursor: pointer;
 }
-.color-input-wrap .color-text {
+.color-input-group .color-hex {
     flex: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-family: monospace;
+    padding: 8px 12px;
 }
 
-/* Pages List */
-.pages-list {
-    margin-bottom: 20px;
+/* Image Upload */
+.image-upload-area { text-align: center; }
+.image-preview {
+    width: 200px;
+    height: 150px;
+    margin: 0 auto 15px;
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
+.image-preview img { width: 100%; height: 100%; object-fit: cover; }
+.image-preview .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.no-image { text-align: center; color: #94a3b8; }
+.no-image .dashicons { font-size: 40px; width: 40px; height: 40px; }
+
+/* Pages Accordion */
+.pages-accordion { }
 .page-item {
-    border: 1px solid #eee;
-    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     margin-bottom: 10px;
     overflow: hidden;
 }
 .page-header {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     padding: 15px;
-    background: #f8f9fa;
+    background: #f8fafc;
     cursor: pointer;
 }
-.page-header h4 {
-    margin: 0;
-    flex: 1;
-}
-.page-header .dashicons:first-child {
-    color: #667eea;
-}
-.required-badge {
+.page-header .dashicons { color: #0891b2; }
+.page-header .required-badge {
     font-size: 10px;
-    background: #dc3545;
-    color: #fff;
+    background: #fee2e2;
+    color: #ef4444;
     padding: 2px 8px;
     border-radius: 10px;
 }
-.toggle-icon {
-    transition: transform 0.3s;
-}
-.page-item.open .toggle-icon {
-    transform: rotate(180deg);
-}
+.page-header .toggle-icon { margin-left: auto; }
 .page-content {
-    padding: 20px;
-    border-top: 1px solid #eee;
-}
-.page-description {
-    color: #666;
-    margin-bottom: 15px;
-}
-.section-item {
-    background: #f8f9fa;
     padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    display: none;
+    border-top: 1px solid #e2e8f0;
 }
-.section-item h5 {
-    margin: 0 0 10px 0;
-    color: #667eea;
+.page-item.open .page-content { display: block; }
+.page-description { color: #64748b; margin-bottom: 15px; }
+.sections-list h5 { font-size: 12px; color: #94a3b8; margin: 0 0 10px 0; }
+.section-item {
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+.section-name { font-weight: 600; margin-right: 10px; }
+.section-type {
+    font-size: 11px;
+    background: #e2e8f0;
+    padding: 2px 8px;
+    border-radius: 10px;
 }
 .section-fields {
+    margin-top: 10px;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 5px;
 }
-.field-item {
-    font-size: 12px;
-    background: #fff;
-    padding: 5px 10px;
-    border-radius: 5px;
-    border: 1px solid #eee;
-}
-.field-type {
-    color: #999;
-    margin-left: 5px;
+.section-fields .field-tag {
+    font-size: 10px;
+    background: #fef3c7;
+    padding: 2px 8px;
+    border-radius: 8px;
 }
 
 /* Features Editor */
 .features-editor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: 15px;
+    min-height: 40px;
+    padding: 10px;
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
 }
-.feature-item {
+.features-editor .feature-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 15px;
+}
+.features-editor .remove-feature {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+}
+.add-feature-row {
     display: flex;
     gap: 10px;
-    margin-bottom: 10px;
 }
-.feature-item input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-}
-.remove-feature {
-    width: 36px;
-    height: 36px;
-    background: #f8d7da;
-    color: #dc3545;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 18px;
-}
+.add-feature-row input { flex: 1; }
 
 /* Sidebar */
-.editor-sidebar {
-    position: sticky;
-    top: 50px;
-}
+.editor-sidebar { }
 .sidebar-card {
     background: #fff;
     border-radius: 12px;
@@ -968,287 +872,366 @@ $category_filter = isset($_GET['category']) ? sanitize_text_field($_GET['categor
 }
 .sidebar-card h4 {
     margin: 0 0 15px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-}
-.publish-info {
-    margin-bottom: 15px;
-}
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    font-size: 13px;
-}
-.status-badge {
-    padding: 2px 10px;
-    border-radius: 10px;
-    font-size: 11px;
-}
-.status-badge.active {
-    background: #d4edda;
-    color: #155724;
-}
-.status-badge.inactive {
-    background: #f8d7da;
-    color: #721c24;
+    font-size: 14px;
+    color: #64748b;
 }
 .status-toggle {
-    margin-bottom: 15px;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 6px;
-}
-.status-toggle label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+.publish-info { font-size: 13px; color: #64748b; margin-bottom: 15px; }
+.publish-info p { margin: 5px 0; }
+
+/* Switch Toggle */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute;
     cursor: pointer;
+    inset: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 26px;
 }
-.sidebar-card .button-large {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-/* Preview Box */
-.preview-box {
-    height: 150px;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 15px;
-}
-.preview-mockup {
-    height: 100%;
-    background: #fff;
-    border-radius: 6px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-.pm-header {
+.slider:before {
+    position: absolute;
+    content: "";
     height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
 }
-.pm-hero {
-    height: 40px;
-    background: currentColor;
-    opacity: 0.3;
-}
-.pm-content {
-    flex: 1;
-    padding: 8px;
-    display: flex;
-    gap: 5px;
-}
-.pm-card {
-    flex: 1;
-    background: #eee;
-    border-radius: 3px;
-}
-.preview-fonts {
-    font-size: 12px;
-    margin: 5px 0;
-    color: #666;
-}
+input:checked + .slider { background-color: #10b981; }
+input:checked + .slider:before { transform: translateX(24px); }
 
-/* Info Box */
-.info-box {
-    display: flex;
-    gap: 15px;
-    padding: 15px;
-    background: #e7f3ff;
+/* Preview Mockup */
+.preview-mockup { }
+.mockup-screen {
+    width: 100%;
+    height: 200px;
+    background: #f8fafc;
     border-radius: 8px;
-    margin-top: 15px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
 }
-.info-box .dashicons {
-    color: #0073aa;
-    flex-shrink: 0;
+.mockup-screen .mockup-header {
+    height: 25px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+}
+.mockup-screen .mockup-hero {
+    height: 60px;
+}
+.mockup-screen .mockup-content {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+}
+.mockup-screen .mockup-card {
+    flex: 1;
+    height: 40px;
+    background: #e2e8f0;
+    border-radius: 4px;
+}
+.mockup-screen .mockup-footer {
+    height: 25px;
+    margin-top: auto;
 }
 
-/* Modal */
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s;
+}
+.btn-primary { background: #0891b2; color: #fff; }
+.btn-primary:hover { background: #0e7490; }
+.btn-secondary { background: #f1f5f9; color: #475569; }
+.btn-secondary:hover { background: #e2e8f0; }
+.btn-small { padding: 8px 16px; font-size: 13px; }
+.btn-block { width: 100%; justify-content: center; }
+
+/* Modal Styles */
 .spfm-modal {
+    display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 100000;
-    display: flex;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 10000;
     align-items: center;
     justify-content: center;
 }
-.modal-large {
-    width: 90%;
-    max-width: 1200px;
-    max-height: 90vh;
+.spfm-modal.active { display: flex; }
+.modal-content {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
+.modal-lg { max-width: 600px; }
+.modal-xl { max-width: 1200px; }
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #eee;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e2e8f0;
 }
-.modal-header h3 {
+.modal-header h2 {
     margin: 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
-.close-modal {
+.modal-close {
     background: none;
     border: none;
     font-size: 28px;
     cursor: pointer;
-    color: #666;
+    color: #94a3b8;
 }
 .modal-body {
-    flex: 1;
-    overflow: auto;
-    padding: 20px;
+    padding: 25px;
+    overflow-y: auto;
 }
-.loading {
-    text-align: center;
-    padding: 40px;
-    color: #666;
-}
-
-@media (max-width: 1200px) {
-    .editor-layout {
-        grid-template-columns: 1fr;
-    }
-    .editor-sidebar {
-        position: static;
-    }
-    .color-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px 25px;
+    border-top: 1px solid #e2e8f0;
 }
 
-@media (max-width: 600px) {
-    .templates-grid {
-        grid-template-columns: 1fr;
-    }
-    .form-row, .color-grid {
-        grid-template-columns: 1fr;
-    }
+.required { color: #ef4444; }
+.loading { text-align: center; padding: 40px; color: #64748b; }
+
+@media (max-width: 1024px) {
+    .editor-layout { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .color-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .templates-grid { grid-template-columns: 1fr; }
+    .spfm-header { flex-direction: column; gap: 20px; }
 }
 </style>
 
 <script>
 jQuery(document).ready(function($) {
-    // Color picker sync
-    $('input[type="color"]').on('input', function() {
-        $(this).siblings('.color-text').val($(this).val());
-    });
-    $('.color-text').on('input', function() {
-        var val = $(this).val();
-        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-            $(this).siblings('input[type="color"]').val(val);
+    // Category Filter
+    $('.filter-btn').on('click', function() {
+        $('.filter-btn').removeClass('active');
+        $(this).addClass('active');
+        
+        const category = $(this).data('category');
+        
+        if (category === 'all') {
+            $('.template-card').removeClass('hidden');
+        } else {
+            $('.template-card').each(function() {
+                if ($(this).data('category') === category) {
+                    $(this).removeClass('hidden');
+                } else {
+                    $(this).addClass('hidden');
+                }
+            });
         }
     });
     
-    // Image upload
-    $('.upload-image-btn').on('click', function() {
-        var field = $(this).data('field');
-        var container = $(this).data('container');
+    // Color Picker Sync
+    $('input[type="color"]').on('input', function() {
+        $(this).siblings('.color-hex').val($(this).val());
+        updatePreviewMockup();
+    });
+    $('.color-hex').on('input', function() {
+        const val = $(this).val();
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+            $(this).siblings('input[type="color"]').val(val);
+            updatePreviewMockup();
+        }
+    });
+    
+    // Upload Preview Image
+    $('#upload-preview-btn').on('click', function(e) {
+        e.preventDefault();
         
-        var frame = wp.media({
-            title: 'Select Image',
-            button: { text: 'Use Image' },
+        const frame = wp.media({
+            title: 'Select Preview Image',
+            button: { text: 'Use this image' },
             multiple: false
         });
         
         frame.on('select', function() {
-            var attachment = frame.state().get('selection').first().toJSON();
-            $('#' + field).val(attachment.url);
-            $('#' + container).html(
-                '<img src="' + attachment.url + '" alt="Preview">' +
-                '<button type="button" class="remove-image" data-field="' + field + '">&times;</button>'
-            );
+            const attachment = frame.state().get('selection').first().toJSON();
+            $('#preview_image').val(attachment.url);
+            $('#preview-container').html(`
+                <img src="${attachment.url}" alt="Preview">
+                <button type="button" class="remove-image" onclick="removePreviewImage()">×</button>
+            `);
         });
         
         frame.open();
     });
     
-    // Remove image
-    $(document).on('click', '.remove-image', function() {
-        var field = $(this).data('field');
-        $('#' + field).val('');
-        $(this).parent().html(
-            '<div class="no-image"><span class="dashicons dashicons-format-image"></span><span>No preview image</span></div>'
-        );
-    });
-    
-    // Save template
-    $('#template-form').on('submit', function(e) {
+    // Theme Edit Form Submit
+    $('#theme-edit-form').on('submit', function(e) {
         e.preventDefault();
         
-        var $btn = $(this).find('button[type="submit"]');
-        $btn.text('Saving...').prop('disabled', true);
-        
-        var formData = $(this).serialize();
-        formData += '&action=spfm_save_theme&nonce=' + spfm_ajax.nonce;
+        const formData = $(this).serializeArray();
+        formData.push({ name: 'action', value: 'spfm_save_theme' });
+        formData.push({ name: 'nonce', value: spfm_ajax.nonce });
         
         $.post(spfm_ajax.ajax_url, formData, function(response) {
             if (response.success) {
-                if (!$('#template-form input[name="id"]').val()) {
-                    window.location.href = '<?php echo admin_url('admin.php?page=spfm-themes&action=edit&id='); ?>' + response.data.id;
-                } else {
-                    alert('Template saved successfully!');
-                    $btn.html('<span class="dashicons dashicons-saved"></span> Save Changes').prop('disabled', false);
-                }
+                alert('Template saved successfully!');
             } else {
-                alert(response.data.message);
-                $btn.html('<span class="dashicons dashicons-saved"></span> Save Changes').prop('disabled', false);
+                alert(response.data.message || 'Failed to save template.');
             }
         });
     });
     
-    // Preview template
-    $('.preview-btn').on('click', function() {
-        var id = $(this).data('id');
-        $('#template-preview-modal').show();
+    // Create Template Form
+    $('#create-template-form').on('submit', function(e) {
+        e.preventDefault();
         
-        $.post(spfm_ajax.ajax_url, {
-            action: 'spfm_get_theme_pages',
-            nonce: spfm_ajax.nonce,
-            theme_id: id
-        }, function(response) {
+        const formData = $(this).serializeArray();
+        formData.push({ name: 'action', value: 'spfm_save_theme' });
+        formData.push({ name: 'nonce', value: spfm_ajax.nonce });
+        
+        $.post(spfm_ajax.ajax_url, formData, function(response) {
             if (response.success) {
-                $('#preview-modal-title').text(response.data.theme_name + ' - Preview');
-                $('#preview-modal-body').html(response.data.html);
+                window.location.href = '<?php echo admin_url('admin.php?page=spfm-themes&action=edit&id='); ?>' + response.data.id;
+            } else {
+                alert(response.data.message || 'Failed to create template.');
             }
         });
     });
 });
 
-function togglePageContent(header) {
-    var item = jQuery(header).closest('.page-item');
-    item.toggleClass('open');
-    item.find('.page-content').slideToggle(300);
+function openCreateModal() {
+    document.getElementById('create-modal').classList.add('active');
 }
 
-function closePreviewModal() {
-    jQuery('#template-preview-modal').hide();
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+function removePreviewImage() {
+    document.getElementById('preview_image').value = '';
+    document.getElementById('preview-container').innerHTML = `
+        <div class="no-image">
+            <span class="dashicons dashicons-format-image"></span>
+            <p>No preview image</p>
+        </div>
+    `;
+}
+
+function togglePageAccordion(header) {
+    const pageItem = header.closest('.page-item');
+    pageItem.classList.toggle('open');
 }
 
 function addFeature() {
-    jQuery('#features-editor').append(
-        '<div class="feature-item">' +
-        '<input type="text" name="features[]" placeholder="Feature name">' +
-        '<button type="button" class="remove-feature" onclick="removeFeature(this)">&times;</button>' +
-        '</div>'
-    );
+    const input = document.getElementById('new-feature');
+    const value = input.value.trim();
+    
+    if (value) {
+        const tag = document.createElement('div');
+        tag.className = 'feature-tag';
+        tag.innerHTML = `
+            <input type="hidden" name="features[]" value="${value}">
+            <span>${value}</span>
+            <button type="button" class="remove-feature" onclick="removeFeature(this)">×</button>
+        `;
+        document.getElementById('features-editor').appendChild(tag);
+        input.value = '';
+    }
 }
 
 function removeFeature(btn) {
-    jQuery(btn).closest('.feature-item').remove();
+    btn.closest('.feature-tag').remove();
+}
+
+function updatePreviewMockup() {
+    const primary = document.querySelector('input[name="primary_color"]').value;
+    const secondary = document.querySelector('input[name="secondary_color"]').value;
+    const footer = document.querySelector('input[name="footer_bg_color"]')?.value || '#0f172a';
+    
+    const hero = document.querySelector('.mockup-screen .mockup-hero');
+    if (hero) {
+        hero.style.background = `linear-gradient(135deg, ${primary}, ${secondary})`;
+    }
+    
+    const footerEl = document.querySelector('.mockup-screen .mockup-footer');
+    if (footerEl) {
+        footerEl.style.background = footer;
+    }
+}
+
+function duplicateTemplate(id) {
+    if (confirm('Create a copy of this template?')) {
+        jQuery.post(spfm_ajax.ajax_url, {
+            action: 'spfm_duplicate_theme',
+            nonce: spfm_ajax.nonce,
+            id: id
+        }, function(response) {
+            if (response.success) {
+                window.location.href = '<?php echo admin_url('admin.php?page=spfm-themes&action=edit&id='); ?>' + response.data.id;
+            } else {
+                alert('Failed to duplicate template.');
+            }
+        });
+    }
+}
+
+function previewTemplate(id) {
+    document.getElementById('preview-modal').classList.add('active');
+    document.getElementById('preview-content').innerHTML = '<div class="loading">Loading preview...</div>';
+    
+    // Load preview content via AJAX
+    jQuery.post(spfm_ajax.ajax_url, {
+        action: 'spfm_get_theme',
+        nonce: spfm_ajax.nonce,
+        id: id
+    }, function(response) {
+        if (response.success) {
+            const theme = response.data.theme;
+            document.getElementById('preview-content').innerHTML = `
+                <div style="text-align: center;">
+                    <div style="background: linear-gradient(135deg, ${theme.primary_color}, ${theme.secondary_color}); border-radius: 12px; padding: 40px; color: #fff; margin-bottom: 20px;">
+                        <h2 style="margin: 0 0 10px;">${theme.name}</h2>
+                        <p style="opacity: 0.9; margin: 0;">${theme.description}</p>
+                    </div>
+                    <p>This is a preview placeholder. The actual website preview would render here.</p>
+                </div>
+            `;
+        }
+    });
 }
 </script>
+
+<?php
+// Enqueue media for upload
+wp_enqueue_media();
+?>
